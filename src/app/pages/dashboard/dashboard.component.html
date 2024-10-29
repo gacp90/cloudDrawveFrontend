@@ -1,0 +1,162 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Lista de rifas</h4>
+
+                <div class="d-flex justify-content-between flex-wrap mt-1">
+
+                    <div class="my-2">
+
+                        <label for="mostrar" class="me-2">Mostrar: </label>
+                        <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                        </select>
+
+                    </div>
+
+                    <div>
+                        <button *ngIf="user.role === 'ADMIN'" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRifa">
+                            Crear Rifa
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="table-responsive">
+                    <table id="demo-foo-addrow" class="table m-t-30 table-hover no-wrap contact-list" data-page-size="10">
+                        <thead>
+                            <tr>
+                                <th>Rifa</th>
+                                <th>Monto</th>
+                                <th>Loteria</th>
+                                <th>Fecha</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr *ngIf="rifas.length === 0">
+                                <td colspan="6"> No existen registros de rifas... </td>
+                            </tr>
+
+                            <tr *ngFor="let rifa of rifas">
+                                <td>
+                                    <a [routerLink]="['/dashboard/rifa', rifa.rifid]">
+                                        {{ rifa.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ rifa.monto}}
+                                </td>
+                                <td>{{ rifa.loteria }}</td>
+                                <td>{{ rifa.fecha | date:'short' }}</td>
+                                <td>
+                                    <span class="label " [ngClass]="{'label-warning': rifa.estado === 'Pendiente', 'label-primary': rifa.estado === 'Activa', 'label-success': rifa.estado === 'Finalizada'}"> {{ rifa.estado }} </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+
+                                <td colspan="8">
+
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <button [disabled]="query.desde === 0" (click)="cambiarPagina(query.hasta * -1)" type="button" class="btn btn-dark text-white">Atras</button>
+                                        <button [disabled]="( query.desde + query.hasta ) >= total" (click)="cambiarPagina(query.hasta)" type="button" class="btn btn-dark text-white">Siguiente</button>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================= 
+MODAL AGREGAR RIFA
+======================================================== -->
+<div id="createRifa" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="createRifa" aria-hidden="true" #modalNewUser>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="createRifa">Nueva Rifa</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="newRifaForm" (ngSubmit)="create()">
+
+                    <div class="form-group has-danger">
+
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="name" type="text" class="form-control" placeholder="Titulo de la rifa">
+                            <div *ngIf="validate('name')" class="form-control-feedback">
+                                <small> El nombre es obligatorio </small>
+                            </div>
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="monto" type="number" min="0" class="form-control" placeholder="Monto">
+                            <div *ngIf="validate('monto')" class="form-control-feedback">
+                                <small> El monto es obligatorio </small>
+                            </div>
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <label for="">Precio de Promoción</label>
+                            <input formControlName="promocion" type="number" min="0" class="form-control" placeholder="Promocion">
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <label for="">Comision para los vendedores</label>
+                            <input formControlName="comision" type="number" min="0" class="form-control" placeholder="Comision">
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="numeros" type="number" min="0" class="form-control" placeholder="Numeros">
+                            <div *ngIf="validate('numeros')" class="form-control-feedback">
+                                <small> Los numeros son obligatorios </small>
+                            </div>
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="loteria" type="text" class="form-control" placeholder="Loteria">
+                            <div *ngIf="validate('loteria')" class="form-control-feedback">
+                                <small> La loteria es obligatoria </small>
+                            </div>
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="fecha" type="datetime-local" class="form-control" placeholder="Fecha">
+                            <div *ngIf="validate('fecha')" class="form-control-feedback">
+                                <small> La fecha de la rifa es obligatoria </small>
+                            </div>
+                        </div>
+                        <div class="col-md-12 m-b-20">
+                            <textarea formControlName="descripcion" rows="5" type="text" class="form-control" placeholder="Descripcion"></textarea>
+                            <div *ngIf="validate('descripcion')" class="form-control-feedback">
+                                <small> Agrega la descripción de la rifa </small>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button [disabled]="btnCreate" type="submit" class="btn btn-info waves-effect btn-block">
+                        <span *ngIf="btnCreate">Creando rifa...</span>
+                        <span *ngIf="!btnCreate">Crear</span>
+                    </button>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

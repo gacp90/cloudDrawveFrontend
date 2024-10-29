@@ -1,0 +1,116 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Lista de rutas</h4>
+
+                <div class="d-flex justify-content-between flex-wrap mt-1">
+
+                    <div class="my-2">
+
+                        <label for="mostrar" class="me-2">Mostrar: </label>
+                        <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                        </select>
+
+                    </div>
+
+                    <div>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRifa">
+                            Crear Ruta
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="table-responsive">
+                    <table id="demo-foo-addrow" class="table m-t-30 table-hover no-wrap contact-list" data-page-size="10">
+                        <thead>
+                            <tr>
+                                <th>Ruta</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr *ngIf="rutas.length === 0">
+                                <td colspan="6"> No existen registros de rutas... </td>
+                            </tr>
+
+                            <tr *ngFor="let ruta of rutas">
+                                <td> {{ ruta.name }} </td>
+                                <td>
+                                    <button (click)="desactiveRuta(ruta)" *ngIf="ruta.status" type="button" class="btn btn-sm btn-success">Activa</button>
+                                    <button (click)="desactiveRuta(ruta)" *ngIf="ruta.status === false" type="button" class="btn btn-sm btn-danger">Desactiva</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn">
+                                        <i class="ti-arrow-top-right" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+
+                                <td colspan="8">
+
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <button [disabled]="query.desde === 0" (click)="cambiarPagina(query.hasta * -1)" type="button" class="btn btn-dark text-white">Atras</button>
+                                        <button [disabled]="( query.desde + query.hasta ) >= total" (click)="cambiarPagina(query.hasta)" type="button" class="btn btn-dark text-white">Siguiente</button>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================= 
+MODAL AGREGAR RUTAS
+======================================================== -->
+<div id="createRifa" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="createRifa" aria-hidden="true" #modalNewUser>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="createRifa">Nueva Ruta</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="newRutaForm" (ngSubmit)="create()">
+
+                    <div class="form-group has-danger">
+
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="name" type="text" class="form-control" placeholder="Nombre de la ruta">
+                            <div *ngIf="validate('name')" class="form-control-feedback">
+                                <small> El nombre es obligatorio </small>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-info waves-effect btn-block">Crear</button>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

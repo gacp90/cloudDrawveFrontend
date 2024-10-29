@@ -1,0 +1,75 @@
+<!-- ============================================================== -->
+<!-- Main wrapper - style you can find in pages.scss -->
+<!-- ============================================================== -->
+<section id="wrapper">
+    <div class="login-register login-sidebar" style="background-image:url(../assets/images/background/login-register.jpg);">
+        <div class="login-box card">
+            <div class="card-body">
+                <form class="form-horizontal form-material" id="loginform" autocomplete="off" [formGroup]="registerForm" (ngSubmit)="register()">
+                    <h3 class="box-title m-b-20">Registrarme</h3>
+                    <div class="form-group has-danger">
+                        <div class="col-xs-12">
+                            <input formControlName="name" class="form-control" type="text" required="" placeholder="Nombres">
+                            <div *ngIf="validate('name')" class="form-control-feedback">
+                                <small> Los nombres son obligatorios </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-xs-12">
+                            <input formControlName="email" class="form-control" type="email" required="" placeholder="Email">
+                            <div *ngIf="validate('email')" class="form-control-feedback">
+                                <small> El email es obligatorio </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-xs-12">
+                            <input formControlName="phone" class="form-control" type="tel" required="" placeholder="Telefono">
+                            <div *ngIf="validate('phone')" class="form-control-feedback">
+                                <small> El telefono es obligatorio </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-xs-12">
+                            <input formControlName="password" class="form-control" type="password" required="" placeholder="Contraseña">
+                            <div *ngIf="validate('password')" class="form-control-feedback">
+                                <small> La contraseña es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-xs-12">
+                            <input formControlName="repassword" class="form-control" type="password" required="" placeholder="Confirmar Contraseña">
+                            <div *ngIf="validate('repassword')" class="form-control-feedback">
+                                <small> La contraseña es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row has-danger">
+                        <div class="col-md-12">
+                            <div class="checkbox checkbox-success p-t-0">
+                                <input formControlName="terms" id="checkbox-signup" type="checkbox" class="filled-in chk-col-light-blue">
+                                <label for="checkbox-signup"> Yo acepto <a href="javascript:void(0)">Todos los terminos y condiciones</a></label>
+                                <div *ngIf="validate('terms')" class="form-control-feedback">
+                                    <small> Debes de aceptar los terminos </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group text-center p-b-20">
+                        <div class="col-xs-12">
+                            <button class="btn btn-info btn-lg btn-block btn-rounded text-uppercase waves-effect waves-light" type="submit">Registrarme</button>
+                        </div>
+                    </div>
+                    <div class="form-group m-b-0">
+                        <div class="col-sm-12 text-center">
+                            Ya tengo cuenta? <a routerLink="/login" class="text-info m-l-5"><b>Iniciar Sesion</b></a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

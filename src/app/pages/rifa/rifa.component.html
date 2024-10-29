@@ -1,0 +1,1421 @@
+<section *ngIf="rifa">
+
+    <div *ngIf="rifa.estado === 'Pendiente'" class="card bg-warning p-3 text-center text-white text-break shadow animated pulse x5">
+        <h4 class="mb-0 fw-bold text-white">Atención</h4>
+        <p> Para activar esta rifa, debes de comunicarte al siguiente numero de Whatsapp:
+            <a class="text-white fw-bold" href="https://wa.link/c1wigk" target="_blank"> <i class="mdi mdi-whatsapp"></i>+584247064335</a>
+        </p>
+    </div>
+
+    <div *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" class="d-flex flex-wrap gap-2 my-2">
+
+        <button type="button" class="m-1 btn btn-primary" data-toggle="modal" data-target="#addMetodoPaid">
+            Metodos de pago
+        </button>
+
+        <button type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#addPremios">
+            Premios especiales
+        </button>
+
+        <button type="button" class="m-1 btn btn-dark" data-toggle="modal" data-target="#addImagenes">
+            Imagenes
+        </button>
+
+        <button type="button" class="m-1 btn btn-danger" data-toggle="modal" data-target="#cambiarFecha">
+            Cambiar fecha
+        </button>
+
+        <button (click)="loadIngresos()" type="button" class="m-1 btn btn-secondary" data-toggle="modal" data-target="#ingresosYegresos">
+            Ingresos y Egresos
+        </button>
+
+        <button (click)="loadIngresos()" type="button" class="m-1 btn btn-warning" data-toggle="modal" data-target="#abonosPendientes">
+            Abonos Pendientes
+        </button>
+
+        <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappqr">
+            Vincular Whatsapp
+        </button>
+
+
+    </div>
+
+    <div class="card w-100">
+        <div class="card-body">
+            <!-- BOTONES EDITAR Y CERRAR RIFA -->
+            <div *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" class="d-flex justify-content-end flex-wrap mb-3">
+                <button (click)="close(rifa.abierta)" type="button" class="btn m-1" [ngClass]="{'btn-success': rifa.abierta, 'btn-danger': !rifa.abierta }">
+                    <span *ngIf="rifa.abierta" >Cerrar rifa</span>
+                    <span *ngIf="!rifa.abierta" >Abrir rifa</span>
+                </button>
+                <button type="button" data-toggle="modal" data-target="#updateRifa" class="btn btn-primary m-1">
+                    <i class="fa fa-pencil-square-o"></i>
+                </button>
+            </div>
+            <div class="d-flex flex-row flex-wrap gap-2 mb-3">
+                <div>
+                    <h3 class="mb-2 fw-bold fs-2"> {{ rifa.name }} </h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-xs-6 b-r"><strong class="fw-bold">Loteria</strong><br>
+                    <p class="text-muted"> {{ rifa.loteria }} </p>
+                </div>
+                <div class="col-md-3 col-xs-6 b-r"><strong class="fw-bold">Fecha</strong><br>
+                    <p class="text-muted"> {{ rifa.fecha | date:'d/M/yy, h:mm a' }} </p>
+                </div>
+                <div class="col-md-3 col-xs-6 b-r"><strong class="fw-bold">Monto</strong><br>
+                    <p class="text-muted"> {{ rifa.monto | currency }} </p>
+                </div>
+                <div class="col-md-3 col-xs-6"><strong class="fw-bold"> Estado </strong><br>
+                    <p [ngClass]="{'text-success': rifa.estado === 'Activa', 'text-warning': rifa.estado === 'Pendiente', 'text-danger': rifa.estado === 'Pendiente'}"> {{ rifa.estado }} </p>
+                </div>
+            </div>
+            <div><strong class="fw-bold">Descripción</strong><br>
+                <p class="text-muted"> {{ rifa.descripcion }} </p>
+            </div>
+
+            <div><strong class="fw-bold">Link</strong><br>
+                <p class="text-muted mb-0" (click)="copyToClipboard()">
+                    <span (click)="copyToClipboard()" class="text-accent fs-sm pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Clic para copiar"> 
+                            https://drawve.com/rifa/{{this.rifa.rifid!}}  <i class="ci ci-clip"></i> 
+                        </span>
+                </p>
+                <button type="button" (click)="copyToClipboard()" class="btn btn-sm btn-secondary ">
+                    Click para Copiar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUMEROS -->
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row m-t-40">
+                <!-- TOTAL -->
+                <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer" (click)="searchEstado('total')">
+                    <div class="card">
+                        <div class="box bg-primary text-center">
+                            <h1 class="font-light text-white"> {{ total }} </h1>
+                            <h6 class="text-white">Total</h6>
+                        </div>
+                    </div>
+                </div>
+                <!-- PENDIENTES -->
+                <div class="col-md-6 col-lg-3 col-xlg-3 pointer" (click)="searchEstado('Disponible')">
+                    <div class="card">
+                        <div class="box bg-success text-center">
+                            <h1 class="font-light text-white"> {{ disponibles }} </h1>
+                            <h6 class="text-white">Disponibles</h6>
+                        </div>
+                    </div>
+                </div>
+                <!-- ENVIANDO -->
+                <div class="col-md-6 col-lg-3 col-xlg-3 pointer" (click)="searchEstado('Apartado')">
+                    <div class="card">
+                        <div class="box bg-warning text-center">
+                            <h1 class="font-light text-white"> {{ apartados }} </h1>
+                            <h6 class="text-white">Apartados</h6>
+                        </div>
+                    </div>
+                </div>
+                <!-- ENTREGADOS -->
+                <div class="col-md-6 col-lg-3 col-xlg-3 pointer" (click)="searchEstado('Pagado')">
+                    <div class="card">
+                        <div class="box bg-danger text-center">
+                            <h1 class="font-light text-white"> {{ pagados }} </h1>
+                            <h6 class="text-white">Pagados</h6>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column -->
+            </div>
+
+            <hr>
+
+            <!-- FILTROS -->
+            <div class="d-flex justify-content-between flex-wrap mt-1">
+
+                <div>
+                    <h3> Filtros </h3>
+                </div>
+
+                <div class="my-2">
+
+                    <label for="mostrar" class="me-2">Mostrar: </label>
+                    <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="250">250</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <!-- RUTAS Y VENDEDORES -->
+            <div class="d-flex justify-content-between flex-wrap mt-1">
+
+                <div class="">
+
+                    <label for="rutas" class="me-2">Rutas: </label>
+                    <select name="" id="rutas" #rutaF (change)="filterRuta(rutaF.value)">
+                        <option value="Todos">Todos</option>
+                        <option *ngFor="let ruta of rutas" [value]="ruta.ruid"> {{ ruta.name }} </option>
+                    </select>
+
+                </div>
+
+                <div *ngIf="user.role === 'ADMIN'" class="">
+
+                    <label for="vendedores" class="me-2">Vendedores: </label>
+                    <select name="" id="vendedores" #vendedoresF (change)="filterVendedor(vendedoresF.value)">
+                        <option value="Todos">Todos</option>
+                        <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            <div>
+
+                <div class="d-flex justify-content-between">
+
+                    <div class="col-sm-3">
+                        <div class="demo-switch-title">Seleccionar Varios tickets</div>
+                        <div class="switch">
+                            <label>
+                            <input #checkVarios (change)="checkVarios.checked" type="checkbox"><span class="lever switch-col-indigo"></span>
+                        </label>
+                        </div>
+                    </div>
+
+                    <div *ngIf="checkVarios.checked">
+                        <button [disabled]="listTicketsSelect.length === 0" type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalListTicket">
+                            Asignar tickets
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="d-flex justify-content-center flex-wrap w-100">
+
+                    <ng-container *ngIf="checkVarios.checked">
+
+                        <div *ngIf="listTicketsSelect.length === 0">
+                            <p class="text-muted"> Aun no has seleccionado ningún ticket </p>
+                        </div>
+
+                        <ng-container *ngFor="let ticket of listTicketsSelect; let i = index">
+                            <button (click)="delTicketList(i)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
+                                <span class="btn-label"><i class="mdi mdi-close"></i></span>
+                                 {{ ticket.numero }}
+                            </button>
+                        </ng-container>
+                    </ng-container>
+
+
+                </div>
+
+
+
+
+            </div>
+
+            <hr>
+
+            <div>
+                <div class="form-group">
+                    <label for="example-search-input" class="">Buscar</label>
+                    <input class="form-control" #searchI (keyup)="search(searchI.value)" type="search" id="example-search-input" placeholder="Buscar por, Nombre, Telefono o cedula">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mb-3">
+
+                <div>Resultados: {{ tickets.length }} </div>
+
+                <button (click)="exportar()" type="button" class="btn btn-success">
+                    <i class="ti ti-download"></i> Exportar excel
+                </button>
+
+                <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappmasive">
+                    Enviar mensajes masivos
+                </button>
+
+            </div>
+
+            <!-- PORCENTAJE DE MUMEROS -->
+            <div class="mb-3">
+                <h5 class="m-t-30">Porcentaje<span class="pull-right"> {{ ((apartados + pagados )* 100) / rifa.numeros }}% </span></h5>
+                <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar" style="height:15px;" [ngStyle]="{'width': ((apartados + pagados )* 100) / rifa.numeros + '%'}" role="progressbar"></div>
+                </div>
+            </div>
+
+            <!-- TICKETS -->
+            <div class="d-flex justify-content-center flex-wrap w-100">
+
+                <h4 *ngIf="tickets.length === 0"> Lista Vacia... </h4>
+
+                <ng-container *ngIf="checkVarios.checked">
+                    <ng-container *ngFor="let ticket of tickets">
+                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" style="width: 5rem;" type="button" class="border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
+                            <p class="mb-0 fw-bold fs-3"> {{ ticket.numero }} </p>
+                        </button>
+                    </ng-container>
+                </ng-container>
+
+
+                <ng-container *ngIf="!checkVarios.checked">
+                    <ng-container *ngFor="let ticket of tickets">
+                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta" (click)="selectTicket(ticket)" data-toggle="modal" data-target="#modalTicket" style="width: 5rem;" type="button" class="border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
+                            <p class="mb-0 fw-bold fs-3"> {{ ticket.numero }} </p>
+                        </button>
+                    </ng-container>
+                </ng-container>
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================= 
+    MODAL UPDATE TICKET
+    ======================================================== -->
+    <div id="modalTicket" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="modalTicket" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="modalTicket">Actualizar Ticket</h4>
+                </div>
+                <div class="modal-body">
+
+                    <!-- CARGANDO -->
+                    <div *ngIf="loadingTicket">
+                        <p class="text-center fs-2">Cargando...</p>
+                    </div>
+
+                    <ng-container *ngIf="!loadingTicket">
+
+                        <ul class="nav nav-tabs customtab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#ticketDetails" role="tab" aria-expanded="true">
+                                    <span class="hidden-sm-up"><i class="ti-receipt"></i>
+                                </span> <span class="hidden-xs-down">Ticket</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#paymentsTicket" role="tab" aria-expanded="false">
+                                    <span class="hidden-sm-up"><i class="ti-money"></i></span>
+                                    <span class="hidden-xs-down">Pagos</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#whatsappTicket" role="tab" aria-expanded="false">
+                                    <span class="hidden-sm-up"><i class="mdi mdi-whatsapp"></i></span>
+                                    <span class="hidden-xs-down">Whatsapp </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#imgTicket" role="tab" aria-expanded="false">
+                                    <span class="hidden-sm-up"><i class="mdi mdi-whatsapp"></i></span>
+                                    <span class="hidden-xs-down">Imagen </span>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" *ngIf="ticketSelected">
+
+                            <!-- DETALLES DEL TICKET -->
+                            <div class="tab-pane active" id="ticketDetails" role="tabpanel" aria-expanded="true">
+
+                                <div>
+                                    <h3 class="fw-bold mt-4 mb-0" [ngClass]="{'text-success': ticketUpdate.value.estado === 'Disponible', 'text-warning':ticketUpdate.value.estado === 'Apartado', 'text-danger':ticketUpdate.value.estado === 'Pagado' }"> {{ ticketUpdate.value.estado }} #{{ ticketSelected.numero }} </h3>
+                                    <small *ngIf="ticketSelected.vendedor">Vendedor: {{ ticketSelected.vendedor.name }} </small>
+                                </div>
+
+                                <hr>
+
+                                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="ticketUpdate" (ngSubmit)="updateTicket()">
+
+                                    <div class="form-group has-danger">
+
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="nombre" type="text" class="form-control" placeholder="Nombres del cliente">
+                                            <div *ngIf="validateUpTicket('nombre')" class="form-control-feedback">
+                                                <small> El nombre es obligatorio </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="telefono" type="text" class="form-control" placeholder="Telefono del cliente">
+                                            <div *ngIf="validateUpTicket('telefono')" class="form-control-feedback">
+                                                <small> El telefono es obligatorio </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="cedula" type="text" class="form-control" placeholder="Cedula">
+                                            <div *ngIf="validateUpTicket('cedula')" class="form-control-feedback">
+                                                <small> La cedula es obligatoria </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="direccion" type="text" class="form-control" placeholder="Dirección">
+                                            <div *ngIf="validateUpTicket('direccion')" class="form-control-feedback">
+                                                <small> La dirección es obligatoria </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+                                            <div class="form-group">
+                                                <label>Seleccionar ruta</label>
+                                                <select class="form-control" formControlName="ruta">
+                                                    <option value="" disabled>Seleccionar</option>
+                                                    <ng-container *ngFor="let ruta of rutas">                                                
+                                                        <option  [value]="ruta.ruid"> {{ ruta.name }} </option>
+                                                    </ng-container>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+                                            <div class="form-group">
+                                                <label>Seleccionar Monto</label>
+                                                <select class="form-control" formControlName="monto">
+                                                    <option [value]="rifa.monto"> $ {{rifa.monto}} </option>
+                                                    <option *ngIf="rifa.promocion" [value]="rifa.promocion"> $ {{rifa.promocion}} </option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+
+                                            <div class="form-check form-check-inline">
+                                                <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado1" value="Disponible" checked>
+                                                <label class="form-check-label text-dark" for="estado1">
+                                                  Disponible
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado2" value="Apartado">
+                                                <label class="form-check-label text-dark" for="estado2">
+                                                  Apartado
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado3" value="Pagado">
+                                                <label class="form-check-label text-dark" for="estado3">
+                                                  Pagado
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+                                            <textarea formControlName="nota" rows="5" type="text" class="form-control" placeholder="Nota"></textarea>
+                                            <div *ngIf="validateUpTicket('nota')" class="form-control-feedback">
+                                                <small> Puedes Agregar una nota </small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <button *ngIf="ticketSelected" [disabled]="ticketSelected.vendedor && user.role === 'STAFF' && user.uid !== ticketSelected.vendedor._id && ticketSelected.estado !== 'Disponible'" type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
+                                </form>
+
+                            </div>
+                            <!-- DETALLES DEL TICKET -->
+
+                            <!-- PAGOS Y ABONOS DEL TICKET -->
+                            <div class="tab-pane" id="paymentsTicket" role="tabpanel" aria-expanded="false">
+
+
+                                <ng-container *ngIf="user.role === 'ADMIN' || ticketSelected.disponible || ticketSelected.vendedor && user.role === 'STAFF' && user.uid === ticketSelected.vendedor._id">
+                                    <h3 class="fw-bold mt-4">Agregar pagos</h3>
+
+                                    <div class="form-group mb-3">
+                                        <input type="text" class="form-control" placeholder="Descripción" #desc>
+                                        <div class="form-control-feedback">
+                                            <small> La Descripción es obligatoria </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <input type="number" min="0" class="form-control" placeholder="Monto" #monto>
+                                        <div class="form-control-feedback">
+                                            <small> El monto es obligatorio </small>
+                                        </div>
+                                    </div>
+
+                                    <button (click)="addPaid(desc.value, monto.value)" [disabled]="totalPaid === ticketSelected.monto" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+
+                                    <hr>
+                                </ng-container>
+
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title"><span class="lstick"></span> Pagos</h4>
+                                        <div class="table-responsive m-t-20">
+                                            <table class="table vm no-th-brd no-wrap pro-of-month">
+                                                <thead>
+                                                    <tr>
+                                                        <th colspan="2">Descripción</th>
+                                                        <th>Fecha</th>
+                                                        <th>Estado</th>
+                                                        <th>Monto</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngIf="paymentsTicket.length === 0">
+                                                        <td class="text-center" colspan="4"> No se ha registrado ningún pago... </td>
+                                                    </tr>
+                                                    <tr *ngFor="let paid of paymentsTicket; let i = index">
+                                                        <td colspan="2">
+                                                            <button *ngIf="user.role !== 'STAFF' || user.uid === ticketSelected.vendedor._id" (click)="deletePaid(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                            <i class="ti-trash"></i>
+                                                        </button> {{paid.descripcion}}
+                                                        </td>
+                                                        <td>{{ paid.fecha | date:'d/M/yy, h:mm a' }}</td>
+                                                        <td>
+                                                            <button type="button" [disabled]="user.role !== 'ADMIN'" class="btn btn-sm waves-effect waves-light" [ngClass]="{'btn-warning': paid.estado === 'Pendiente', 'btn-success': paid.estado === 'Confirmado'}">
+                                                                <span> {{ paid.estado || 'Confirmado' }} </span>
+                                                            </button>
+                                                        </td>
+                                                        <td>{{ paid.monto | currency }}</td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr class="fw-bold">
+                                                        <td colspan="3">Total</td>
+                                                        <td> {{ totalPaid | currency }} </td>
+                                                    </tr>
+                                                    <tr class="fw-bold">
+                                                        <td colspan="3">Resta</td>
+                                                        <td> {{ (ticketSelected.monto - totalPaid) | currency }} </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- PAGOS Y ABONOS DEL TICKET -->
+
+                            <!-- SEND WHATSAPP -->
+                            <div class="tab-pane" id="whatsappTicket" role="tabpanel" aria-expanded="false">
+
+                                <div class="mt-3" *ngIf="ticketSelected.estado === 'Disponible'">
+                                    <h4>Este ticket aun esta disponible</h4>
+                                </div>
+
+                                <div class="mt-3" *ngIf="ticketSelected.vendedor && ticketSelected.estado !== 'Disponible'">
+
+                                    <div class="form-group mb-1">
+                                        <label>Mensaje</label>
+                                        <textarea #tWhatp class="form-control" rows="10" [value]="ticketWhatsapp"></textarea>
+                                    </div>
+
+                                    <button [disabled]="sendM" (click)="sendWhatsapp(tWhatp.value)" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
+                                        <span *ngIf="sendM">Enviando...</span>
+                                        <span *ngIf="!sendM">Enviar</span>
+                                    </button>
+                                </div>
+
+                            </div>
+                            <!-- SEND WHATSAPP -->
+
+                            <!-- IMG TICKET -->
+                            <div class="tab-pane" id="imgTicket" role="tabpanel" aria-expanded="false">
+
+                                <div class="d-flex flex-wrap justify-content-center my-5">
+                                    <!-- TICKETS -->
+                                    <ng-container *ngIf="ticketSelected.disponible === false">
+
+                                        <div class="card mb-3 shadow pb-5" style="width: 250px;" #contentToCapture>
+                                            <div class="card-body">
+
+                                                <div class="pro-img m-t-20 d-flex justify-content-center">
+                                                    <img [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
+                                                </div>
+                                                <p class="card-text fw-bold mb-0 text-center text-dark"> {{ rifa.admin.empresa }} </p>
+                                                <p class="card-text fs-sm mb-0" [ngClass]="{'text-warning': ticketSelected.estado === 'Apartado', 'text-danger': ticketSelected.estado === 'Pagado'}"> {{ ticketSelected.estado }} </p>
+                                                <h5 class="card-title display-4"> #{{ ticketSelected.numero }} </h5>
+                                                <p class="card-text fw-bold"> {{ rifa.name }} </p>
+                                            </div>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item"> Valor del ticket {{ rifa.monto | currency }} </li>
+                                                <li class="list-group-item"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
+                                                <li class="list-group-item"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
+                                                <li class="list-group-item"> Loteria: {{ rifa.loteria }}</li>
+                                                <li class="list-group-item"> {{ ticketSelected.nombre }} </li>
+                                                <li class="list-group-item"> {{ ticketSelected.telefono }} </li>
+                                                <li class="list-group-item" *ngFor="let pago of ticketSelected.pagos">
+                                                    <span class="fw-bold">{{ pago.descripcion }}</span> - <small> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </small> - {{ pago.monto | currency }}
+                                                </li>
+                                                <li class="list-group-item"> <span class="fw-bold">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
+                                            </ul>
+                                        </div>
+
+                                    </ng-container>
+                                </div>
+
+                                <div>
+
+                                    <div class="form-group mb-1">
+                                        <label>Mensaje</label>
+                                        <textarea #captionI class="form-control" rows="5"></textarea>
+                                    </div>
+
+                                    <button [disabled]="sendImage" (click)="sendImg(captionI.value)" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
+                                        <span *ngIf="sendImage">Enviando...</span>
+                                        <span *ngIf="!sendImage">Enviar</span>
+                                    </button>
+
+                                </div>
+
+                            </div>
+                            <!-- IMG TICKET -->
+
+                        </div>
+
+                    </ng-container>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL UPDATE LIST TICKETS
+    ======================================================== -->
+    <div id="modalListTicket" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="modalListTicket" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="modalListTicket">Actualizar Ticket</h4>
+                </div>
+                <div class="modal-body">
+
+                    <!-- DETALLES DEL TICKET -->
+                    <div>
+                        <div class="d-flex justify-content-center flex-wrap w-100">
+                            <ng-container *ngIf="checkVarios.checked">
+
+                                <div *ngIf="listTicketsSelect.length === 0">
+                                    <p class="text-muted"> Aun no has seleccionado ningún ticket </p>
+                                </div>
+
+                                <ng-container *ngFor="let ticket of listTicketsSelect; let i = index">
+                                    <button (click)="delTicketList(i)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
+                                        <span class="btn-label"><i class="mdi mdi-close"></i></span>
+                                         {{ ticket.numero }}
+                                    </button>
+                                </ng-container>
+                            </ng-container>
+
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <form class="form-horizontal form-material" autocomplete="off" [formGroup]="ticketUpdate" (ngSubmit)="updateListTikcets()">
+
+                        <div class="form-group has-danger">
+
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="nombre" type="text" class="form-control" placeholder="Nombres del cliente">
+                                <div *ngIf="validateUpTicket('nombre')" class="form-control-feedback">
+                                    <small> El nombre es obligatorio </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="telefono" type="text" class="form-control" placeholder="Telefono del cliente">
+                                <div *ngIf="validateUpTicket('telefono')" class="form-control-feedback">
+                                    <small> El telefono es obligatorio </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="cedula" type="text" class="form-control" placeholder="Cedula">
+                                <div *ngIf="validateUpTicket('cedula')" class="form-control-feedback">
+                                    <small> La cedula es obligatoria </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="direccion" type="text" class="form-control" placeholder="Dirección">
+                                <div *ngIf="validateUpTicket('direccion')" class="form-control-feedback">
+                                    <small> La dirección es obligatoria </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <div class="form-group">
+                                    <label>Seleccionar ruta</label>
+                                    <select class="form-control" formControlName="ruta">
+                                                <option value="" disabled>Seleccionar</option>
+                                                <ng-container *ngFor="let ruta of rutas">                                                
+                                                    <option  [value]="ruta.ruid"> {{ ruta.name }} </option>
+                                                </ng-container>
+                                            </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 m-b-20">
+                                <div class="form-group">
+                                    <label>Seleccionar Monto</label>
+                                    <select class="form-control" formControlName="monto">
+                                        <option [value]="rifa.monto"> $ {{rifa.monto}} </option>
+                                        <option *ngIf="rifa.promocion" [value]="rifa.promocion"> $ {{rifa.promocion}} </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 m-b-20">
+
+                                <div class="form-check form-check-inline">
+                                    <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado4" value="Disponible" checked>
+                                    <label class="form-check-label text-dark" for="estado4">
+                                      Disponible
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado5" value="Apartado">
+                                    <label class="form-check-label text-dark" for="estado5">
+                                      Apartado
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado6" value="Pagado">
+                                    <label class="form-check-label text-dark" for="estado6">
+                                      Pagado
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 m-b-20">
+                                <textarea formControlName="nota" rows="5" type="text" class="form-control" placeholder="Nota"></textarea>
+                                <div *ngIf="validateUpTicket('nota')" class="form-control-feedback">
+                                    <small> Puedes Agregar una nota </small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <button [disabled]="listTicketsSelect.length === 0" type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
+                    </form>
+                    <!-- DETALLES DEL TICKET -->
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- ========================================================= 
+    MODAL AGREGAR METODOS DE PAGOS
+    ======================================================== -->
+    <div id="addMetodoPaid" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="addMetodoPaid" #modalNewUser>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="addMetodoPaid">Metodos de pagos</h4>
+                </div>
+                <div class="modal-body">
+
+                    <h3 class="fw-bold mt-4">Agregar nuevo metodo de pago</h3>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Nombre" #nameM>
+                        <div class="form-control-feedback">
+                            <small> El nombre es obligatorio </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Descripción" #descM>
+                        <div class="form-control-feedback">
+                            <small> La Descripción es obligatoria </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Cuenta" #cuentaM>
+                        <div class="form-control-feedback">
+                            <small> La cuenta es obligatoria </small>
+                        </div>
+                    </div>
+
+                    <button (click)="addMetodoPaid(nameM.value, descM.value, cuentaM.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+
+                    <hr>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span class="lstick"></span>Metodos de Pagos</h4>
+                            <div class="table-responsive m-t-20">
+                                <table class="table vm no-th-brd no-wrap pro-of-month">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Cuenta</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngIf="rifa.metodos.length === 0">
+                                            <td class="text-center" colspan="4"> No se ha registrado ningún metodo de pago... </td>
+                                        </tr>
+                                        <tr *ngFor="let paid of rifa.metodos; let i = index">
+                                            <td colspan="2">
+                                                <button (click)="deleteMetodoPaid(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                    <i class="ti-trash"></i>
+                                                </button> {{paid.name}}
+                                            </td>
+                                            <td>{{ paid.descripcion }}</td>
+                                            <td>{{ paid.cuenta }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL AGREGAR PREMIOS ESPECIALES
+    ======================================================== -->
+    <div id="addPremios" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="addPremios" #modalNewUser>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="addPremios">Premios Especiales</h4>
+                </div>
+                <div class="modal-body">
+
+                    <h3 class="fw-bold mt-4">Agregar nuevo premio especial</h3>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Nombre" #nameP>
+                        <div class="form-control-feedback">
+                            <small> El nombre es obligatorio </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Descripción" #descripcionP>
+                        <div class="form-control-feedback">
+                            <small> La Descripción es obligatoria </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="datetime-local" class="form-control" placeholder="Fecha" #fechaP>
+                        <div class="form-control-feedback">
+                            <small> La fecha es obligatoria </small>
+                        </div>
+                    </div>
+
+                    <button (click)="addPremios(nameP.value, descripcionP.value, fechaP.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+
+                    <hr>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span class="lstick"></span>Metodos de Pagos</h4>
+                            <div class="table-responsive m-t-20">
+                                <table class="table vm no-th-brd no-wrap pro-of-month">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">Nombre</th>
+                                            <th>Descripción</th>
+                                            <th>Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngIf="rifa.premios.length === 0">
+                                            <td class="text-center" colspan="4"> No se ha registrado ningún metodo de pago... </td>
+                                        </tr>
+                                        <tr *ngFor="let premio of rifa.premios; let i = index">
+                                            <td colspan="2">
+                                                <button (click)="deletePremio(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                    <i class="ti-trash"></i>
+                                                </button> {{premio.name}}
+                                            </td>
+                                            <td>{{ premio.descripcion }}</td>
+                                            <td>{{ premio.fecha | date:'d/M/yy, h:mm a' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL AGREGAR IMAGENES
+    ======================================================== -->
+    <div id="addImagenes" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="addImagenes" #modalNewUser>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="addImagenes">Fotos</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card">
+
+                        <div class="card-body">
+
+                            <div class="form-group file-area border">
+                                <input #fileImg (change)="cambiarImage($event)" type="file" name="images" id="images" required="required" multiple="multiple" />
+                                <div class="file-dummy">
+
+                                    <div class="default py-5">
+                                        <h5 class="text-center card-title text-muted">
+                                            Agregar Imagen
+                                        </h5>
+                                        <p class="text-center card-text fs-2 mb-0">
+                                            <i class="mdi mdi-plus"></i>
+                                        </p>
+                                        <p class="text-center card-text fs-sm">Arrastre la imagen ó dar click aquí</p>
+                                    </div>
+
+                                    <!-- IMG VALIDA -->
+                                    <div class="success">
+
+                                        <div class="d-flex justify-content-center" *ngIf="imgTempP">
+                                            <div class="mx-auto" style="background-image: url({{imgTempP}});width: 400px; height: 300px; background-repeat: no-repeat; background-size: cover; background-position: center center;"></div>
+                                        </div>
+
+                                    </div>
+                                    <!-- IMG VALIDA -->
+                                </div>
+                            </div>
+
+                            <div *ngIf="imgTempP" class="d-flex justify-content-between flex-wrap pt-4 gap-2">
+                                <button type="button" class="btn btn-info btn-sm" [disabled]="!subirImagen" (click)="subirImg()"> Subir </button>
+                                <button type="button" class="btn btn-danger btn-sm" (click)="imgTempP = ''; fileImg.value = ''"> Eliminar </button>
+                            </div>
+
+                            <hr>
+
+                            <div>
+                                <h4>Imagenes</h4>
+                                <p *ngIf="rifa.img.length === 0">No se han cargado las imagenes de la rifa</p>
+                            </div>
+
+                            <!-- IMGS -->
+                            <div *ngIf="rifa.img.length > 0" class="mt-4">
+
+                                <swiper [config]="config">
+
+                                    <ng-template swiperSlide *ngFor="let file of rifa.img">
+                                        <div>
+                                            <div style="background-image: url('{{ file.img | imagen }}');width: 150px; height: 150px; background-repeat: no-repeat; background-size: cover; background-position: center center;"></div>
+                                            <small class="gallery-item-caption"> {{ file.fecha | date:'medium' }} </small>
+                                            <div class="w-100 text-danger">
+                                                <a class="text-decoration-none pointer fs-sm" (click)="deleImg(file.img)">
+                                                    <i class="ti ti-trash"></i> Eliminar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </ng-template>
+
+                                </swiper>
+
+                            </div>
+                            <!-- IMGS -->
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL UPDATE RIFA
+    ======================================================== -->
+    <div id="updateRifa" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="updateRifa" #modalNewUser>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="updateRifa">Actualizar Información de la Rifa</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form class="form-horizontal form-material" autocomplete="off" [formGroup]="newRifaForm" (ngSubmit)="update()">
+
+                        <div class="form-group has-danger">
+
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="name" type="text" class="form-control" placeholder="Titulo de la rifa">
+                                <div *ngIf="validate('name')" class="form-control-feedback">
+                                    <small> El nombre es obligatorio </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="monto" type="number" min="0" class="form-control" placeholder="Monto">
+                                <div *ngIf="validate('monto')" class="form-control-feedback">
+                                    <small> El monto es obligatorio </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <label for="">Precio de Promoción</label>
+                                <input formControlName="promocion" type="number" min="0" class="form-control" placeholder="Promocion">
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <label for="">Comision para los vendedores</label>
+                                <input formControlName="comision" type="number" min="0" class="form-control" placeholder="Comision">
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="loteria" type="text" class="form-control" placeholder="Loteria">
+                                <div *ngIf="validate('loteria')" class="form-control-feedback">
+                                    <small> La loteria es obligatoria </small>
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-b-20">
+                                <textarea formControlName="descripcion" rows="5" type="text" class="form-control" placeholder="Descripcion"></textarea>
+                                <div *ngIf="validate('descripcion')" class="form-control-feedback">
+                                    <small> Agrega la descripción de la rifa </small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <button type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL ACTUALIZAR FECHA
+    ======================================================== -->
+    <div id="cambiarFecha" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="cambiarFecha" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="cambiarFecha">Actualizar fecha</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="jumbotron">
+                        <h1 class="display-3"> {{ rifa.fecha | date:'d/M/yy, h:mm a' }} </h1>
+                        <p class="lead">Fecha de la rifa</p>
+                        <hr class="my-4">
+                        <p>Puedes corregir la fecha de la rifa o actualizarla, solo si estas seguro de hacerlo.</p>
+
+                        <div class="m-b-20">
+                            <label for="updateDate">Seleccionar la nueva fecha</label>
+                            <input #upDate id="updateDate" type="datetime-local" class="form-control" placeholder="Fecha">
+                        </div>
+
+                        <button (click)="actualizarFecha(upDate.value)" type="button" class="btn btn-primary">
+                            Actualizar fecha
+                        </button>
+
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL INGRESOS Y EGRESOS
+    ======================================================== -->
+    <div id="ingresosYegresos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="ingresosYegresos" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="ingresosYegresos">Ingresos y Egresos</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row m-t-40">
+                        <!-- TOTAL -->
+                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                            <div class="card">
+                                <div class="box bg-primary text-center">
+                                    <h2 class="font-light text-white"> {{ totalTickets + totalPagado | currency }} </h2>
+                                    <h6 class="text-white mb-0">Tickets Vendidos</h6>
+                                    <p class="mb-0 text-white font-weight-bold"> <strong> <i class="ti-ticket"></i> {{ apartadosIng.length + pagadosIng.length }} </strong> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- TOTAL APARTADOS -->
+                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                            <div class="card">
+                                <div class="box bg-warning text-center">
+                                    <h2 class="font-light text-white"> {{ totalApartado | currency }} </h2>
+                                    <h6 class="text-white mb-0">Tickets Abonados</h6>
+                                    <p class="mb-0 text-white font-weight-bold"> <strong> <i class="ti-ticket"></i>   {{ apartadosIng.length }} </strong> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- TOTAL PAGADOS -->
+                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                            <div class="card">
+                                <div class="box bg-danger text-center">
+                                    <h2 class="font-light text-white"> {{ totalPagado | currency }} </h2>
+                                    <h6 class="text-white mb-0">Tickets Pagados</h6>
+                                    <p class="mb-0 text-white font-weight-bold"> <strong> <i class="ti-ticket"></i>   {{ pagadosIng.length }} </strong> </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOTAL EGRESOS -->
+                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                            <div class="card">
+                                <div class="box bg-info text-center">
+                                    <h2 class="font-light text-white"> {{ totalPendienteCobrar | currency }} </h2>
+                                    <h6 class="text-white mb-0">Pendientes Por Cobrar</h6>
+                                    <p class="mb-0 text-white font-weight-bold"> <strong> <i class="ti-ticket"></i>   {{ apartadosIng.length }} </strong> </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOTAL EGRESOS -->
+                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                            <div class="card">
+                                <div class="box bg-dark text-center">
+                                    <h2 class="font-light text-white"> {{ totalMovimiento | currency }} </h2>
+                                    <h6 class="text-white">Total Egresos</h6>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <hr>
+
+                    <!-- CREAR Y VER EGRESOS -->
+                    <div *ngIf="loadingEgresos">
+                        <p>Cargando...</p>
+                    </div>
+                    <div *ngIf="!loadingEgresos">
+
+                        <ng-container *ngIf="user.role === 'ADMIN'">
+                            <h3 class="fw-bold mt-4">Agregar Egreso</h3>
+
+                            <div class="form-group mb-3">
+                                <input type="text" class="form-control" placeholder="Descripción" #descE>
+                                <div class="form-control-feedback">
+                                    <small> La Descripción es obligatoria </small>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <input type="number" min="0" class="form-control" placeholder="Monto" #montoE>
+                                <div class="form-control-feedback">
+                                    <small> El monto es obligatorio </small>
+                                </div>
+                            </div>
+
+                            <button (click)="addEgresos(descE.value, montoE.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+
+                            <hr>
+                        </ng-container>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title"><span class="lstick"></span> Egresos</h4>
+                                <div class="table-responsive m-t-20">
+                                    <table class="table vm no-th-brd no-wrap pro-of-month">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2">Descripción</th>
+                                                <th>Fecha</th>
+                                                <th>Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngIf="egresos.length === 0">
+                                                <td class="text-center" colspan="4"> No se ha registrado ningún egreso... </td>
+                                            </tr>
+                                            <tr *ngFor="let egreso of egresos; let i = index">
+                                                <td colspan="2">
+                                                    <button *ngIf="user.role === 'ADMIN'" (click)="deleteEgreso(egreso.moid!)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                    <i class="ti-trash"></i>
+                                                </button> {{egreso.descripcion}}
+                                                </td>
+                                                <td>{{ egreso.fecha | date:'d/M/yy, h:mm a' }}</td>
+                                                <td>{{ egreso.monto | currency }}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="fw-bold">
+                                                <td colspan="3">Total</td>
+                                                <td> {{ totalMovimiento | currency }} </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL INGRESOS Y EGRESOS
+    ======================================================== -->
+    <div id="abonosPendientes" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="abonosPendientes" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="abonosPendientes">Abonos Pendientes</h4>
+                </div>
+                <div class="modal-body">
+
+
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span class="lstick"></span> Lista de abonos pendientes</h4>
+
+                            <div class="d-flex justify-content-between flex-wrap mt-1">
+
+                                <div *ngIf="user.role === 'ADMIN'" class="">
+
+                                    <label for="vendedores" class="me-2">Vendedores: </label>
+                                    <select name="" id="vendedores" #vendedoresF (change)="filterVendedorPendientes(vendedoresF.value)">
+                                            <option value="Todos">Todos</option>
+                                            <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
+                                        </select>
+
+                                </div>
+
+                            </div>
+
+                            <!-- CREAR Y VER EGRESOS -->
+                            <div *ngIf="loadingEgresos">
+                                <p>Cargando...</p>
+                            </div>
+
+                            <div *ngIf="!loadingEgresos">
+
+                                <div class="table-responsive m-t-20">
+                                    <table class="table vm no-th-brd no-wrap pro-of-month">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th colspan="2">Descripción</th>
+                                                <th>Fecha</th>
+                                                <th>Estado</th>
+                                                <th>Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngIf="pendientes.length === 0">
+                                                <td class="text-center" colspan="5"> No se ha registrado ningún pago... </td>
+                                            </tr>
+
+                                            <ng-container *ngFor="let pendiente of pendientes; let i = index">
+
+                                                <ng-container *ngFor="let paid of pendiente.pagos; let i = index">
+                                                    <tr *ngIf="paid.estado === 'Pendiente'">
+                                                        <td> {{ pendiente.numero }} </td>
+                                                        <td colspan="2">
+                                                            {{paid.descripcion}}
+                                                            <br><small> {{paid.user.name}} </small>
+                                                        </td>
+                                                        <td>{{ paid.fecha | date:'d/M/yy, h:mm a' }}</td>
+                                                        <td>
+                                                            <button type="button" (click)="confirmarPago(pendiente.tid!, paid._id!, 'Confirmado' )" [disabled]="user.role !== 'ADMIN'" class="btn btn-sm waves-effect waves-light" [ngClass]="{'btn-warning': paid.estado === 'Pendiente'}">
+                                                        <span> {{ paid.estado || 'Confirmado' }} </span>
+                                                    </button>
+                                                        </td>
+                                                        <td>{{ paid.monto | currency }}</td>
+                                                    </tr>
+                                                </ng-container>
+                                            </ng-container>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="fw-bold">
+                                                <td colspan="5" class="text-right">Total</td>
+                                                <td> {{ totalPendiente | currency }} </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL GET QR
+    ======================================================== -->
+    <div id="whatsappqr" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappqr" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="whatsappqr">Vincular Whatsapp</h4>
+                </div>
+                <div class="modal-body">
+
+                    <button [disabled]="generando" (click)="generarQR()" type="button" class="btn btn-success">
+                        <span *ngIf="generando">Generando codigo...</span>
+                        <span *ngIf="!generando">Generar codigo QR</span>
+                    </button>
+
+                    <div *ngIf="qr">
+                        <qrcode [qrdata]="qr" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL WHATSAPP MASIVE
+    ======================================================== -->
+    <div id="whatsappmasive" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappmasive" #modalNewUser>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="whatsappmasive">Enviar Mensaje Masivo</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="d-flex flex-wrapp gap-2">
+                        <button (click)="addDeco('@name')" type="button" class="btn btn-primary btn-sm">
+                            {{'@name'}}
+                        </button>
+                        <button (click)="addDeco('@number')" type="button" class="btn btn-primary btn-sm">
+                            {{'@number'}}
+                        </button>
+                        <button (click)="addDeco('@premio')" type="button" class="btn btn-primary btn-sm">
+                            {{'@premio'}}
+                        </button>
+                        <button (click)="addDeco('@empresa')" type="button" class="btn btn-primary btn-sm">
+                            {{'@empresa'}}
+                        </button>
+                    </div>
+
+                    <div class="mt-3">
+
+                        <div class="form-group mb-1">
+                            <label>Mensaje</label>
+                            <textarea [(ngModel)]="message" #whatMasive class="form-control" rows="5"></textarea>
+                            <small class="text-mute"> <span class="fw-bold">Nota: </span>Debes de agregar un mensaje con mas de 5 caracteres</small>
+                        </div>
+
+                        <button [disabled]="sendMasive || message.length < 5" (click)="sendMasiveW()" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
+                            <span *ngIf="sendMasive">Enviando...</span>
+                            <span *ngIf="!sendMasive">Enviar</span>
+                        </button>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+</section>
