@@ -249,7 +249,7 @@
                     <i class="ti ti-download"></i> Exportar excel
                 </button>
 
-                <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappmasive">
+                <button *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappmasive">
                     Enviar mensajes masivos
                 </button>
 
@@ -333,7 +333,7 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#imgTicket" role="tab" aria-expanded="false">
-                                    <span class="hidden-sm-up"><i class="mdi mdi-whatsapp"></i></span>
+                                    <span class="hidden-sm-up"><i class="mdi mdi-image-filter"></i></span>
                                     <span class="hidden-xs-down">Imagen </span>
                                 </a>
                             </li>
