@@ -1464,12 +1464,15 @@ export class RifaComponent implements OnInit {
           mensaje = mensaje.replace(/@number/g, '*#'+ticket.numero+'*');
         }
 
-        let number = ticket.telefono.trim()+"@c.us";
+        let number:string = ticket.telefono.trim().replace(/\s/g, '');
+
+        // let number = ticket.telefono.trim()+"@c.us";
 
         messages.push({
-          number,
+          number: number.replace(/[^\d]/g, '') + '@c.us',
           message: mensaje
         })
+        
         
       }     
       
