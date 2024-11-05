@@ -1022,6 +1022,11 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   public sendM: boolean = false;
   sendWhatsapp(message: string){
+
+    if (this.user.role !== 'ADMIN') {
+      this.sendWhatsappOld(message)
+      return;
+    }
         
     if (this.ticketSelected.telefono) {
       
@@ -1053,6 +1058,18 @@ export class RifaComponent implements OnInit {
             this.sendM = false;
           })      
     }
+    
+  }
+
+  /** ================================================================
+   *   ENVIAR WHATSAPP
+  ==================================================================== */
+  sendWhatsappOld(msg: string){
+    
+    let text = msg.replaceAll(' ','+').replaceAll('\n' , '%0A');
+
+    // window.open(`https://wa.me/${this.ticketSelected.telefono}?text=${text}`, '_blank')
+    window.open(`whatsapp://send?text=${text}&phone=${this.ticketSelected.telefono}`);
     
   }
 
@@ -1367,6 +1384,11 @@ export class RifaComponent implements OnInit {
   @ViewChild('captionI') captionI!: ElementRef;
   sendImg(caption: string = ''){
 
+    if (this.user.role !== 'ADMIN') {
+      Swal.fire('Atención', 'Solo el administrador puede usar esta función', 'warning');
+      return;
+    }
+
     this.sendImage = true;
 
     html2canvas(this.contentToCapture.nativeElement, { useCORS: true }).then((canvas) => {
@@ -1433,6 +1455,11 @@ export class RifaComponent implements OnInit {
   public sendMasive: boolean = false;
   @ViewChild('whatMasive') whatMasive!: ElementRef;
   sendMasiveW(){
+
+    if (this.user.role !== 'ADMIN') {
+      Swal.fire('Atención', 'Solo el administrador puede usar esta función', 'warning');
+      return;
+    }
 
     if (this.message.length < 5) {
       Swal.fire('Atención', 'Debes de agregar un mensaje con mas de 5 caracteres', 'warning');
