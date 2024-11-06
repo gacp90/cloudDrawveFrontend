@@ -224,11 +224,7 @@
                         </ng-container>
                     </ng-container>
 
-
                 </div>
-
-
-
 
             </div>
 
@@ -237,7 +233,7 @@
             <div>
                 <div class="form-group">
                     <label for="example-search-input" class="">Buscar</label>
-                    <input class="form-control" #searchI (keyup)="search(searchI.value)" type="search" id="example-search-input" placeholder="Buscar por, Nombre, Telefono o cedula">
+                    <input class="form-control" #searchI (keydown)="search(searchI.value)" type="search" id="example-search-input" placeholder="Buscar por, Nombre, Telefono o cedula">
                 </div>
             </div>
 
