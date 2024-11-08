@@ -1023,40 +1023,41 @@ export class RifaComponent implements OnInit {
   public sendM: boolean = false;
   sendWhatsapp(message: string){
 
-    if (this.user.role !== 'ADMIN') {
-      this.sendWhatsappOld(message)
-      return;
-    }
+    if (!this.user.whatsapp) {
+      this.sendWhatsappOld(message);
+    }else{    
         
-    if (this.ticketSelected.telefono) {
-      
-      this.sendM = true;
-      this.whatsappService.sendMessage(this.user.uid!, {message: message, number: this.ticketSelected.telefono})
-      .subscribe( ({ok, msg}) => {
-            this.sendM = false;
+      if (this.ticketSelected.telefono) {
+        
+        this.sendM = true;
+        this.whatsappService.sendMessage(this.user.uid!, {message: message, number: this.ticketSelected.telefono}, this.user.wp!)
+        .subscribe( ({ok, msg}) => {
+              this.sendM = false;
 
-            const Toast = Swal.mixin({
-              toast: true,
-              position: "top-end",
-              showConfirmButton: false,
-              timer: 2000,
-              timerProgressBar: true,
-              didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-              }
-            });
+              const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                }
+              });
 
-            Toast.fire({
-              icon: "success",
-              title: msg
-            });
-            
-          }, (err)=> {
-            console.log(err);
-            Swal.fire('Error', err.error.msg, 'error');            
-            this.sendM = false;
-          })      
+              Toast.fire({
+                icon: "success",
+                title: msg
+              });
+              
+            }, (err)=> {
+              console.log(err);
+              Swal.fire('Error', err.error.msg, 'error');            
+              this.sendM = false;
+            })      
+      }
+
     }
     
   }
@@ -1360,11 +1361,14 @@ export class RifaComponent implements OnInit {
   public generando: boolean = false;
   generarQR(){
 
-    if (this.user.role !== 'ADMIN') { return }
+    if (!this.user.whatsapp) {
+      Swal.fire('Atención', 'No tienes habilitada esta funcion', 'warning');
+      return;
+    }
 
     this.generando = true;
     
-    this.whatsappService.generateQR(this.user.uid!)
+    this.whatsappService.generateQR(this.user.uid!, this.user.wp!)
     .subscribe( ({qr}) => {
           this.qr = qr;
           this.generando = false;
@@ -1384,8 +1388,8 @@ export class RifaComponent implements OnInit {
   @ViewChild('captionI') captionI!: ElementRef;
   sendImg(caption: string = ''){
 
-    if (this.user.role !== 'ADMIN') {
-      Swal.fire('Atención', 'Solo el administrador puede usar esta función', 'warning');
+    if (!this.user.whatsapp) {
+      Swal.fire('Atención', 'No tienes habilitada esta funcion', 'warning');
       return;
     }
 
@@ -1399,7 +1403,7 @@ export class RifaComponent implements OnInit {
       canvas.toBlob((blob) => {
         if (blob) {
           // Crear un objeto FormData para enviar la imagen
-          this.whatsappService.sendImage(this.user.uid!, this.ticketSelected.telefono, blob, caption)
+          this.whatsappService.sendImage(this.user.uid!, this.ticketSelected.telefono, blob, caption, this.user.wp!)
               .subscribe( ({ok, msg}) => {
                 this.sendImage = false;
 
@@ -1456,8 +1460,8 @@ export class RifaComponent implements OnInit {
   @ViewChild('whatMasive') whatMasive!: ElementRef;
   sendMasiveW(){
 
-    if (this.user.role !== 'ADMIN') {
-      Swal.fire('Atención', 'Solo el administrador puede usar esta función', 'warning');
+    if (!this.user.whatsapp) {
+      Swal.fire('Atención', 'No tienes habilitada esta funcion', 'warning');
       return;
     }
 
@@ -1496,7 +1500,7 @@ export class RifaComponent implements OnInit {
         // let number = ticket.telefono.trim()+"@c.us";
 
         messages.push({
-          number: number.replace(/[^\d]/g, '') + '@c.us',
+          number: number.replace(/[^\d]/g, '') + '@s.whatsapp.net',
           message: mensaje
         })
         
@@ -1505,7 +1509,7 @@ export class RifaComponent implements OnInit {
       
     }
     
-    this.whatsappService.sendMessageMasive(this.user.uid!, {contacts: messages})
+    this.whatsappService.sendMessageMasive(this.user.uid!, {contacts: messages}, this.user.wp!)
         .subscribe( ({msg}) => {
 
           const Toast = Swal.mixin({

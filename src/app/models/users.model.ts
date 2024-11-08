@@ -19,6 +19,8 @@ export class User {
         public referralCode: string,
         public referredBy: string,
         public walletBalance: number,
+        public whatsapp?: boolean,
+        public wp?: string,
         public uid?: string,
         public _id?: string
         

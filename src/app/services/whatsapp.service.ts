@@ -18,34 +18,34 @@ export class WhatsappService {
   /** ================================================================
    *  GENERATE QR
   ==================================================================== */
-  generateQR(id: string){
-    return this.http.get<{ok: boolean, qr: string}>( `${this.url}/qr/${id}`);
+  generateQR(id: string, wp: string){
+    return this.http.get<{ok: boolean, qr: string}>( `${wp}/api/whatsapp/qr/${id}`);
   }
 
   /** ================================================================
    *  SEND MESSAGE
   ==================================================================== */
-  sendMessage(id: string, message: _message){
-    return this.http.post<{ok: boolean, msg: string}>( `${this.url}/send/${id}`, message);
+  sendMessage(id: string, message: _message, wp: string){
+    return this.http.post<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/send/${id}`, message);
   }
 
   /** ================================================================
    *  SEND IMAGE
   ==================================================================== */
-  sendImage(id: string, number: string, img: any, caption: string = ''){
+  sendImage(id: string, number: string, img: any, caption: string = '', wp: string){
 
     const formData = new FormData();
     formData.append('image', img);
     formData.append('caption', caption);
 
-    return this.http.post<{ok: boolean, msg: string}>( `${this.url}/send-iamge/${id}/${number}`, formData);
+    return this.http.post<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/send-iamge/${id}/${number}`, formData);
   }
 
   /** ================================================================
    *  SEND MESSAGE MASIVE
   ==================================================================== */
-  sendMessageMasive(id: string, message: any){
-    return this.http.post<{ok: boolean, msg: string}>( `${this.url}/masive/${id}`, message);
+  sendMessageMasive(id: string, message: any, wp: string){
+    return this.http.post<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/masive/${id}`, message);
   }
 
 }

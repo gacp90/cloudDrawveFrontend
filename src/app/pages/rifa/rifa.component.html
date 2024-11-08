@@ -7,6 +7,13 @@
         </p>
     </div>
 
+    <!-- VINCULAR WHATSAPP -->
+    <div *ngIf="user.whatsapp && user.wp" class="d-flex flex-wrap gap-2">
+        <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappqr">
+            Vincular Whatsapp
+        </button>
+    </div>
+
     <div *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" class="d-flex flex-wrap gap-2 my-2">
 
         <button type="button" class="m-1 btn btn-primary" data-toggle="modal" data-target="#addMetodoPaid">
@@ -33,12 +40,9 @@
             Abonos Pendientes
         </button>
 
-        <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappqr">
-            Vincular Whatsapp
-        </button>
-
-
     </div>
+
+    
 
     <div class="card w-100">
         <div class="card-body">
@@ -245,7 +249,7 @@
                     <i class="ti ti-download"></i> Exportar excel
                 </button>
 
-                <button *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappmasive">
+                <button *ngIf="user.whatsapp && user.wp" type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappmasive">
                     Enviar mensajes masivos
                 </button>
 
