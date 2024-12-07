@@ -18,6 +18,11 @@ interface _img {
     _id?: string
 }
 
+interface _montos{
+    monto: number,
+    _id?: string
+}
+
 export class Rifa{
 
     constructor(
@@ -25,6 +30,7 @@ export class Rifa{
         public name: string,
         public monto: number,
         public promocion: number,
+        public montos: _montos[],
         public comision: number,
         public numeros: number,
         public loteria: string,

@@ -20,6 +20,10 @@
             Metodos de pago
         </button>
 
+        <button type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#addMontos">
+            Montos Adicionales
+        </button>
+
         <button type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#addPremios">
             Premios especiales
         </button>
@@ -398,6 +402,9 @@
                                                 <select class="form-control" formControlName="monto">
                                                     <option [value]="rifa.monto"> $ {{rifa.monto}} </option>
                                                     <option *ngIf="rifa.promocion" [value]="rifa.promocion"> $ {{rifa.promocion}} </option>
+                                                    <ng-container *ngIf="rifa.montos.length > 0">
+                                                        <option *ngFor="let monto of rifa.montos"  [value]="monto.monto"> $ {{monto.monto}} </option>
+                                                    </ng-container>
                                                 </select>
                                             </div>
                                         </div>
@@ -686,6 +693,10 @@
                                     <select class="form-control" formControlName="monto">
                                         <option [value]="rifa.monto"> $ {{rifa.monto}} </option>
                                         <option *ngIf="rifa.promocion" [value]="rifa.promocion"> $ {{rifa.promocion}} </option>
+                                        <ng-container *ngIf="rifa.montos.length > 0">
+                                            <option *ngFor="let monto of rifa.montos"  [value]="monto.monto"> $ {{monto.monto}} </option>
+                                        </ng-container>
+                                        
                                     </select>
                                 </div>
                             </div>
@@ -1406,6 +1417,74 @@
                             <span *ngIf="sendMasive">Enviando...</span>
                             <span *ngIf="!sendMasive">Enviar</span>
                         </button>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL AGREGAR MONTOS ADICIONALES
+    ======================================================== -->
+    <div id="addMontos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="addMontos" #modalNewUser>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="addMontos">Agregar Montos adicionales</h4>
+                </div>
+                <div class="modal-body">
+
+                    <h3 class="fw-bold mt-4">Agregar nuevo monto para tickets</h3>
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Monto" #newMontoI>
+                        <div class="form-control-feedback">
+                            <small> El monto es obligatorio </small>
+                        </div>
+                    </div>                    
+
+                    <button (click)="addMonto(newMontoI.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+
+                    <hr>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span class="lstick"></span>Montos para tickets adicionales</h4>
+                            <div class="table-responsive m-t-20">
+                                <table class="table table-sm vm no-th-brd no-wrap pro-of-month">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Monto</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngIf="rifa.montos.length === 0">
+                                            <td class="text-center" colspan="4"> No se ha registrado ningún monto adicional... </td>
+                                        </tr>
+                                        <tr *ngFor="let monto of rifa.montos; let i = index">
+                                            <td>
+                                                 {{ i + 1}}
+                                            </td>
+                                            <td>{{ monto.monto }}</td>
+                                            <td>
+                                                <button (click)="delMonto(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                    <i class="ti-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

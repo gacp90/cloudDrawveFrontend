@@ -1603,5 +1603,54 @@ export class RifaComponent implements OnInit {
 
   }
 
+  /** ================================================================
+   *   AGREGAR MONTO
+  ==================================================================== */
+  @ViewChild ('newMontoI') newMontoI!: ElementRef;
+  addMonto(monto: any){
+    monto = Number(monto);
+
+    if (monto < 0 || !monto) {
+      Swal.fire('Atención', 'El monto debe ser mayor a cero', 'warning');
+      return;
+    }
+
+    this.rifa.montos.push({
+      monto
+    })
+
+    this.rifasService.updateRifa({montos: this.rifa.montos}, this.rifa.rifid!)
+        .subscribe( ({}) => {
+
+          Swal.fire('Estupendo', 'Se ha agregado el nuevo monto exitosamente', 'success');
+          this.newMontoI.nativeElement.value = '';
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+  }
+
+  /** ================================================================
+   *   ELIMINAR MONTO
+  ==================================================================== */
+  delMonto(i: any){
+
+    this.rifa.montos.splice(i, 1);
+
+    this.rifasService.updateRifa({montos: this.rifa.montos}, this.rifa.rifid!)
+        .subscribe( ({}) => {
+
+          Swal.fire('Estupendo', 'Se ha eliminado el monto exitosamente', 'success');
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+
+  }
+
 
 }
