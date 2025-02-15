@@ -48,4 +48,20 @@ export class WhatsappService {
     return this.http.post<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/masive/${id}`, message);
   }
 
+  /** ================================================================
+   *  SEND MESSAGE MASIVE WITH IMG
+  ==================================================================== */
+  sendMessageMasiveImg(id: string, message: any, wp: string, img: any){
+    
+    const formData = new FormData();
+  
+    // Agregamos la imagen al FormData
+    formData.append('image', img);
+
+    // Convertimos el mensaje en un string JSON y lo agregamos
+    formData.append('message', JSON.stringify(message));    
+
+    return this.http.post<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/masive/img/${id}`, formData);
+  }
+
 }

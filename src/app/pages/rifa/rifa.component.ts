@@ -374,7 +374,6 @@ export class RifaComponent implements OnInit {
       
           this.ticketSelected = ticket;
           this.paymentsTicket = ticket.pagos;
-
           
           if (this.paymentsTicket.length > 0) {
             for (const paid of this.paymentsTicket) {
@@ -1030,7 +1029,7 @@ export class RifaComponent implements OnInit {
       if (this.ticketSelected.telefono) {
         
         this.sendM = true;
-        this.whatsappService.sendMessage(this.user.uid!, {message: message, number: this.ticketSelected.telefono}, this.user.wp!)
+        this.whatsappService.sendMessage(this.user.uid!, {message: message, number: this.ticketSelected.telefono.trim()}, this.user.wp!)
         .subscribe( ({ok, msg}) => {
               this.sendM = false;
 
@@ -1443,7 +1442,33 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
-   *   ADD DECORATOR WHATSAPP MASIVE 
+   *   ACTUALIZAR IMAGEN
+  ==================================================================== */
+  @ViewChild('fileImgMasive') fileImgMasive!: ElementRef;
+  public imgTempPMasive: any = null;
+  public subirImagenMasive!: any;
+  public imgMasive: string = 'no-image';
+
+  cambiarImageMasive(file: any): any{  
+
+    console.log(file);
+    
+    
+    this.subirImagenMasive = file.target.files[0];
+    
+    if (!this.subirImagenMasive) { return this.imgTempPMasive = null }    
+    
+    const reader = new FileReader();
+    const url64 = reader.readAsDataURL(file.target.files[0]);
+        
+    reader.onloadend = () => {
+      this.imgTempPMasive = reader.result;      
+    }
+
+  }
+
+  /** ================================================================
+   *   ADD DECORATOR WHATSAPP MASIVE
   ==================================================================== */
   addDeco(deco: string){
 
@@ -1458,7 +1483,8 @@ export class RifaComponent implements OnInit {
   public message: string = '';
   public sendMasive: boolean = false;
   @ViewChild('whatMasive') whatMasive!: ElementRef;
-  sendMasiveW(){
+  @ViewChild('addImgMasive') addImgMasive!: ElementRef;
+  sendMasiveW(imgS: boolean = false){
 
     if (!this.user.whatsapp) {
       Swal.fire('Atención', 'No tienes habilitada esta funcion', 'warning');
@@ -1508,35 +1534,73 @@ export class RifaComponent implements OnInit {
       }     
       
     }
+
+    if (imgS) {
+      this.whatsappService.sendMessageMasiveImg(this.user.uid!, {contacts: messages}, this.user.wp!, this.subirImagenMasive)
+          .subscribe( ({msg}) => {
+
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              }
+            });
+  
+            Toast.fire({
+              icon: "success",
+              title: msg
+            });
+            
+            this.message = '';
+            this.sendMasive = false;
+
+            this.imgTempPMasive = ''; 
+            this.fileImgMasive.nativeElement.value = '';
+            this.addImgMasive.nativeElement.checked = false;
+
+          }, (err) => {
+            console.log(err);
+            Swal.fire('Error', err.error.msg, 'error');
+            this.sendMasive = false;          
+          })
+      
+    }else{
+
+      this.whatsappService.sendMessageMasive(this.user.uid!, {contacts: messages}, this.user.wp!)
+          .subscribe( ({msg}) => {
+  
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              }
+            });
+  
+            Toast.fire({
+              icon: "success",
+              title: msg
+            });
+            
+            this.message = '';
+            this.sendMasive = false;
+  
+          }, (err) => {
+            console.log(err);
+            Swal.fire('Error', err.error.msg, 'error');
+            this.sendMasive = false;          
+          })
+    }
     
-    this.whatsappService.sendMessageMasive(this.user.uid!, {contacts: messages}, this.user.wp!)
-        .subscribe( ({msg}) => {
-
-          const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.onmouseenter = Swal.stopTimer;
-              toast.onmouseleave = Swal.resumeTimer;
-            }
-          });
-
-          Toast.fire({
-            icon: "success",
-            title: msg
-          });
-          
-          this.message = '';
-          this.sendMasive = false;
-
-        }, (err) => {
-          console.log(err);
-          Swal.fire('Error', err.error.msg, 'error');
-          this.sendMasive = false;          
-        })
 
 
   }

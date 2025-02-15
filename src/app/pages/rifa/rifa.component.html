@@ -1405,7 +1405,47 @@
                         </button>
                     </div>
 
+                    <div *ngIf="addImgMasive.checked" class="my-3">
+
+                            <div class="form-group file-area border">
+                                <input #fileImgMasive (change)="cambiarImageMasive($event)" type="file" name="images" id="imagesMasive" required="required" multiple="multiple" />
+                                <div class="file-dummy">
+
+                                    <div class="default py-5">
+                                        <h5 class="text-center card-title text-muted">
+                                            Agregar Imagen
+                                        </h5>
+                                        <p class="text-center card-text fs-2 mb-0">
+                                            <i class="mdi mdi-plus"></i>
+                                        </p>
+                                        <p class="text-center card-text fs-sm">Arrastre la imagen ó dar click aquí</p>
+                                    </div>
+
+                                    <!-- IMG VALIDA -->
+                                    <div class="success">
+
+                                        <div class="d-flex justify-content-center" *ngIf="imgTempPMasive">
+                                            <div class="mx-auto" style="background-image: url({{imgTempPMasive}});width: 400px; height: 300px; background-repeat: no-repeat; background-size: contain; background-position: center center;"></div>
+                                        </div>
+
+                                    </div>
+                                    <!-- IMG VALIDA -->
+                                </div>
+                            </div>
+
+                            <div *ngIf="imgTempPMasive" class="d-flex justify-content-between flex-wrap pt-4 gap-2">
+                                <button type="button" class="btn btn-danger btn-sm" (click)="imgTempPMasive = ''; fileImgMasive.value = ''"> Eliminar </button>
+                            </div>
+                    </div>
+
                     <div class="mt-3">
+
+                        <div class="form-group mb-1">
+                            <div class="checkbox checkbox-success">
+                                <input id="addImgMasive" #addImgMasive type="checkbox" (change)="addImgMasive.checked = addImgMasive.checked">
+                                <label for="addImgMasive"> Agregar Imagen </label>
+                            </div>
+                        </div>
 
                         <div class="form-group mb-1">
                             <label>Mensaje</label>
@@ -1413,7 +1453,7 @@
                             <small class="text-mute"> <span class="fw-bold">Nota: </span>Debes de agregar un mensaje con mas de 5 caracteres</small>
                         </div>
 
-                        <button [disabled]="sendMasive || message.length < 5" (click)="sendMasiveW()" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
+                        <button [disabled]="sendMasive || message.length < 5" (click)="sendMasiveW(addImgMasive.checked)" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
                             <span *ngIf="sendMasive">Enviando...</span>
                             <span *ngIf="!sendMasive">Enviar</span>
                         </button>
