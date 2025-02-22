@@ -60,11 +60,22 @@
                     <i class="fa fa-pencil-square-o"></i>
                 </button>
             </div>
-            <div class="d-flex flex-row flex-wrap gap-2 mb-3">
+
+            <!-- DESCCRIPCION DE LA RIFA Y PORTADA-->
+            <div class="d-flex flex-row gap-2 mb-3">
+                <!-- PORTADA -->
+                <div *ngIf="rifa.portada">
+                    <img [src]="rifa.portada.img | imagen: 'portada' " alt="image" class="img-responsive img-rounded" width="50" style="max-width: 250px;">
+                </div>
                 <div>
                     <h3 class="mb-2 fw-bold fs-2"> {{ rifa.name }} </h3>
+                    <div>
+                        <strong class="fw-bold">Descripción</strong><br>
+                        <p class="text-muted"> {{ rifa.descripcion }} </p>
+                    </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-3 col-xs-6 b-r"><strong class="fw-bold">Loteria</strong><br>
                     <p class="text-muted"> {{ rifa.loteria }} </p>
@@ -79,9 +90,7 @@
                     <p [ngClass]="{'text-success': rifa.estado === 'Activa', 'text-warning': rifa.estado === 'Pendiente', 'text-danger': rifa.estado === 'Pendiente'}"> {{ rifa.estado }} </p>
                 </div>
             </div>
-            <div><strong class="fw-bold">Descripción</strong><br>
-                <p class="text-muted"> {{ rifa.descripcion }} </p>
-            </div>
+            
 
             <div><strong class="fw-bold">Link</strong><br>
                 <p class="text-muted mb-0" (click)="copyToClipboard()">
@@ -93,6 +102,7 @@
                     Click para Copiar
                 </button>
             </div>
+            
         </div>
     </div>
 
@@ -941,7 +951,7 @@
                                     <div class="success">
 
                                         <div class="d-flex justify-content-center" *ngIf="imgTempP">
-                                            <div class="mx-auto" style="background-image: url({{imgTempP}});width: 400px; height: 300px; background-repeat: no-repeat; background-size: cover; background-position: center center;"></div>
+                                            <div class="mx-auto" style="background-image: url({{imgTempP}});width: 400px; height: 300px; background-repeat: no-repeat; background-size: contain; background-position: center center;"></div>
                                         </div>
 
                                     </div>
@@ -949,8 +959,19 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3">
+                                <label for="" class="form-label">Tipo de imagen</label>
+                                <select #imgType class="form-select form-select-lg" name="" id="">
+                                    <option value="rifa">Imagen</option>
+                                    <option value="portada">Portada</option>
+                                </select>
+                            </div>
+
                             <div *ngIf="imgTempP" class="d-flex justify-content-between flex-wrap pt-4 gap-2">
-                                <button type="button" class="btn btn-info btn-sm" [disabled]="!subirImagen" (click)="subirImg()"> Subir </button>
+
+                                
+
+                                <button type="button" class="btn btn-info btn-sm" [disabled]="!subirImagen" (click)="subirImg(imgType.value)"> Subir </button>
                                 <button type="button" class="btn btn-danger btn-sm" (click)="imgTempP = ''; fileImg.value = ''"> Eliminar </button>
                             </div>
 
@@ -1312,7 +1333,7 @@
                                                         <td> {{ pendiente.numero }} </td>
                                                         <td colspan="2">
                                                             {{paid.descripcion}}
-                                                            <br><small> {{paid.user.name}} </small>
+                                                            <br><small *ngIf="paid.user"> {{paid.user.name || ''}} </small>
                                                         </td>
                                                         <td>{{ paid.fecha | date:'d/M/yy, h:mm a' }}</td>
                                                         <td>

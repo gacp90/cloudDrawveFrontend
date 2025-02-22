@@ -951,16 +951,24 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   @ViewChild('fileImg') fileImg!: ElementRef;
   public imgPerfil: string = 'no-image';
-  subirImg(){
+  subirImg(type: any){
     
-    this.fileUploadService.updateImage( this.subirImagen, 'rifa', this.rifa.rifid!)
+    this.fileUploadService.updateImage( this.subirImagen, type, this.rifa.rifid!)
     .then( 
       (resp:{ date: Date, nombreArchivo: string, ok: boolean }) => {
+
+        if (type === 'rifa') {
+          this.rifa.img.push({
+            img: resp.nombreArchivo,
+            fecha: resp.date
+          })          
+        }else{
+          this.rifa.portada = {
+            img: resp.nombreArchivo,
+            fecha: resp.date
+          }
+        }
         
-        this.rifa.img.push({
-          img: resp.nombreArchivo,
-          fecha: resp.date
-        })
       }
     );
     

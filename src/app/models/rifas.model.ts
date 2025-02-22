@@ -43,6 +43,7 @@ export class Rifa{
         public status: boolean,
         public abierta: boolean,
         public img: _img[],
+        public portada: _img,
         public _id?: string,
         public rifid?: string,
 
