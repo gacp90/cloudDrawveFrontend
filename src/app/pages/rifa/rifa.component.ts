@@ -56,6 +56,20 @@ export class RifaComponent implements OnInit {
     
   }
 
+  loadGanador(){
+
+    this.ticketsService.loadTickets({rifa: this.rifa.rifid, ganador: true})
+        .subscribe( ({tickets}) => {
+
+          this.ganador = tickets[0];
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+  }
+
   /** ================================================================
    *  ACTUALIZAR FECHA
   ==================================================================== */
@@ -205,6 +219,8 @@ export class RifaComponent implements OnInit {
             promocion: this.rifa.promocion,
             comision: this.rifa.comision
           })
+
+          this.loadGanador();
           
 
         }, (err) => {
@@ -413,7 +429,7 @@ export class RifaComponent implements OnInit {
               direccion: ticket.direccion,
               ruta: ticket.ruta._id! || '',
               estado: ticket.estado,
-              nota: ticket.nota,
+              nota: ticket.nota || '',
               vendedor: this.user.uid!,
               monto: ticket.monto,
               disponible: false
@@ -503,6 +519,100 @@ export class RifaComponent implements OnInit {
 
   }
 
+  /** ================================================================
+   *   CLEAR TICKET
+  ==================================================================== */
+  clearTicket(id: string){
+
+    Swal.fire({
+      title: "Estas seguro de limpiar el ticket?",
+      text: "Si haces esto!, se eliminara toda la información del ticket automaticamente",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, limpiar!",
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        
+        this.ticketsService.clearTicket(id)
+            .subscribe( ({ticket}) => {
+
+              this.tickets.map( (tic) => {
+                if (tic.tid === ticket.tid) {
+                  tic.estado = ticket.estado;
+                }
+              });
+              this.ticketSelected = ticket;
+              this.paymentsTicket = [];
+              this.totalPaid = 0;
+
+              this.ticketUpdate.reset({
+                tid: ticket.tid!,
+                estado: 'Disponible',
+                vendedor: this.user.uid!,
+                disponible: true
+              });
+
+              Swal.fire('Estupendo', 'Se ha limpiado el ticket exitosamente', 'success');
+
+            }, (err) => {
+              console.log(err);
+              Swal.fire('Error', err.error.msg, 'error');              
+            })
+
+      }
+    });
+
+  }
+
+  /** ================================================================
+   *   GANADOR TICKET
+  ==================================================================== */
+  public ganador!: Ticket;
+  ganadorTicket(id: string){
+
+    Swal.fire({
+      title: "Estas seguro que este ticket a sido el ganador?",
+      text: "Si aceptas de que es el ganador, no podras cambiarlo",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, es el ticket ganador!",
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        let formData = {
+          tid: id,
+          rifid: this.rifa.rifid
+        }
+        
+        this.ticketsService.ganadorTicket(formData)
+            .subscribe( ({ticket}) => {
+
+              this.ganador = ticket;
+
+              this.tickets.map( (tic) => {
+                if (tic.tid === ticket.tid) {
+                  tic.ganador = true;
+                }
+              });
+
+              Swal.fire('Estupendo', 'Este ticket a sido seleccionado como el ticket ganador de esta rifa!', 'success');
+
+            }, (err) => {
+              console.log(err);
+              Swal.fire('Error', err.error.msg, 'error');              
+            })
+
+      }
+    });
+
+  }
+  
   /** ================================================================
    *   UPDATE LIST TICKETS
   ==================================================================== */
@@ -790,10 +900,13 @@ export class RifaComponent implements OnInit {
   @ViewChild('nameM') nameM!: ElementRef;
   @ViewChild('descM') descM!: ElementRef;
   @ViewChild('cuentaM') cuentaM!: ElementRef;
+  @ViewChild('tasaM') tasaM!: ElementRef;
 
-  addMetodoPaid(name: string, descripcion: string, cuenta: string){
+  addMetodoPaid(name: string, descripcion: string, cuenta: string, tasa: any){
+
+    tasa = Number(tasa);
     
-    if (name.length === 0 || descripcion.length === 0 || cuenta.length === 0) {
+    if (name.length === 0 || descripcion.length === 0 || cuenta.length === 0 || tasa <= 0) {
       Swal.fire('Atención', 'Debes de llenar los campos obligatorios', 'warning');
       return;
     }
@@ -801,7 +914,8 @@ export class RifaComponent implements OnInit {
     this.rifa.metodos.push({
       name,
       descripcion,
-      cuenta
+      cuenta,
+      tasa
     })
 
     this.rifasService.updateRifa({metodos: this.rifa.metodos}, this.rifa.rifid!)
@@ -812,6 +926,7 @@ export class RifaComponent implements OnInit {
           this.nameM.nativeElement.value = '';
           this.descM.nativeElement.value = '';
           this.cuentaM.nativeElement.value = '';
+          this.tasaM.nativeElement.value = '';
 
         }, (err) => {
           console.log(err);
@@ -1297,7 +1412,17 @@ export class RifaComponent implements OnInit {
 
 
       let totalPendientesT = 0;
-      let pendientesT = this.pendientes.filter( (tick) => vendedor == tick.vendedor._id );
+      let pendientesT = this.pendientes.filter( (tick) => {
+
+        // Verifica que tick.vendedor y tick.vendedor._id existan
+        if (!tick.vendedor || !tick.vendedor._id) {
+          return false;
+        }
+
+        // Compara los IDs
+        return vendedor === tick.vendedor._id;
+
+      });
 
       for (const pendienteT of pendientesT) {
         for (const paid of pendienteT.pagos) {
@@ -1332,7 +1457,18 @@ export class RifaComponent implements OnInit {
 
           })
 
-          this.ticketsService.updateTicket( {pagos: ticket.pagos}, ticketE )
+          let totalPago = 0;
+          for (const pago of ticket.pagos) {
+            if (pago.estado === estado) {
+              totalPago += pago.monto;
+            }
+          }
+
+          if (totalPago >= ticket.monto) {
+            ticket.estado = 'Pagado'
+          }
+
+          this.ticketsService.updateTicket( {pagos: ticket.pagos, estado: ticket.estado}, ticketE )
               .subscribe( ({ticket} ) => {
 
                 this.pendientes.map( (tick) => {
@@ -1457,10 +1593,7 @@ export class RifaComponent implements OnInit {
   public subirImagenMasive!: any;
   public imgMasive: string = 'no-image';
 
-  cambiarImageMasive(file: any): any{  
-
-    console.log(file);
-    
+  cambiarImageMasive(file: any): any{    
     
     this.subirImagenMasive = file.target.files[0];
     

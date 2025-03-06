@@ -106,6 +106,63 @@
         </div>
     </div>
 
+    <!-- TICKET GANADOR -->
+    <div *ngIf="ganador" class="card">
+        <div class="card-body">
+            <h4 class="card-title text-success">TICKET GANADOR</h4>
+
+            <p class="mb-0 fw-bold fs-4"> 
+                <span class="label" [ngClass]="{'label-success': ganador.estado === 'Disponible', 'label-warning': ganador.estado === 'Apartado', 'label-danger': ganador.estado === 'Pagado'}">
+                    {{ganador.estado}} 
+                </span>
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-between">
+
+                <div class="">                    
+                    <div class="display-2 text-info"> <span> #{{ ganador.numero }} </span></div>                
+                </div>
+
+                <!-- INFORMACION -->
+                <div>
+                    <div>
+                        <p *ngIf="!ganador.disponible" class="mb-0 text-capitalize "> <span class="fw-bold">Nombre:</span>  {{ganador.nombre}} </p>
+                        <p *ngIf="!ganador.disponible" class="mb-0 text-capitalize "> <span class="fw-bold">Telefono:</span>  {{ganador.telefono}} </p>
+                        <p *ngIf="!ganador.disponible" class="mb-0 text-capitalize "> <span class="fw-bold">Dirección:</span>  {{ganador.direccion}} </p>
+                        <p *ngIf="!ganador.disponible" class="mb-0 text-capitalize "> <span class="fw-bold">Ruta:</span>  {{ganador.ruta.name}} </p>
+                        <p *ngIf="!ganador.disponible" class="mb-0 text-capitalize "> <span class="fw-bold">Vendedor:</span>  {{ganador.vendedor.name}} </p>
+                    </div>
+
+                </div>
+
+                <!-- PAGOS -->
+                <div>
+                    <p class="mb-0 fw-bold">Pagos o Abonos</p>
+                    <table class="table table-sm table-hover table-stripe no-border">
+                        <thead>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                        </thead>
+                        <tbody>
+                            <tr *ngIf="ganador.pagos.length === 0">
+                                <td colspan="3">No hay registro de pagos...</td>
+                            </tr>
+
+                            <tr *ngFor="let pago of ganador.pagos">
+                                <td> {{ pago.descripcion }} </td>
+                                <td> {{ pago.fecha | date:'short' }} </td>
+                                <td> {{ pago.monto | currency }} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>            
+            
+        </div>
+    </div>
+
     <!-- NUMEROS -->
     <div class="card">
         <div class="card-body">
@@ -358,7 +415,19 @@
                             <!-- DETALLES DEL TICKET -->
                             <div class="tab-pane active" id="ticketDetails" role="tabpanel" aria-expanded="true">
 
-                                <div>
+                                <div class="mt-4 d-flex flex-wrap justify-content-between ">
+                                    <button *ngIf="user.role === 'ADMIN'" [disabled]="user.role !== 'ADMIN'" type="button" class="btn btn-success btn-sm" (click)="ganadorTicket(ticketSelected.tid!)" >
+                                        Ticket Ganador
+                                    </button>
+
+                                    <button [disabled]="user.role !== 'ADMIN' || ticketSelected.disponible" type="button" class="btn btn-danger btn-sm" (click)="clearTicket(ticketSelected.tid!)">
+                                        Limpiar Ticket
+                                    </button>                                    
+
+                                </div>
+                                <div class="mt-2">
+
+
                                     <h3 class="fw-bold mt-4 mb-0" [ngClass]="{'text-success': ticketUpdate.value.estado === 'Disponible', 'text-warning':ticketUpdate.value.estado === 'Apartado', 'text-danger':ticketUpdate.value.estado === 'Pagado' }"> {{ ticketUpdate.value.estado }} #{{ ticketSelected.numero }} </h3>
                                     <small *ngIf="ticketSelected.vendedor">Vendedor: {{ ticketSelected.vendedor.name }} </small>
                                 </div>
@@ -493,6 +562,7 @@
                                                         <th>Fecha</th>
                                                         <th>Estado</th>
                                                         <th>Monto</th>
+                                                        <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -512,6 +582,11 @@
                                                             </button>
                                                         </td>
                                                         <td>{{ paid.monto | currency }}</td>
+                                                        <td>
+                                                            <a *ngIf="paid.img" href="http://localhost:3000/api/uploads/payments/{{paid.img}}" target="_blank">
+                                                                <img [src]=" paid.img | imagen: 'payments' " alt="user" width="40" class="img-circle" />
+                                                            </a>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                                 <tfoot>
@@ -792,7 +867,14 @@
                         </div>
                     </div>
 
-                    <button (click)="addMetodoPaid(nameM.value, descM.value, cuentaM.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+                    <div class="form-group mb-3">
+                        <input type="number" min="1" class="form-control" placeholder="Tasa" #tasaM>
+                        <div class="form-control-feedback">
+                            <small> La tasa es obligatoria </small>
+                        </div>
+                    </div>
+
+                    <button (click)="addMetodoPaid(nameM.value, descM.value, cuentaM.value, tasaM.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
 
                     <hr>
 
@@ -806,6 +888,7 @@
                                             <th colspan="2">Nombre</th>
                                             <th>Descripción</th>
                                             <th>Cuenta</th>
+                                            <th>Tasa</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -820,6 +903,7 @@
                                             </td>
                                             <td>{{ paid.descripcion }}</td>
                                             <td>{{ paid.cuenta }}</td>
+                                            <td>{{ paid.tasa }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1272,7 +1356,7 @@
     </div>
 
     <!-- ========================================================= 
-    MODAL INGRESOS Y EGRESOS
+    MODAL ABONOS PENDIENTES
     ======================================================== -->
     <div id="abonosPendientes" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="abonosPendientes" #modalNewUser>
         <div class="modal-dialog modal-lg">
@@ -1295,9 +1379,10 @@
 
                                     <label for="vendedores" class="me-2">Vendedores: </label>
                                     <select name="" id="vendedores" #vendedoresF (change)="filterVendedorPendientes(vendedoresF.value)">
-                                            <option value="Todos">Todos</option>
-                                            <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
-                                        </select>
+                                        <option value="Todos">Todos</option>
+                                        <option [value]="rifa.admin._id"> {{ rifa.admin.name }} </option>
+                                        <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
+                                    </select>
 
                                 </div>
 
@@ -1319,11 +1404,12 @@
                                                 <th>Fecha</th>
                                                 <th>Estado</th>
                                                 <th>Monto</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngIf="pendientes.length === 0">
-                                                <td class="text-center" colspan="5"> No se ha registrado ningún pago... </td>
+                                                <td class="text-center" colspan="6"> No se ha registrado ningún pago... </td>
                                             </tr>
 
                                             <ng-container *ngFor="let pendiente of pendientes; let i = index">
@@ -1342,6 +1428,11 @@
                                                     </button>
                                                         </td>
                                                         <td>{{ paid.monto | currency }}</td>
+                                                        <td>
+                                                            <a *ngIf="paid.img" href="http://localhost:3000/api/uploads/payments/{{paid.img}}" target="_blank">
+                                                                <img [src]=" paid.img | imagen: 'payments' " alt="user" width="40" class="img-circle" />
+                                                            </a>
+                                                        </td>
                                                     </tr>
                                                 </ng-container>
                                             </ng-container>

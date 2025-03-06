@@ -66,9 +66,24 @@ export class TicketsService {
   }
 
   /** ================================================================
+   *  CREATE TICKET
+  ==================================================================== */
+  ganadorTicket(formData: any){
+    return this.http.post<{ok: Boolean, ticket: Ticket}>(`${base_url}/tickets/ganador`, formData, this.headers);
+  }
+
+  /** ================================================================
    *  UPDATE TICKET
   ==================================================================== */
   updateTicket(formData: any, id: string){
     return this.http.put<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/${id}`, formData, this.headers);
   }
+
+  /** ================================================================
+   *  CLEAR TICKET
+  ==================================================================== */
+  clearTicket(id: string){
+    return this.http.delete<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/restore/${id}`, this.headers);
+  }
+
 }

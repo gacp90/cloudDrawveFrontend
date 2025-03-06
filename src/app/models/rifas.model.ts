@@ -4,6 +4,7 @@ interface _metodos{
     name: string,
     descripcion: string,
     cuenta: string,
+    tasa: number
 }
 
 interface _premios{
