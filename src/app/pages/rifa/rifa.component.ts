@@ -25,6 +25,8 @@ import { UsersService } from 'src/app/services/users.service';
 import { MovimientosService } from 'src/app/services/movimientos.service';
 import { WhatsappService } from 'src/app/services/whatsapp.service';
 
+import { environment } from '../../../environments/environment';
+
 @Component({
   selector: 'app-rifa',
   templateUrl: './rifa.component.html',
@@ -33,6 +35,7 @@ import { WhatsappService } from 'src/app/services/whatsapp.service';
 export class RifaComponent implements OnInit {
 
   public user!: User;
+  public base_url = environment.base_url;
 
   constructor(  private activatedRoute: ActivatedRoute,
                 private usersService: UsersService,

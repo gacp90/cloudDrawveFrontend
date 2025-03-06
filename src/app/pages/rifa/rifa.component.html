@@ -583,7 +583,7 @@
                                                         </td>
                                                         <td>{{ paid.monto | currency }}</td>
                                                         <td>
-                                                            <a *ngIf="paid.img" href="http://localhost:3000/api/uploads/payments/{{paid.img}}" target="_blank">
+                                                            <a *ngIf="paid.img" href="{{base_url}}/uploads/payments/{{paid.img}}" target="_blank">
                                                                 <img [src]=" paid.img | imagen: 'payments' " alt="user" width="40" class="img-circle" />
                                                             </a>
                                                         </td>
@@ -1429,7 +1429,7 @@
                                                         </td>
                                                         <td>{{ paid.monto | currency }}</td>
                                                         <td>
-                                                            <a *ngIf="paid.img" href="http://localhost:3000/api/uploads/payments/{{paid.img}}" target="_blank">
+                                                            <a *ngIf="paid.img" href="{{base_url}}/uploads/payments/{{paid.img}}" target="_blank">
                                                                 <img [src]=" paid.img | imagen: 'payments' " alt="user" width="40" class="img-circle" />
                                                             </a>
                                                         </td>
