@@ -335,7 +335,7 @@
             </div>
 
             <!-- TICKETS -->
-            <div class="d-flex justify-content-center flex-wrap w-100">
+            <div class="d-flex justify-content-center flex-wrap w-100 mb-2">
 
                 <h4 *ngIf="tickets.length === 0"> Lista Vacia... </h4>
 
@@ -356,8 +356,15 @@
                     </ng-container>
                 </ng-container>
 
+                
 
+            </div>
 
+            <div class="d-flex justify-content-end">
+                <div class="btn-group" role="group" aria-label="First group">
+                    <button [disabled]="query.desde === 0" (click)="cambiarPagina(query.hasta * -1)" type="button" class="btn btn-dark text-white">Atras</button>
+                    <button [disabled]="( query.desde + query.hasta ) >= total" (click)="cambiarPagina(query.hasta)" type="button" class="btn btn-dark text-white">Siguiente</button>
+                </div>
             </div>
 
         </div>

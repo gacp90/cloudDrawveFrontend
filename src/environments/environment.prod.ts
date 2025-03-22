@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  base_url: 'https://admin.rifasaurinegro.com/api',
-    local_url: 'https://admin.rifasaurinegro.com',
-    app: false
+  base_url: 'https://cloud.drawve.com/api',
+  local_url: 'https://cloud.drawve.com',
+  app: true
 };
