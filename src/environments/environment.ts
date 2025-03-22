@@ -6,26 +6,31 @@
 /**
   base_url: 'https://cloud.drawve.com/api',
   local_url: 'https://cloud.drawve.com',
+  client: false,
   app: false
 
   base_url: 'https://admin.rifaselmocho.com/api',
   local_url: 'https://admin.rifaselmocho.com',
+  client: true,
   app: false
   
   base_url: 'https://admin.rifasaurinegro.com/api',
   local_url: 'https://admin.rifasaurinegro.com',
+  client: true,
   app: false
 
   base_url: 'http://localhost:3000/api',
   local_url: 'http://localhost:4200',
+  client: true,
   app: false
 
 */
 
 export const environment = {
   production: false,
-  base_url: 'https://cloud.drawve.com/api',
-  local_url: 'https://cloud.drawve.com',
+  base_url: 'https://admin.rifasaurinegro.com/api',
+  local_url: 'https://admin.rifasaurinegro.com',
+  client: true,
   app: false
 };
 

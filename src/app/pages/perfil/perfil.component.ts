@@ -12,12 +12,17 @@ import { BluetoothService } from 'src/app/services/bluetooth.service';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+import { environment } from '../../../environments/environment'; 
+
 @Component({
   selector: 'app-perfil',
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css']
 })
 export class PerfilComponent implements OnInit {
+
+  public client = environment.client || false;
+
   constructor(  private activatedRoute: ActivatedRoute,
                 private usersService: UsersService,
                 private router: Router,

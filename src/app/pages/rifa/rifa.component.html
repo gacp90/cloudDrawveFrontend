@@ -92,7 +92,8 @@
             </div>
             
 
-            <div><strong class="fw-bold">Link</strong><br>
+            <div *ngIf="!client">
+                <strong class="fw-bold">Link</strong><br>
                 <p class="text-muted mb-0" (click)="copyToClipboard()">
                     <span (click)="copyToClipboard()" class="text-accent fs-sm pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Clic para copiar"> 
                             https://drawve.com/rifa/{{this.rifa.rifid!}}  <i class="ci ci-clip"></i> 

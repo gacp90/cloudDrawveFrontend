@@ -40,7 +40,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group m-b-0">
+                    <div *ngIf="!client" class="form-group m-b-0">
                         <div class="col-sm-12 text-center">
                             Aún no tienes cuenta? <a routerLink="/registrarme" class="text-info m-l-5"><b>Registrarme</b></a>
                         </div>

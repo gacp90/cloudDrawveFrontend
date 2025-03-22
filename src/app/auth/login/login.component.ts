@@ -5,6 +5,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 
 import Swal from 'sweetalert2';
 import { UsersService } from 'src/app/services/users.service';
+import { environment } from '../../../environments/environment'; 
 
 @Component({
   selector: 'app-login',
@@ -13,13 +14,15 @@ import { UsersService } from 'src/app/services/users.service';
 })
 export class LoginComponent {
 
+  public client = environment.client || false;
+
   constructor(  private router: Router,
                 private fb: FormBuilder,
                 private usersService: UsersService){}
 
 
   /** =============================================================
-   * LOGIN
+   * LOGIN client: true,
   =============================================================== */
   public formSubmitted: boolean = false;
   public loginForm = this.fb.group({

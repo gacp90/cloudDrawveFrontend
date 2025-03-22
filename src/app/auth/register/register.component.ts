@@ -1,15 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsersService } from 'src/app/services/users.service';
 import Swal from 'sweetalert2';
+
+import { environment } from '../../../environments/environment'; 
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
+
+  public client = environment.client || false;
 
   constructor(  private router: Router,
                 private fb: FormBuilder,
@@ -28,6 +32,12 @@ export class RegisterComponent {
 
                 }
 
+  ngOnInit(): void {
+    if (this.client) {
+      this.router.navigateByUrl('/login');
+    }
+  }
+
   /** =============================================================
    * REGISTER
   =============================================================== */
@@ -43,6 +53,11 @@ export class RegisterComponent {
   })
 
   register(){
+
+    if (this.client) {
+      this.router.navigateByUrl('/login');
+      return;
+    }
 
     this.registerFormSubmitted = true;
     

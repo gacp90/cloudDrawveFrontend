@@ -39,6 +39,7 @@ export class RifaComponent implements OnInit {
 
   public user!: User;
   public base_url = environment.base_url;
+  public client = environment.client || false;
 
   constructor(  private activatedRoute: ActivatedRoute,
                 private usersService: UsersService,
