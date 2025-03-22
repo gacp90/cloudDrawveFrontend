@@ -398,13 +398,13 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#whatsappTicket" role="tab" aria-expanded="false">
-                                    <span class="hidden-sm-up"><i class="mdi mdi-whatsapp"></i></span>
+                                    <span class="hidden-sm-up"><i class="ti-comment"></i></span>
                                     <span class="hidden-xs-down">Whatsapp </span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#imgTicket" role="tab" aria-expanded="false">
-                                    <span class="hidden-sm-up"><i class="mdi mdi-image-filter"></i></span>
+                                    <span class="hidden-sm-up"><i class="ti-image"></i></span>
                                     <span class="hidden-xs-down">Imagen </span>
                                 </a>
                             </li>
@@ -633,33 +633,43 @@
                             <!-- IMG TICKET -->
                             <div class="tab-pane" id="imgTicket" role="tabpanel" aria-expanded="false">
 
+                                <button *ngIf="app" [disabled]="imprimiendo" class="btn btn-info my-3" (click)="printTicket()">
+                                    <span *ngIf="imprimiendo">Imprimiendo...</span>
+                                    <span *ngIf="!imprimiendo">Imprimir</span>
+                                </button>
+
                                 <div class="d-flex flex-wrap justify-content-center my-5">
                                     <!-- TICKETS -->
                                     <ng-container *ngIf="ticketSelected.disponible === false">
+                                        
 
-                                        <div class="card mb-3 shadow pb-5" style="width: 250px;" #contentToCapture>
+                                        <div class="card mb-3 shadow pb-5"  style="width: 250px;" #contentToCapture>
                                             <div class="card-body">
-
+                                                
                                                 <div class="pro-img m-t-20 d-flex justify-content-center">
                                                     <img [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
                                                 </div>
-                                                <p class="card-text fw-bold mb-0 text-center text-dark"> {{ rifa.admin.empresa }} </p>
-                                                <p class="card-text fs-sm mb-0" [ngClass]="{'text-warning': ticketSelected.estado === 'Apartado', 'text-danger': ticketSelected.estado === 'Pagado'}"> {{ ticketSelected.estado }} </p>
-                                                <h5 class="card-title display-4"> #{{ ticketSelected.numero }} </h5>
-                                                <p class="card-text fw-bold"> {{ rifa.name }} </p>
+
+                                                <div id="captureImprimir">
+                                                    <p class="card-text fw-bold mb-0 text-center text-dark"> {{ rifa.admin.empresa }} </p>
+                                                    <p class="card-text fs-sm mb-0" [ngClass]="{'text-warning': ticketSelected.estado === 'Apartado', 'text-danger': ticketSelected.estado === 'Pagado'}"> {{ ticketSelected.estado }} </p>
+                                                    <h5 class="card-title display-4"> #{{ ticketSelected.numero }} </h5>
+                                                    <p class="card-text fw-bold"> {{ rifa.name }} </p>
+
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item"> Valor del ticket: {{ rifa.monto | currency }} </li>
+                                                        <li class="list-group-item"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
+                                                        <li class="list-group-item"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
+                                                        <li class="list-group-item"> Loteria: {{ rifa.loteria }}</li>
+                                                        <li class="list-group-item"> {{ ticketSelected.nombre }} </li>
+                                                        <li class="list-group-item"> {{ ticketSelected.telefono }} </li>
+                                                        <li class="list-group-item" *ngFor="let pago of ticketSelected.pagos">
+                                                            <span class="fw-bold">{{ pago.descripcion }}</span> - <small> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </small> - {{ pago.monto | currency }}
+                                                        </li>
+                                                        <li class="list-group-item"> <span class="fw-bold">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
+                                                    </ul>
+                                                </div>
                                             </div>
-                                            <ul class="list-group list-group-flush">
-                                                <li class="list-group-item"> Valor del ticket {{ rifa.monto | currency }} </li>
-                                                <li class="list-group-item"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
-                                                <li class="list-group-item"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
-                                                <li class="list-group-item"> Loteria: {{ rifa.loteria }}</li>
-                                                <li class="list-group-item"> {{ ticketSelected.nombre }} </li>
-                                                <li class="list-group-item"> {{ ticketSelected.telefono }} </li>
-                                                <li class="list-group-item" *ngFor="let pago of ticketSelected.pagos">
-                                                    <span class="fw-bold">{{ pago.descripcion }}</span> - <small> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </small> - {{ pago.monto | currency }}
-                                                </li>
-                                                <li class="list-group-item"> <span class="fw-bold">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
-                                            </ul>
                                         </div>
 
                                     </ng-container>

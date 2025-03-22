@@ -142,7 +142,7 @@ export class RutasComponent implements OnInit {
   }
 
   /** ======================================================================
-   * DESACTIVAR O ACTIVAR USUARIOS
+   * DESACTIVAR O ACTIVAR
   ====================================================================== */
   desactiveRuta(ruta: Ruta){
 
@@ -190,6 +190,61 @@ export class RutasComponent implements OnInit {
       }
     })
 
+  }
+
+  /** ======================================================================
+   * SET FORM UPDATE
+  ====================================================================== */
+  public rutaSelected!: Ruta;
+  setForm(ruta: Ruta){
+
+    this.rutaSelected = ruta;
+    this.updateForm.setValue({
+      name: ruta.name
+    });
+
+  }
+
+  /** ======================================================================
+   * UPDATE
+  ====================================================================== */  
+  public updateSubmitted: boolean = false;
+  public updateForm = this.fb.group({
+    name: ['', [Validators.required]]
+  });
+
+  update(){
+
+    this.updateSubmitted = true;
+
+    if (this.updateForm.invalid) {
+      return;
+    }
+
+    this.rutasService.updateRuta(this.updateForm.value, this.rutaSelected.ruid!)
+        .subscribe( ({ruta}) => {
+
+          this.rutas.map( (rut) => {
+            if (rut.ruid === this.rutaSelected.ruid!) {
+              rut.name = ruta.name;
+            }
+          })
+
+          Swal.fire('Estupendo', 'Se ha actualizado la ruta exitosamente!', 'success');
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');
+          
+        })
+
+  }
+
+  /** ======================================================================
+   * VALIDATE UPDATE
+  ====================================================================== */
+  validateUpdate(campo: string): boolean{
+    return (this.updateSubmitted && this.updateForm.get(campo)?.invalid)? true : false;
   }
 
 }

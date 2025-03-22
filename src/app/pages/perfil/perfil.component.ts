@@ -7,6 +7,10 @@ import { User } from 'src/app/models/users.model';
 
 import { UsersService } from 'src/app/services/users.service';
 import { FileUploadService } from 'src/app/services/file-upload.service';
+import { BluetoothService } from 'src/app/services/bluetooth.service';
+
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-perfil',
@@ -18,6 +22,7 @@ export class PerfilComponent implements OnInit {
                 private usersService: UsersService,
                 private router: Router,
                 private fileUploadService: FileUploadService,
+                private bluetoothService: BluetoothService,
                 private fb: FormBuilder){
                   this.user = usersService.user;
                 }
@@ -215,6 +220,52 @@ export class PerfilComponent implements OnInit {
       document.removeEventListener('copy', null!);
     });
     document.execCommand('copy');
+  }
+
+  /** ================================================================
+   *   IMPRESORA BLUETOOTH
+  ==================================================================== */
+  devices: any[] = [];
+  selectedDevice: string = '';
+  // 🔍 Escanear dispositivos Bluetooth
+  scanDevices() {
+    this.bluetoothService.discoverDevices().then(devices => {
+      this.devices = devices;
+      console.log('Dispositivos encontrados:', devices);
+    }).catch(error => {
+      console.error('Error al escanear dispositivos:', error);
+    });
+  }
+
+  // 🔗 Conectar a una impresora
+  connectPrinter() {
+    if (this.selectedDevice) {
+      this.bluetoothService.connectToDevice(this.selectedDevice).then(msg => {
+        console.log(msg);
+      }).catch(error => {
+        console.error('Error al conectar con la impresora:', error);
+      });
+    }
+  }
+
+  // 🖨️ Enviar texto a imprimir
+  printReceipt(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const receiptText = this.generateReceipt();
+      bluetoothSerial.write(receiptText,
+        () => resolve('Factura impresa correctamente'),
+        (error: any) => reject(error)
+      );
+    });
+  }
+
+  // 🔵 Función para generar el texto de la factura
+  generateReceipt(): string {
+    let receipt = '';
+
+    receipt += '\n       Prueba de impresion exitosa\n';
+
+    return receipt;
   }
 
 }

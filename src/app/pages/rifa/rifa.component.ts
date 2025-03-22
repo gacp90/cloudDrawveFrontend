@@ -2,7 +2,9 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
+
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // EXCEL
 import * as XLSX from 'xlsx';
@@ -26,6 +28,7 @@ import { MovimientosService } from 'src/app/services/movimientos.service';
 import { WhatsappService } from 'src/app/services/whatsapp.service';
 
 import { environment } from '../../../environments/environment';
+import { BluetoothService } from 'src/app/services/bluetooth.service';
 
 @Component({
   selector: 'app-rifa',
@@ -45,6 +48,7 @@ export class RifaComponent implements OnInit {
                 private movimientosService: MovimientosService,
                 private fileUploadService: FileUploadService,
                 private whatsappService: WhatsappService,
+                private bluetoothService: BluetoothService,
                 private fb: FormBuilder){
 
     this.user = usersService.user;
@@ -1860,5 +1864,50 @@ export class RifaComponent implements OnInit {
 
   }
 
+  /** ================================================================
+   *   CONVERTIR EN BASE64 EL LOGO
+  ==================================================================== */
+  convertImageToBase64(imageUrl: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous'; // Importante para evitar problemas de CORS
+      img.src = imageUrl;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));  // Convierte la imagen a Base64
+      };
+
+      img.onerror = (error) => reject(error);
+    });
+  }
+
+  /** ================================================================
+   *   ELIMINAR MONTO
+  ==================================================================== */
+  public app = environment.app;
+  public imprimiendo: boolean = false;
+  async printTicket() {
+    
+    this.imprimiendo = true;
+
+    const content = document.getElementById('captureImprimir')?.innerText;
+    if (content) {
+      this.bluetoothService.printText(content)
+        .then(response => {
+          this.imprimiendo = false;
+          console.log(response)
+        })
+        .catch(error => {
+          this.imprimiendo = false;
+          console.error(error)
+        });
+    }
+  }
+  
 
 }

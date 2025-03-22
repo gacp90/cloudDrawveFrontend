@@ -21,7 +21,7 @@
                     </div>
 
                     <div>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRifa">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRuta">
                             Crear Ruta
                         </button>
 
@@ -50,9 +50,9 @@
                                     <button (click)="desactiveRuta(ruta)" *ngIf="ruta.status" type="button" class="btn btn-sm btn-success">Activa</button>
                                     <button (click)="desactiveRuta(ruta)" *ngIf="ruta.status === false" type="button" class="btn btn-sm btn-danger">Desactiva</button>
                                 </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn">
-                                        <i class="ti-arrow-top-right" aria-hidden="true"></i>
+                                <td>                                    
+                                    <button type="button" (click)="setForm(ruta)" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn" data-toggle="modal" data-target="#updateRuta">
+                                        <i class="ti ti-pencil" aria-hidden="true"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -80,12 +80,12 @@
 <!-- ========================================================= 
 MODAL AGREGAR RUTAS
 ======================================================== -->
-<div id="createRifa" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="createRifa" aria-hidden="true" #modalNewUser>
+<div id="createRuta" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="createRuta" aria-hidden="true" #modalNewUser>
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="createRifa">Nueva Ruta</h4>
+                <h4 class="modal-title" id="createRuta">Nueva Ruta</h4>
             </div>
             <div class="modal-body">
 
@@ -103,6 +103,44 @@ MODAL AGREGAR RUTAS
                     </div>
 
                     <button type="submit" class="btn btn-info waves-effect btn-block">Crear</button>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- ========================================================= 
+MODAL ACTUALIAR RUTAS
+======================================================== -->
+<div id="updateRuta" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="updateRuta" aria-hidden="true" #modalNewUser>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="updateRuta">Actualizar Ruta</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="updateForm" (ngSubmit)="update()">
+
+                    <div class="form-group has-danger">
+
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="name" type="text" class="form-control" placeholder="Nombre de la ruta">
+                            <div *ngIf="validate('name')" class="form-control-feedback">
+                                <small> El nombre es obligatorio </small>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
                 </form>
 
             </div>

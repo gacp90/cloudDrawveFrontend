@@ -52,6 +52,37 @@
 
             </div>
         </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="mb-2">Vincular impresora Bluetooth</h4>
+
+                <div class="d-flex flex-column gap-2">
+
+                    <button type="button" (click)="scanDevices()" class="btn btn-sm btn-outline-primary w-100"> <i class="bi-printer"></i> Escanear</button>
+                    
+                    <div *ngIf="devices.length > 0" class="form-group">
+                        <label for="exampleFormControlSelect1">Seleccionar Dispositivo</label>
+                        <select class="form-control" id="exampleFormControlSelect1" [(ngModel)]="selectedDevice">
+                            <option *ngFor="let device of devices" [value]="device.address">
+                                {{ device.name || device.address }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <button *ngIf="devices.length > 0" type="button" (click)="connectPrinter()" class="btn btn-sm btn-outline-primary w-100"> <i class="bi-printer"></i> Conectar</button>
+
+                    <hr>
+
+                    <button *ngIf="devices.length > 0" type="button" (click)="printReceipt()" class="btn btn-sm btn-outline-primary w-100"> <i class="bi-printer"></i> Imprimir Prueba</button>
+                
+                </div>
+               
+
+            </div>
+        </div>
+
     </div>
     <!-- Column -->
     <!-- Column -->
