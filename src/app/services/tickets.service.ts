@@ -80,6 +80,13 @@ export class TicketsService {
   }
 
   /** ================================================================
+   *  UPDATE TICKET
+  ==================================================================== */
+  updateVendedorTicket(formData: any, id: string){
+    return this.http.put<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/vendedor/${id}`, formData, this.headers);
+  }
+
+  /** ================================================================
    *  CLEAR TICKET
   ==================================================================== */
   clearTicket(id: string){

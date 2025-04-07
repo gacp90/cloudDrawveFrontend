@@ -101,7 +101,8 @@ export class RutasComponent implements OnInit {
   ====================================================================== */
   public newRutaFormSubmitted: boolean = false;
   public newRutaForm = this.fb.group({
-    name: ['', [Validators.required]]
+    name: ['', [Validators.required]],
+    color: '#2d2d2d'
   })
 
   create(){
@@ -111,12 +112,15 @@ export class RutasComponent implements OnInit {
     if (this.newRutaForm.invalid) {
       return;
     }
+    
 
     this.rutasService.createRuta(this.newRutaForm.value)
         .subscribe( ({ruta}) => {
 
           this.newRutaFormSubmitted = false;
-          this.newRutaForm.reset();
+          this.newRutaForm.reset({
+            color: this.newRutaForm.value.color
+          });
           ruta.ruid = ruta._id;
           this.rutas.push(ruta);
           Swal.fire('Estupendo', 'Se ha creado la rifa exitosamente', 'success');
@@ -200,7 +204,8 @@ export class RutasComponent implements OnInit {
 
     this.rutaSelected = ruta;
     this.updateForm.setValue({
-      name: ruta.name
+      name: ruta.name,
+      color: ruta.color || '#2d2d2d'
     });
 
   }
@@ -210,7 +215,8 @@ export class RutasComponent implements OnInit {
   ====================================================================== */  
   public updateSubmitted: boolean = false;
   public updateForm = this.fb.group({
-    name: ['', [Validators.required]]
+    name: ['', [Validators.required]],
+    color: ['#2d2d2d', [Validators.required]],
   });
 
   update(){
@@ -227,6 +233,7 @@ export class RutasComponent implements OnInit {
           this.rutas.map( (rut) => {
             if (rut.ruid === this.rutaSelected.ruid!) {
               rut.name = ruta.name;
+              rut.color = ruta.color;
             }
           })
 

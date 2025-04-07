@@ -45,7 +45,7 @@
                             </tr>
 
                             <tr *ngFor="let ruta of rutas">
-                                <td> {{ ruta.name }} </td>
+                                <td [style.color]="ruta.color ? ruta.color  : '#2d2d2d'"> {{ ruta.name }} </td>
                                 <td>
                                     <button (click)="desactiveRuta(ruta)" *ngIf="ruta.status" type="button" class="btn btn-sm btn-success">Activa</button>
                                     <button (click)="desactiveRuta(ruta)" *ngIf="ruta.status === false" type="button" class="btn btn-sm btn-danger">Desactiva</button>
@@ -102,6 +102,13 @@ MODAL AGREGAR RUTAS
 
                     </div>
 
+                    <div class="form-group">
+                        <div class="col-md-12 m-b-20">
+                            <label for="example-color-input" class="">Color del texto</label>
+                            <input formControlName="color" class="form-control" type="color" id="example-color-input">
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-info waves-effect btn-block">Crear</button>
                 </form>
 
@@ -138,6 +145,13 @@ MODAL ACTUALIAR RUTAS
                             </div>
                         </div>
 
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12 m-b-20">
+                            <label for="example-color-input" class="">Color del texto</label>
+                            <input formControlName="color" class="form-control" type="color" id="example-color-input">
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>

@@ -219,7 +219,6 @@
                 </div>
 
                 <div class="my-2">
-
                     <label for="mostrar" class="me-2">Mostrar: </label>
                     <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
                         <option value="50">50</option>
@@ -227,8 +226,9 @@
                         <option value="250">250</option>
                         <option value="500">500</option>
                         <option value="1000">1000</option>
+                        <option value="2500">2500</option>
+                        <option value="5000">5000</option>
                     </select>
-
                 </div>
 
             </div>
@@ -241,7 +241,7 @@
                     <label for="rutas" class="me-2">Rutas: </label>
                     <select name="" id="rutas" #rutaF (change)="filterRuta(rutaF.value)">
                         <option value="Todos">Todos</option>
-                        <option *ngFor="let ruta of rutas" [value]="ruta.ruid"> {{ ruta.name }} </option>
+                        <option *ngFor="let ruta of rutas" [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'"> {{ ruta.name }} </option>
                     </select>
 
                 </div>
@@ -342,7 +342,7 @@
 
                 <ng-container *ngIf="checkVarios.checked">
                     <ng-container *ngFor="let ticket of tickets">
-                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" style="width: 5rem;" type="button" class="border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
+                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" type="button" class="btn-5 border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado', 'btn-6': rifa.numeros > 1000}">
                             <p class="mb-0 fw-bold fs-3"> {{ ticket.numero }} </p>
                         </button>
                     </ng-container>
@@ -351,7 +351,7 @@
 
                 <ng-container *ngIf="!checkVarios.checked">
                     <ng-container *ngFor="let ticket of tickets">
-                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta" (click)="selectTicket(ticket)" data-toggle="modal" data-target="#modalTicket" style="width: 5rem;" type="button" class="border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
+                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta" (click)="selectTicket(ticket)" data-toggle="modal" data-target="#modalTicket" type="button" class="btn-5 border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado', 'btn-6': rifa.numeros > 1000}">
                             <p class="mb-0 fw-bold fs-3"> {{ ticket.numero }} </p>
                         </button>
                     </ng-container>
@@ -438,6 +438,24 @@
 
                                     <h3 class="fw-bold mt-4 mb-0" [ngClass]="{'text-success': ticketUpdate.value.estado === 'Disponible', 'text-warning':ticketUpdate.value.estado === 'Apartado', 'text-danger':ticketUpdate.value.estado === 'Pagado' }"> {{ ticketUpdate.value.estado }} #{{ ticketSelected.numero }} </h3>
                                     <small *ngIf="ticketSelected.vendedor">Vendedor: {{ ticketSelected.vendedor.name }} </small>
+                                    <a *ngIf="ticketSelected.vendedor" class="btn btn-primary btn-sm" data-toggle="collapse" href="#updateVendedor" role="button" aria-expanded="false" aria-controls="updateVendedor">
+                                        <i class="ti-pencil"></i>
+                                    </a>
+                                </div>
+
+                                <div class="collapse" id="updateVendedor">
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="vendedoresSelect">Vendedores</label>
+                                        <select class="form-control" id="vendedoresSelect" #vendedorC>
+                                          <option value="none" disabled> Seleccionar vendedor </option>
+                                          <option *ngIf="rifa" [value]="rifa.admin._id"> {{ rifa.admin.name }} </option>
+                                          <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
+                                        </select>
+                                    </div>
+
+                                    <button (click)="cambiarVendedor(vendedorC.value)" type="button" class="btn btn-primary" data-toggle="collapse" data-target="#updateVendedor" aria-expanded="false" aria-controls="updateVendedor"> Cambiar </button>
+
                                 </div>
 
                                 <hr>
@@ -477,7 +495,7 @@
                                                 <select class="form-control" formControlName="ruta">
                                                     <option value="" disabled>Seleccionar</option>
                                                     <ng-container *ngFor="let ruta of rutas">                                                
-                                                        <option  [value]="ruta.ruid"> {{ ruta.name }} </option>
+                                                        <option  [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'"> {{ ruta.name }} </option>
                                                     </ng-container>
                                                 </select>
                                             </div>
@@ -782,11 +800,11 @@
                                 <div class="form-group">
                                     <label>Seleccionar ruta</label>
                                     <select class="form-control" formControlName="ruta">
-                                                <option value="" disabled>Seleccionar</option>
-                                                <ng-container *ngFor="let ruta of rutas">                                                
-                                                    <option  [value]="ruta.ruid"> {{ ruta.name }} </option>
-                                                </ng-container>
-                                            </select>
+                                        <option value="" disabled>Seleccionar</option>
+                                        <ng-container *ngFor="let ruta of rutas">                                                
+                                            <option  [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'" > {{ ruta.name }} </option>
+                                        </ng-container>
+                                    </select>
                                 </div>
                             </div>
 

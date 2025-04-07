@@ -197,6 +197,8 @@ export class RifaComponent implements OnInit {
     this.rutasService.loadRutas({admin, status: true})
         .subscribe( ({rutas, total}) => {          
           this.rutas = rutas;
+          console.log(rutas);
+          
         });
 
   }
@@ -524,6 +526,37 @@ export class RifaComponent implements OnInit {
     }else{
       return false;
     }
+
+  }
+
+  /** ================================================================
+   *   CHANGE VENDEDOR TICKET
+  ==================================================================== */
+  cambiarVendedor(vendedor: string){
+
+    if (vendedor === 'none') {
+      Swal.fire('Atención', 'debes de seleccionar un vendedor', 'warning');
+      return;
+    }
+
+    this.ticketsService.updateVendedorTicket({vendedor}, this.ticketSelected.tid!)
+        .subscribe( ({ticket}) => {
+
+          this.ticketSelected.vendedor = ticket.vendedor;
+
+          Swal.fire({
+            toast: true,
+            title: 'Vendedor Actualizado!',
+            timer: 2000,
+            icon: 'success',
+            position: 'top-right',
+            showConfirmButton: false,
+          })
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
 
   }
 
@@ -1539,12 +1572,12 @@ export class RifaComponent implements OnInit {
   @ViewChild('captionI') captionI!: ElementRef;
   sendImg(caption: string = ''){
 
+    this.sendImage = true;
+
     if (!this.user.whatsapp) {
       Swal.fire('Atención', 'No tienes habilitada esta funcion', 'warning');
       return;
-    }
-
-    this.sendImage = true;
+    }    
 
     html2canvas(this.contentToCapture.nativeElement, { useCORS: true }).then((canvas) => {
       // Convertir el canvas a data URL (Base64)
