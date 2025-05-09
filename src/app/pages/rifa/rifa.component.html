@@ -240,7 +240,7 @@
 
                     <label for="rutas" class="me-2">Rutas: </label>
                     <select name="" id="rutas" #rutaF (change)="filterRuta(rutaF.value)">
-                        <option value="Todos">Todos</option>
+                        <option value="Todos">Todos</option>                        
                         <option *ngFor="let ruta of rutas" [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'"> {{ ruta.name }} </option>
                     </select>
 
@@ -251,6 +251,7 @@
                     <label for="vendedores" class="me-2">Vendedores: </label>
                     <select name="" id="vendedores" #vendedoresF (change)="filterVendedor(vendedoresF.value)">
                         <option value="Todos">Todos</option>
+                        <option *ngIf="rifa" [value]="rifa.admin._id"> {{ rifa.admin.name  }} </option>
                         <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
                     </select>
 
@@ -493,11 +494,14 @@
                                             <div class="form-group">
                                                 <label>Seleccionar ruta</label>
                                                 <select class="form-control" formControlName="ruta">
-                                                    <option value="" disabled>Seleccionar</option>
+                                                    <option value="">Seleccionar</option>
                                                     <ng-container *ngFor="let ruta of rutas">                                                
                                                         <option  [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'"> {{ ruta.name }} </option>
                                                     </ng-container>
                                                 </select>
+                                                <div *ngIf="validateUpTicket('ruta')" class="form-control-feedback">
+                                                    <small> La ruta es obligatoria </small>
+                                                </div>
                                             </div>
                                         </div>
 

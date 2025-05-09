@@ -196,9 +196,7 @@ export class RifaComponent implements OnInit {
 
     this.rutasService.loadRutas({admin, status: true})
         .subscribe( ({rutas, total}) => {          
-          this.rutas = rutas;
-          console.log(rutas);
-          
+          this.rutas = rutas;          
         });
 
   }
@@ -307,7 +305,8 @@ export class RifaComponent implements OnInit {
   public pagados: number = 0;
   public query: any = {
     desde: 0,
-    hasta: 1000
+    hasta: 1000,
+    sort: {numero: 1}
   }
 
   loadTickets(){
@@ -437,7 +436,7 @@ export class RifaComponent implements OnInit {
               telefono: ticket.telefono,
               cedula: ticket.cedula,
               direccion: ticket.direccion,
-              ruta: ticket.ruta._id! || '',
+              ruta: (ticket.ruta)? ticket.ruta._id!:'',
               estado: ticket.estado,
               nota: ticket.nota || '',
               vendedor: this.user.uid!,
@@ -483,6 +482,11 @@ export class RifaComponent implements OnInit {
       this.ticketUpdate.value.disponible = false;
     }else{
       this.ticketUpdate.value.disponible = true;
+    }
+    
+    if (this.ticketUpdate.value.ruta === '') {
+      Swal.fire('Atención', 'Debes de seleccionar una ruta', 'success');
+      return;
     }
     
     this.ticketsService.updateTicket(this.ticketUpdate.value, this.ticketUpdate.value.tid!)
@@ -1934,7 +1938,6 @@ export class RifaComponent implements OnInit {
       this.bluetoothService.printText(content)
         .then(response => {
           this.imprimiendo = false;
-          console.log(response)
         })
         .catch(error => {
           this.imprimiendo = false;
