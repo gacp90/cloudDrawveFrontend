@@ -1247,7 +1247,7 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   copyToClipboard() {
     document.addEventListener('copy', (e: ClipboardEvent) => {
-      e.clipboardData!.setData('text/plain', (`https://drawve.com/rifa/${this.rifa.rifid!}`));
+      e.clipboardData!.setData('text/plain', (`https://rifari.com/rifa/${this.rifa.rifid!}`));
       e.preventDefault();
       document.removeEventListener('copy', null!);
     });

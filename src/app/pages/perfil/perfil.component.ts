@@ -220,7 +220,7 @@ export class PerfilComponent implements OnInit {
   ==================================================================== */
   copyToClipboard() {
     document.addEventListener('copy', (e: ClipboardEvent) => {
-      e.clipboardData!.setData('text/plain', (`https://cloud.drawve.com/registrarme?referCode=${this.user.referralCode}`));
+      e.clipboardData!.setData('text/plain', (`https://cloud.rifari.com/registrarme?referCode=${this.user.referralCode}`));
       e.preventDefault();
       document.removeEventListener('copy', null!);
     });
