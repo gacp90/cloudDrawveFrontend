@@ -4,8 +4,8 @@
 
 // DOMAINS
 /**
-  base_url: 'https://cloud.drawve.com/api',
-  local_url: 'https://cloud.drawve.com',
+  base_url: 'https://cloud.rifari.com/api',
+  local_url: 'https://cloud.rifari.com',
   client: false,
   app: false
 
@@ -28,8 +28,8 @@
 
 export const environment = {
   production: false,
-  base_url: 'https://cloud.rifari.com/api',
-  local_url: 'https://cloud.rifari.com',
+  base_url: 'http://localhost:3000/api',
+  local_url: 'http://localhost:4200',
   client: false,
   app: false
 };

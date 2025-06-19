@@ -1839,6 +1839,14 @@ export class RifaComponent implements OnInit {
 
     /* generate a worksheet */
     var ws = XLSX.utils.json_to_sheet(tickets);
+
+    // ✅ Aplica tipo texto a todas las celdas de la columna A (excepto encabezado)
+    Object.keys(ws).forEach(cell => {
+      if (cell.startsWith('A') && cell !== 'A1') {
+        ws[cell].t = 's';  // tipo: string
+        ws[cell].z = '@';  // formato: texto
+      }
+    });
       
     /* add to workbook */
     var wb = XLSX.utils.book_new();
@@ -1945,6 +1953,120 @@ export class RifaComponent implements OnInit {
         });
     }
   }
+
+  /** ================================================================
+   *   DESCARGAR PLANTILLA DE EXCEL
+  ==================================================================== */
+  plantilla(){
+
+    let tickets = [{
+        numero: '001',
+        monto: 20,
+        estado: 'Apartado',
+        cedula: '11111111',
+        direccion: 'direccion 1',
+        nombre: 'pepito perez',
+        telefono: '584247111111',
+        ruta: 'nombre de la ruta',
+      },
+      {
+        numero: '221',
+        monto: 20,
+        estado: 'Pagado',
+        cedula: '2222222',
+        direccion: 'direccion 2',
+        nombre: 'fulanito diaz',
+        telefono: '584247222222',
+        ruta: 'nombre de la ruta',
+    
+      }
+    ];
+
+    /* generate a worksheet */
+    var ws = XLSX.utils.json_to_sheet(tickets);
+
+    // Forzar tipo texto a la columna A (números de tickets)
+    Object.keys(ws).forEach(cell => {
+      if (cell.startsWith('A') && cell !== 'A1') {
+        ws[cell].z = '@'; // z = formato, '@' es texto
+        ws[cell].t = 's';  // t = tipo, 's' es string
+      }
+    });
+
+    /* add to workbook */
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "tickets");
+
+    /* title */
+    let title = 'plantilla.xls';
+
+    /* write workbook and force a download */
+    XLSX.writeFile(wb, title);
+  }
+
+  /** ================================================================
+   *   IMPORTAR PRODUCTOS CON EXCEL
+  ==================================================================== */
+  public arrayExceltUpdate:any;
+  public excelUpdate!:File;
+  public ticketsMasivesJson: any[] = [];
+  public sendExcel: boolean = false;
+
+  selectFileExcel(event: any){
+    this.excelUpdate= event.target.files[0]; 
+  }
+
+  UploadExcel() {
+
+    this.ticketsMasivesJson = [];
+
+    if (!this.excelUpdate) {
+      Swal.fire('Atención', 'No has seleccionado ningun archivo de excel', 'info');
+      return;
+    }
+
+    this.sendExcel = true;
+
+    let fileReader = new FileReader();
+      fileReader.onload = (e) => {
+
+          this.arrayExceltUpdate = fileReader.result;
+          var data = new Uint8Array(this.arrayExceltUpdate);
+          var arr = new Array();
+
+          for(var i = 0; i != data.length; ++i) arr[i] = String.fromCharCode(data[i]);
+          
+          var bstr = arr.join("");
+          var workbook = XLSX.read(bstr, {type:"binary"});
+          var first_sheet_name = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[first_sheet_name];
+          
+          this.ticketsMasivesJson = XLSX.utils.sheet_to_json(worksheet,{raw:true});
+
+          this.ticketsService.saveTicketMasive({tickets: this.ticketsMasivesJson, rifid: this.rifa.rifid})
+              .subscribe( ({msg, ticketsNoEncontrados, rutasSinCoincidencia}) => {
+
+                this.query = {
+                  desde: 0,
+                  hasta: 1000,
+                  sort: {numero: 1}
+                }
+                this.loadTickets();
+
+                Swal.fire('Estupendo', `${msg} ${(ticketsNoEncontrados.length > 0)? `, Tickets no encontrados o no disponibles ${ticketsNoEncontrados.length}`: ''} ${(rutasSinCoincidencia.length > 0)? `, Rutas no encontradas ${rutasSinCoincidencia.length}`: ''} `, 'success');                
+                this.sendExcel = false;
+                
+              }, (err) => {
+                this.sendExcel = false;
+                console.log(err);
+                Swal.fire('Error', err.error.msg, 'error');                
+              })
+          
+
+      }
+      
+      fileReader.readAsArrayBuffer(this.excelUpdate);
+  };
   
 
 }

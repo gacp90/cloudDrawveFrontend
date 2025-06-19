@@ -66,6 +66,13 @@ export class TicketsService {
   }
 
   /** ================================================================
+   *  SAVE TICKET MASIVE
+  ==================================================================== */
+  saveTicketMasive(formData: any){
+    return this.http.post<{ok: Boolean, msg: string, ticketsNoEncontrados: any[], rutasSinCoincidencia: any[]}>(`${base_url}/tickets/send/masive`, formData, this.headers);
+  }
+
+  /** ================================================================
    *  CREATE TICKET
   ==================================================================== */
   ganadorTicket(formData: any){
