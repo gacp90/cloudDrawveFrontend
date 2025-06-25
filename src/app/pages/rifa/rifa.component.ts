@@ -1682,43 +1682,92 @@ export class RifaComponent implements OnInit {
       return;
     }
 
+    // let messages: any[] = [];
+    // this.sendMasive = true;
+
+    // for (let i = 0; i < this.tickets.length; i++) {
+    //   const ticket = this.tickets[i];
+    //   let mensaje = this.message;
+
+    //   if (ticket.estado !== 'Disponible') {
+        
+    //     if (mensaje.includes('@name')) {
+    //       mensaje = mensaje.replace(/@name/g, '*'+ticket.nombre+'*');
+    //     }
+  
+    //     if (mensaje.includes('@premio')) {
+    //       mensaje = mensaje.replace(/@premio/g, '*'+this.rifa.name+'*');
+    //     }
+
+    //     if (mensaje.includes('@empresa')) {
+    //       mensaje = mensaje.replace(/@empresa/g, '*'+this.rifa.admin.empresa+'*' || '');
+    //     }
+  
+    //     if (mensaje.includes('@number')) {
+    //       mensaje = mensaje.replace(/@number/g, '*#'+ticket.numero+'*');
+    //     }
+
+    //     let number:string = ticket.telefono.trim().replace(/\s/g, '');
+
+    //     // let number = ticket.telefono.trim()+"@c.us";
+
+    //     messages.push({
+    //       number: number.replace(/[^\d]/g, '') + '@s.whatsapp.net',
+    //       message: mensaje
+    //     })
+        
+        
+    //   }     
+      
+    // }
+
     let messages: any[] = [];
     this.sendMasive = true;
 
+    const groupedTickets: { [telefono: string]: any[] } = {};
+
+    // Agrupar los tickets por número de teléfono
     for (let i = 0; i < this.tickets.length; i++) {
       const ticket = this.tickets[i];
-      let mensaje = this.message;
-
+    
       if (ticket.estado !== 'Disponible') {
-        
-        if (mensaje.includes('@name')) {
-          mensaje = mensaje.replace(/@name/g, '*'+ticket.nombre+'*');
+        const number = ticket.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+        if (!groupedTickets[number]) {
+          groupedTickets[number] = [];
         }
-  
-        if (mensaje.includes('@premio')) {
-          mensaje = mensaje.replace(/@premio/g, '*'+this.rifa.name+'*');
-        }
+        groupedTickets[number].push(ticket);
+      }
+    }
 
-        if (mensaje.includes('@empresa')) {
-          mensaje = mensaje.replace(/@empresa/g, '*'+this.rifa.admin.empresa+'*' || '');
-        }
-  
-        if (mensaje.includes('@number')) {
-          mensaje = mensaje.replace(/@number/g, '*#'+ticket.numero+'*');
-        }
-
-        let number:string = ticket.telefono.trim().replace(/\s/g, '');
-
-        // let number = ticket.telefono.trim()+"@c.us";
-
-        messages.push({
-          number: number.replace(/[^\d]/g, '') + '@s.whatsapp.net',
-          message: mensaje
-        })
-        
-        
-      }     
-      
+    // Recorrer los grupos por número
+    for (const number in groupedTickets) {
+      const ticketsPersona = groupedTickets[number];
+      const primerTicket = ticketsPersona[0]; // Usamos el primer ticket para obtener nombre, etc.
+    
+      let mensaje = this.message;
+    
+      if (mensaje.includes('@name')) {
+        mensaje = mensaje.replace(/@name/g, '*' + primerTicket.nombre + '*');
+      }
+    
+      if (mensaje.includes('@premio')) {
+        mensaje = mensaje.replace(/@premio/g, '*' + this.rifa.name + '*');
+      }
+    
+      if (mensaje.includes('@empresa')) {
+        mensaje = mensaje.replace(/@empresa/g, '*' + (this.rifa.admin.empresa || '') + '*');
+      }
+    
+      if (mensaje.includes('@number')) {
+        // Concatenamos todos los números de los tickets
+        const numeros = ticketsPersona.map(t => '*#' + t.numero + '*').join(', ');
+        mensaje = mensaje.replace(/@number/g, numeros);
+      }
+    
+      messages.push({
+        number: number + '@s.whatsapp.net',
+        message: mensaje
+      });
     }
 
     if (imgS) {
@@ -1860,6 +1909,91 @@ export class RifaComponent implements OnInit {
 
 
   }
+
+  exportarAgrupado() {
+  let agrupado: { [telefono: string]: any } = {};
+
+  for (const ticket of this.tickets) {
+    const telefono = ticket.telefono?.trim()?.replace(/\s/g, '') || 'SinTeléfono';
+
+    if (!agrupado[telefono]) {
+      agrupado[telefono] = {
+        Nombres: ticket.nombre || '',
+        Cedula: ticket.cedula || '',
+        Telefono: ticket.telefono || '',
+        Direccion: ticket.direccion || '',
+        Números: [],
+        Estados: new Set(),
+        MontoTotal: 0,
+        Abonado: 0,
+        Pagos: [],
+
+        Ruta: ticket.ruta?.name || '',
+        Vendedor: ticket.vendedor?.name || ''
+      };
+    }
+
+    // Agregar número y estado
+    agrupado[telefono].Números.push(`#${ticket.numero}`);
+    agrupado[telefono].Estados.add(ticket.estado);
+    agrupado[telefono].MontoTotal += ticket.monto;
+
+    // Agregar pagos
+    if (ticket.pagos?.length) {
+      for (const pago of ticket.pagos) {
+        agrupado[telefono].Abonado += pago.monto;
+        agrupado[telefono].Pagos.push({
+          monto: pago.monto,
+          fecha: new Date(pago.fecha!).toLocaleDateString()
+        });
+      }
+    }
+  }
+
+  // Preparar array final para exportar
+  const resultado: any[] = [];
+
+  Object.values(agrupado).forEach((cliente: any) => {
+    const row: any = {
+      Nombres: cliente.Nombres,
+      Cedula: cliente.Cedula,
+      Telefono: cliente.Telefono,
+      Direccion: cliente.Direccion,
+      Números: cliente.Números.join(', '),
+      Estado: Array.from(cliente.Estados).join(', '),
+      MontoTotal: cliente.MontoTotal,
+      Abonado: cliente.Abonado,
+      Ruta: cliente.Ruta,
+      Vendedor: cliente.Vendedor
+    };
+
+    // Agregar pagos como columnas Pago1, Fecha1, Pago2...
+    cliente.Pagos.forEach((pago: any, index: number) => {
+      row[`Pago${index + 1}`] = pago.monto;
+      row[`Fecha${index + 1}`] = pago.fecha;
+    });
+
+    resultado.push(row);
+  });
+
+  // Exportar con xlsx
+  const ws = XLSX.utils.json_to_sheet(resultado);
+
+  // Marcar columna A como texto si es necesario (por ejemplo, Cédula o Teléfono)
+  Object.keys(ws).forEach(cell => {
+    if ((cell.startsWith('C') || cell.startsWith('B')) && cell !== 'C1' && cell !== 'B1') {
+      ws[cell].t = 's';
+      ws[cell].z = '@';
+    }
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+
+  const title = `${this.rifa.name}_agrupado.xls`;
+  XLSX.writeFile(wb, title);
+}
+
 
   /** ================================================================
    *   AGREGAR MONTO
