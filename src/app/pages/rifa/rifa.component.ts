@@ -1918,39 +1918,34 @@ export class RifaComponent implements OnInit {
 
     if (!agrupado[telefono]) {
       agrupado[telefono] = {
-        Nombres: ticket.nombre || '',
-        Cedula: ticket.cedula || '',
-        Telefono: ticket.telefono || '',
-        Direccion: ticket.direccion || '',
+        Nombres: String(ticket.nombre || ''),
+        Cedula: String(ticket.cedula || ''),
+        Telefono: String(ticket.telefono || ''),
+        Direccion: String(ticket.direccion || ''),
         Números: [],
         Estados: new Set(),
         MontoTotal: 0,
         Abonado: 0,
         Pagos: [],
-
-        Ruta: ticket.ruta?.name || '',
-        Vendedor: ticket.vendedor?.name || ''
+        Ruta: String(ticket.ruta?.name || ''),
+        Vendedor: String(ticket.vendedor?.name || '')
       };
     }
 
-    // Agregar número y estado
     agrupado[telefono].Números.push(`#${ticket.numero}`);
     agrupado[telefono].Estados.add(ticket.estado);
-    agrupado[telefono].MontoTotal += ticket.monto;
+    agrupado[telefono].MontoTotal += Number(ticket.monto || 0);
 
-    // Agregar pagos
     if (ticket.pagos?.length) {
       for (const pago of ticket.pagos) {
-        agrupado[telefono].Abonado += pago.monto;
-        agrupado[telefono].Pagos.push({
-          monto: pago.monto,
-          fecha: new Date(pago.fecha!).toLocaleDateString()
-        });
+        const monto = Number(pago.monto || 0);
+        const fecha = pago.fecha ? new Date(pago.fecha).toLocaleDateString() : '';
+        agrupado[telefono].Abonado += monto;
+        agrupado[telefono].Pagos.push({ monto: String(monto), fecha: String(fecha) });
       }
     }
   }
 
-  // Preparar array final para exportar
   const resultado: any[] = [];
 
   Object.values(agrupado).forEach((cliente: any) => {
@@ -1961,25 +1956,39 @@ export class RifaComponent implements OnInit {
       Direccion: cliente.Direccion,
       Números: cliente.Números.join(', '),
       Estado: Array.from(cliente.Estados).join(', '),
-      MontoTotal: cliente.MontoTotal,
-      Abonado: cliente.Abonado,
+      MontoTotal: Number(cliente.MontoTotal || 0),
+      Abonado: Number(cliente.Abonado || 0),
       Ruta: cliente.Ruta,
       Vendedor: cliente.Vendedor
     };
 
-    // Agregar pagos como columnas Pago1, Fecha1, Pago2...
     cliente.Pagos.forEach((pago: any, index: number) => {
       row[`Pago${index + 1}`] = pago.monto;
       row[`Fecha${index + 1}`] = pago.fecha;
     });
 
+    // Sanitizar todos los campos para evitar errores de tipos
+    for (const key in row) {
+      const value = row[key];
+      if (
+        typeof value !== 'string' &&
+        typeof value !== 'number' &&
+        typeof value !== 'boolean'
+      ) {
+        row[key] = String(value ?? '');
+      }
+
+      // Eliminar NaN o undefined
+      if (value === undefined || value === null || Number.isNaN(value)) {
+        row[key] = '';
+      }
+    }
+
     resultado.push(row);
   });
 
-  // Exportar con xlsx
   const ws = XLSX.utils.json_to_sheet(resultado);
 
-  // Marcar columna A como texto si es necesario (por ejemplo, Cédula o Teléfono)
   Object.keys(ws).forEach(cell => {
     if ((cell.startsWith('C') || cell.startsWith('B')) && cell !== 'C1' && cell !== 'B1') {
       ws[cell].t = 's';
@@ -1993,6 +2002,91 @@ export class RifaComponent implements OnInit {
   const title = `${this.rifa.name}_agrupado.xls`;
   XLSX.writeFile(wb, title);
 }
+
+
+//   exportarAgrupado() {
+//   let agrupado: { [telefono: string]: any } = {};
+
+//   for (const ticket of this.tickets) {
+//     const telefono = ticket.telefono?.trim()?.replace(/\s/g, '') || 'SinTeléfono';
+
+//     if (!agrupado[telefono]) {
+//       agrupado[telefono] = {
+//         Nombres: ticket.nombre || '',
+//         Cedula: ticket.cedula || '',
+//         Telefono: ticket.telefono || '',
+//         Direccion: ticket.direccion || '',
+//         Números: [],
+//         Estados: new Set(),
+//         MontoTotal: 0,
+//         Abonado: 0,
+//         Pagos: [],
+
+//         Ruta: ticket.ruta?.name || '',
+//         Vendedor: ticket.vendedor?.name || ''
+//       };
+//     }
+
+//     // Agregar número y estado
+//     agrupado[telefono].Números.push(`#${ticket.numero}`);
+//     agrupado[telefono].Estados.add(ticket.estado);
+//     agrupado[telefono].MontoTotal += ticket.monto;
+
+//     // Agregar pagos
+//     if (ticket.pagos?.length) {
+//       for (const pago of ticket.pagos) {
+//         agrupado[telefono].Abonado += pago.monto;
+//         agrupado[telefono].Pagos.push({
+//           monto: pago.monto,
+//           fecha: new Date(pago.fecha!).toLocaleDateString()
+//         });
+//       }
+//     }
+//   }
+
+//   // Preparar array final para exportar
+//   const resultado: any[] = [];
+
+//   Object.values(agrupado).forEach((cliente: any) => {
+//     const row: any = {
+//       Nombres: cliente.Nombres,
+//       Cedula: cliente.Cedula,
+//       Telefono: cliente.Telefono,
+//       Direccion: cliente.Direccion,
+//       Números: cliente.Números.join(', '),
+//       Estado: Array.from(cliente.Estados).join(', '),
+//       MontoTotal: cliente.MontoTotal,
+//       Abonado: cliente.Abonado,
+//       Ruta: cliente.Ruta,
+//       Vendedor: cliente.Vendedor
+//     };
+
+//     // Agregar pagos como columnas Pago1, Fecha1, Pago2...
+//     cliente.Pagos.forEach((pago: any, index: number) => {
+//       row[`Pago${index + 1}`] = pago.monto;
+//       row[`Fecha${index + 1}`] = pago.fecha;
+//     });
+
+//     resultado.push(row);
+//   });
+
+//   // Exportar con xlsx
+//   const ws = XLSX.utils.json_to_sheet(resultado);
+
+//   // Marcar columna A como texto si es necesario (por ejemplo, Cédula o Teléfono)
+//   Object.keys(ws).forEach(cell => {
+//     if ((cell.startsWith('C') || cell.startsWith('B')) && cell !== 'C1' && cell !== 'B1') {
+//       ws[cell].t = 's';
+//       ws[cell].z = '@';
+//     }
+//   });
+
+//   const wb = XLSX.utils.book_new();
+//   XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+
+//   const title = `${this.rifa.name}_agrupado.xls`;
+//   XLSX.writeFile(wb, title);
+// }
 
 
   /** ================================================================

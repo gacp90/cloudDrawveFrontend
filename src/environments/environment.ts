@@ -19,6 +19,16 @@
   client: true,
   app: false
 
+  base_url: 'https://admin.rifacarssocopo.com/api',
+  local_url: 'https://admin.rifacarssocopo.com',
+  client: true,
+  app: false
+
+  base_url: 'https://admin.ganaconkingjesus.com/api',
+  local_url: 'https://admin.ganaconkingjesus.com',
+  client: true,
+  app: false
+
   base_url: 'http://localhost:3000/api',
   local_url: 'http://localhost:4200',
   client: false,
@@ -28,9 +38,9 @@
 
 export const environment = {
   production: false,
-  base_url: 'https://cloud.rifari.com/api',
-  local_url: 'https://cloud.rifari.com',
-  client: false,
+  base_url: 'https://admin.rifaselmocho.com/api',
+  local_url: 'https://admin.rifaselmocho.com',
+  client: true,
   app: false
 };
 
