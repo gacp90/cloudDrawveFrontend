@@ -38,8 +38,8 @@
 
 export const environment = {
   production: false,
-  base_url: 'https://admin.rifaselmocho.com/api',
-  local_url: 'https://admin.rifaselmocho.com',
+  base_url: 'https://admin.rifasaurinegro.com/api',
+  local_url: 'https://admin.rifasaurinegro.com',
   client: true,
   app: false
 };
