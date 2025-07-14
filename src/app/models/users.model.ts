@@ -21,6 +21,9 @@ export class User {
         public walletBalance: number,
         public whatsapp?: boolean,
         public wp?: string,
+        public wati?: boolean,
+        public watilink?: string,
+        public watitoken?: string,
         public uid?: string,
         public _id?: string
         

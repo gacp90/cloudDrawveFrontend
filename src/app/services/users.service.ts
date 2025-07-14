@@ -81,11 +81,11 @@ export class UsersService {
         'x-token': token
       }
     }).pipe(
-      tap( (resp: any) => {
+      tap( (resp: any) => {        
         
-        const { email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, uid } = resp.usuario;
+        const { email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, wati, watilink, watitoken, uid } = resp.usuario;
 
-        this.user = new User(email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, uid);   
+        this.user = new User(email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, wati, watilink, watitoken, uid);   
         
         localStorage.setItem('token', resp.token);
 

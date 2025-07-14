@@ -62,7 +62,7 @@ export class PerfilComponent implements OnInit {
     this.usersService.loadUserId(id)
         .subscribe( ({user}) => {
 
-          this.user = user;          
+          this.user = user;    
           this.getForm();  
 
         });
@@ -74,6 +74,9 @@ export class PerfilComponent implements OnInit {
   ==================================================================== */
   getForm(){
 
+    console.log(this.user);
+    
+
     this.formUpdate.reset({
       email: this.user.email,
       name: this.user.name,
@@ -81,6 +84,12 @@ export class PerfilComponent implements OnInit {
       password: '',
       repassword: ''
     });
+
+    this.formWati.reset({
+      wati: this.user.wati || false,
+      watilink: (this.user.watilink)? this.user.watilink : 'empty',
+      watitoken: (this.user.watitoken)? this.user.watitoken : 'empty'
+    })
 
   }
               
@@ -272,5 +281,48 @@ export class PerfilComponent implements OnInit {
 
     return receipt;
   }
+
+  /** ================================================================
+   *  WATI
+  ==================================================================== */
+  public formWatiSubmited: boolean = false;
+  public formWati = this.fb.group({
+    wati: false,
+    watilink: ['', [Validators.required]],
+    watitoken: ['', [Validators.required]]
+  })
+
+  updateWati(){
+
+    this.formWatiSubmited = true;
+
+    if (this.formWati.invalid) {
+      return;
+    }
+
+    this.usersService.updateUser(this.formWati.value, this.user.uid!)
+        .subscribe( ({ user }) => {
+
+          this.user.wati = user.wati;
+          this.user.watilink = user.watilink;
+          this.user.watitoken = user.watitoken;
+          Swal.fire('Estupendo!', 'Se ha actualizado wati exitosamente', 'success');
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+  }
+
+  /** ================================================================
+   *  VALIDATE WATI
+  ==================================================================== */
+  validateWati(campo: string): boolean  {
+
+    return (this.formWatiSubmited && this.formWati.get(campo)?.invalid)? true: false;
+
+  }
+
 
 }

@@ -123,6 +123,9 @@
                 <li class="nav-item">
                     <a class="nav-link active" data-toggle="tab" href="#settings" role="tab">Settings</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#wati" role="tab">Wati</a>
+                </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content">
@@ -183,9 +186,50 @@
                         </form>
                     </div>
                 </div>
+
                 <!-- =================================
-                    PERFIL
+                    WATI
                 ================================== -->
+                <div class="tab-pane" id="wati" role="tabpanel">
+                    <div class="card-body">
+                        <form class="form-horizontal form-material" [formGroup]="formWati" (ngSubmit)="updateWati()">
+                            
+                            <div class="form-group" [ngClass]="{'has-danger': validateWati('watilink')}">
+                                <label class="col-md-12"> Wati Link </label>
+                                <div class="col-md-12">
+                                    <input formControlName="watilink" type="text" placeholder="https://live-mt-server.wati.io/000000" class="form-control " [ngClass]="{'form-control-danger': validateWati('watilink')}">
+                                    <small *ngIf="validateWati('watilink')" class="form-control-feedback animated fadeIn">Este campo es obligatorio</small>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group" [ngClass]="{'has-danger': validateWati('watitoken')}">
+                                <label class="col-md-12"> Wati Token </label>
+                                <div class="col-md-12">
+                                    <input formControlName="watitoken" type="text" placeholder="Bearer eyJhbGciOiJIUzI1NiI..." class="form-control form-control-line" [ngClass]="{'form-control-danger': validateWati('watitoken')}">
+                                    <small *ngIf="validateWati('watitoken')" class="form-control-feedback animated fadeIn">Este campo es obligatorio</small>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 mb-3">
+                                <div class="demo-switch-title">
+                                    <span *ngIf="formWati.value.wati" >Activado</span>
+                                    <span *ngIf="!formWati.value.wati" >Desactivado</span>
+                                </div>
+                                <div class="switch">
+                                    <label>
+                                        <input formControlName="wati" type="checkbox" checked=""><span class="lever switch-col-indigo"></span></label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <button type="submit" class="btn btn-success">Actualizar wati</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
 
 

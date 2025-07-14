@@ -29,6 +29,21 @@ import { WhatsappService } from 'src/app/services/whatsapp.service';
 
 import { environment } from '../../../environments/environment';
 import { BluetoothService } from 'src/app/services/bluetooth.service';
+import { WatiService } from 'src/app/services/wati.service';
+
+interface templateIn{
+  id: string,
+  elementName: string,
+  category: string,
+  subCategory: string,
+  catalogInfo: string,
+  customParams: any[],
+  status: string,
+  body: string,
+  bodyOriginal: string,
+  header: any,
+  footer: any,
+}
 
 @Component({
   selector: 'app-rifa',
@@ -50,6 +65,7 @@ export class RifaComponent implements OnInit {
                 private fileUploadService: FileUploadService,
                 private whatsappService: WhatsappService,
                 private bluetoothService: BluetoothService,
+                private watiService: WatiService,
                 private fb: FormBuilder){
 
     this.user = usersService.user;
@@ -229,6 +245,10 @@ export class RifaComponent implements OnInit {
           })
 
           this.loadGanador();
+
+          if (this.user.wati) {
+            this.loadTemplates();
+          }
           
 
         }, (err) => {
@@ -240,7 +260,31 @@ export class RifaComponent implements OnInit {
   }
 
   /** ======================================================================
-   * NEW RIFA
+   * LOAD PLANTILLAS WATI
+  ====================================================================== */
+  public templates: any[] = [];
+  loadTemplates(){
+
+    this.watiService.loadPlantilla(this.user.watitoken!, this.user.watilink!)
+        .subscribe( (resp: any) => {
+          
+          for (const temp of resp.messageTemplates) {
+            
+            if (temp.status === "APPROVED") {
+              this.templates.push(temp)
+            }
+
+          }          
+          
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error, 'error');          
+        })
+
+  }
+
+  /** ======================================================================
+   * UPDATE RIFA
   ====================================================================== */
   public newRifaFormSubmitted: boolean = false;
   public newRifaForm = this.fb.group({
@@ -1201,32 +1245,67 @@ export class RifaComponent implements OnInit {
       if (this.ticketSelected.telefono) {
         
         this.sendM = true;
-        this.whatsappService.sendMessage(this.user.uid!, {message: message, number: this.ticketSelected.telefono.trim()}, this.user.wp!)
-        .subscribe( ({ok, msg}) => {
-              this.sendM = false;
 
-              const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                  toast.onmouseenter = Swal.stopTimer;
-                  toast.onmouseleave = Swal.resumeTimer;
-                }
-              });
+        if (this.user.wati) {
 
-              Toast.fire({
-                icon: "success",
-                title: msg
-              });
-              
-            }, (err)=> {
-              console.log(err);
-              Swal.fire('Error', err.error.msg, 'error');            
-              this.sendM = false;
-            })      
+          this.watiService.sendMessage(this.user.watitoken!, this.user.watilink!, this.ticketSelected.telefono.trim(), message)
+              .subscribe( (resp) => {
+
+                this.sendM = false;
+  
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: "top-end",
+                  showConfirmButton: false,
+                  timer: 2000,
+                  timerProgressBar: true,
+                  didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                  }
+                });
+  
+                Toast.fire({
+                  icon: "success",
+                  title: 'se ha enviado el mensaje con exito'
+                });
+                
+
+              }, (err) => {
+                console.log(err);
+                this.sendM = false;
+                Swal.fire('Error', err.error, 'error');                
+              })
+          
+        }else{
+          this.whatsappService.sendMessage(this.user.uid!, {message: message, number: this.ticketSelected.telefono.trim()}, this.user.wp!)
+          .subscribe( ({ok, msg}) => {
+                this.sendM = false;
+  
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: "top-end",
+                  showConfirmButton: false,
+                  timer: 2000,
+                  timerProgressBar: true,
+                  didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                  }
+                });
+  
+                Toast.fire({
+                  icon: "success",
+                  title: msg
+                });
+                
+              }, (err)=> {
+                console.log(err);
+                Swal.fire('Error', err.error.msg, 'error');            
+                this.sendM = false;
+              })  
+        }
+
       }
 
     }
@@ -1595,35 +1674,72 @@ export class RifaComponent implements OnInit {
       canvas.toBlob((blob) => {
         if (blob) {
           // Crear un objeto FormData para enviar la imagen
-          this.whatsappService.sendImage(this.user.uid!, this.ticketSelected.telefono, blob, caption, this.user.wp!)
-              .subscribe( ({ok, msg}) => {
-                this.sendImage = false;
 
-                const Toast = Swal.mixin({
-                  toast: true,
-                  position: "top-end",
-                  showConfirmButton: false,
-                  timer: 2000,
-                  timerProgressBar: true,
-                  didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                  }
-                });
-    
-                Toast.fire({
-                  icon: "success",
-                  title: msg
-                });
+          if (this.user.wati) {
 
-                this.captionI.nativeElement.value = '';
-                
-              }, (err) => {
-                console.log(err);
-                Swal.fire('Error', err.error.msg, 'error');
-                this.sendImage = false;
-                
-              })
+            this.watiService.sendImage(this.user.watitoken!, this.user.watilink!, this.ticketSelected.telefono, blob, caption)
+                .subscribe( (resp) => {
+
+                  this.sendImage = false;
+
+                  const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                      toast.onmouseenter = Swal.stopTimer;
+                      toast.onmouseleave = Swal.resumeTimer;
+                    }
+                  });
+      
+                  Toast.fire({
+                    icon: "success",
+                    title: 'Se ha enviado el ticket digital exitosamente!'
+                  });
+
+                  this.captionI.nativeElement.value = '';
+
+                }, (err) => {
+                  console.log(err);
+                  Swal.fire('Error', err.error, 'error');
+                  
+                })
+            
+          }else{
+
+            this.whatsappService.sendImage(this.user.uid!, this.ticketSelected.telefono, blob, caption, this.user.wp!)
+                .subscribe( ({ok, msg}) => {
+                  this.sendImage = false;
+  
+                  const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                      toast.onmouseenter = Swal.stopTimer;
+                      toast.onmouseleave = Swal.resumeTimer;
+                    }
+                  });
+      
+                  Toast.fire({
+                    icon: "success",
+                    title: msg
+                  });
+  
+                  this.captionI.nativeElement.value = '';
+                  
+                }, (err) => {
+                  console.log(err);
+                  Swal.fire('Error', err.error.msg, 'error');
+                  this.sendImage = false;
+                  
+                })
+          }
+
 
           // Enviar la imagen a la API
           
@@ -1685,45 +1801,6 @@ export class RifaComponent implements OnInit {
       Swal.fire('Atención', 'Debes de agregar un mensaje con mas de 5 caracteres', 'warning');
       return;
     }
-
-    // let messages: any[] = [];
-    // this.sendMasive = true;
-
-    // for (let i = 0; i < this.tickets.length; i++) {
-    //   const ticket = this.tickets[i];
-    //   let mensaje = this.message;
-
-    //   if (ticket.estado !== 'Disponible') {
-        
-    //     if (mensaje.includes('@name')) {
-    //       mensaje = mensaje.replace(/@name/g, '*'+ticket.nombre+'*');
-    //     }
-  
-    //     if (mensaje.includes('@premio')) {
-    //       mensaje = mensaje.replace(/@premio/g, '*'+this.rifa.name+'*');
-    //     }
-
-    //     if (mensaje.includes('@empresa')) {
-    //       mensaje = mensaje.replace(/@empresa/g, '*'+this.rifa.admin.empresa+'*' || '');
-    //     }
-  
-    //     if (mensaje.includes('@number')) {
-    //       mensaje = mensaje.replace(/@number/g, '*#'+ticket.numero+'*');
-    //     }
-
-    //     let number:string = ticket.telefono.trim().replace(/\s/g, '');
-
-    //     // let number = ticket.telefono.trim()+"@c.us";
-
-    //     messages.push({
-    //       number: number.replace(/[^\d]/g, '') + '@s.whatsapp.net',
-    //       message: mensaje
-    //     })
-        
-        
-    //   }     
-      
-    // }
 
     let messages: any[] = [];
     this.sendMasive = true;
@@ -1841,6 +1918,115 @@ export class RifaComponent implements OnInit {
     }
     
 
+
+  }
+
+  /** ================================================================
+   *   SELECCIONAR PLANTILLA
+  ==================================================================== */
+  public templateSelected: any;
+  seleccionarPlantilla(plantillaID: string){
+
+    if (plantillaID === 'none') {
+      delete this.templateSelected;
+      return;
+    }
+
+    this.templates.map( temp => {
+      if (temp.id === plantillaID) {
+        this.templateSelected = temp;
+      }
+    })
+
+  }
+
+  /** ================================================================
+   *   SEND MASIVE WITH WATI
+  ==================================================================== */
+  sendMassiveWATI() {
+
+    if (!this.user.whatsapp) {
+      Swal.fire('Atención', 'No tienes habilitada esta función', 'warning');
+      return;
+    }
+
+    if (!this.templateSelected || !this.templateSelected.customParams?.length) {
+      Swal.fire('Atención', 'Debes seleccionar una plantilla con parámetros', 'warning');
+      return;
+    }
+
+    const receivers: any[] = [];
+    const groupedTickets: { [telefono: string]: any[] } = {};
+
+    // Agrupar los tickets por número de teléfono
+    for (const ticket of this.tickets) {
+      if (ticket.estado !== 'Disponible') {
+        const number = ticket.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+        if (!groupedTickets[number]) {
+          groupedTickets[number] = [];
+        }
+        groupedTickets[number].push(ticket);
+      }
+    }
+
+    // Construir estructura receivers
+    for (const number in groupedTickets) {
+      const ticketsPersona = groupedTickets[number];
+      const primerTicket = ticketsPersona[0];
+
+      // Construir parámetros personalizados (basado en la plantilla seleccionada)
+      const customParams = this.templateSelected.customParams.map((param: any) => {
+        let value = '';
+
+        switch (param.paramName) {
+          case 'tickets':
+            value = ticketsPersona.map(t => `#${t.numero}`).join(', ');
+            break;
+          case 'nombre':
+          case 'name':
+            value = primerTicket.nombre || '';
+            break;
+          case 'cedula':
+            value = primerTicket.cedula || '';
+            break;
+          case 'empresa':
+            value = this.rifa.admin?.empresa || '';
+            break;
+          case 'premio':
+            value = this.rifa?.name || '';
+            break;
+          default:
+            value = '-'; // Por si el campo no existe
+        }
+
+        return {
+          name: param.paramName,
+          value
+        };
+      });
+
+      receivers.push({
+        whatsappNumber: number,
+        customParams
+      });
+    }
+
+    // Construir cuerpo final para WATI
+    const body = {
+      template_name: this.templateSelected.elementName,
+      broadcast_name: this.templateSelected.elementName,
+      receivers
+    };
+
+    this.watiService.sendTemplateMasive(this.user.watitoken!, this.user.watilink!, body)
+        .subscribe( (resp) => {
+          Swal.fire('Estupendo', 'se estan enviando todos los mensajes', 'success');
+
+        }, (err) =>{
+          console.log(err);
+          Swal.fire('Error', err.error, 'error');
+          
+        })
 
   }
 
