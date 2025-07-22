@@ -385,7 +385,9 @@ export class RifaComponent implements OnInit {
   searchEstado(estado: string){
 
     if (estado === 'total') {
-      delete this.query.estado;      
+      delete this.query.estado;  
+      delete this.query.pagos;  
+      delete this.query.$expr;  
     }else{
       this.query.estado = estado;
 
@@ -540,6 +542,7 @@ export class RifaComponent implements OnInit {
           this.tickets.map( (tic) => {
             if (tic.tid === ticket.tid) {
               tic.estado = ticket.estado;
+              tic.nombre = ticket.nombre;
             }
           });
 
@@ -633,6 +636,7 @@ export class RifaComponent implements OnInit {
               this.tickets.map( (tic) => {
                 if (tic.tid === ticket.tid) {
                   tic.estado = ticket.estado;
+                  tic.nombre = ticket.nombre;
                 }
               });
               this.ticketSelected = ticket;
@@ -735,6 +739,7 @@ export class RifaComponent implements OnInit {
           this.tickets.map( (tic) => {
             if (tic.tid === ticket.tid) {
               tic.estado = ticket.estado;
+              tic.nombre = ticket.nombre;
             }
           });
 
@@ -963,6 +968,44 @@ export class RifaComponent implements OnInit {
     }
 
     this.query.vendedor = vendedor;
+    this.loadTickets();
+
+  }
+
+  /** ================================================================
+   *   SEARCH TICKET REZAGADO
+  ==================================================================== */
+  filterRezagados(){
+
+    this.query.pagos = { $size: 0 };
+    this.loadTickets();
+
+  }
+
+  /** ================================================================
+   *   SEARCH MONTO X
+  ==================================================================== */
+  filterMonto(monto: any){
+
+    monto = Number(monto);
+    if (monto <= 0) {
+      Swal.fire('Atención', 'El monto debe ser mayor a 0', 'warning');
+      return;
+    }
+
+    this.query.$expr = {
+      $lt: [
+        {
+          $reduce: {
+            input: "$pagos",
+            initialValue: 0,
+            in: { $add: ["$$value", "$$this.monto"] }
+          }
+        },
+        monto  // Monto límite
+      ]
+    }
+
     this.loadTickets();
 
   }
@@ -1249,9 +1292,19 @@ export class RifaComponent implements OnInit {
         if (this.user.wati) {
 
           this.watiService.sendMessage(this.user.watitoken!, this.user.watilink!, this.ticketSelected.telefono.trim(), message)
-              .subscribe( (resp) => {
+              .subscribe( (resp: any) => {
 
                 this.sendM = false;
+
+                console.log(resp);
+                
+
+                if (!resp.result) {
+                  Swal.fire('Error', resp.info, 'error');
+                  return;       
+                }
+
+                Swal.fire('Estupendo', 'se estan enviando todos los mensajes', 'success');
   
                 const Toast = Swal.mixin({
                   toast: true,
@@ -2019,7 +2072,13 @@ export class RifaComponent implements OnInit {
     };
 
     this.watiService.sendTemplateMasive(this.user.watitoken!, this.user.watilink!, body)
-        .subscribe( (resp) => {
+        .subscribe( (resp: any) => {
+
+          if (!resp.result) {
+            Swal.fire('Error', resp.errors.error, 'error');
+            return;       
+          }
+
           Swal.fire('Estupendo', 'se estan enviando todos los mensajes', 'success');
 
         }, (err) =>{
