@@ -1011,6 +1011,16 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
+   *   LIMPIAR FILTRO
+  ==================================================================== */
+  clearFilters(){
+    delete this.query.$expr;
+    delete this.query.pagos;
+
+    this.loadTickets();
+  }
+
+  /** ================================================================
    *   SEARCH TICKET FOR CLIENT
   ==================================================================== */
   search(busqueda: string){

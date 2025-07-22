@@ -347,20 +347,26 @@
             </div>
 
             <!-- FILTROS DE TICKETS APARTADOS -->
-            <div *ngIf="query.estado === 'Apartado'" class="d-flex justify-content-between flex-wrap mb-3">
-                <div class="mb-2">
-                    <button class="btn btn-warning" (click)="filterRezagados()">Buscar Rezagados</button>
-                </div>
-                
-                <div class="form-row mb-2">
-                    <div class="col">
-                        <input #montF type="number" min="1" class="form-control" placeholder="Monto menor a">
+            <div *ngIf="query.estado === 'Apartado'">
+               
+                <a class="text-decoration-none text-danger pointer" (click)="clearFilters()">limpiar filtros</a>
+                <div class="d-flex justify-content-between flex-wrap mb-3">
+    
+    
+                    <div class="mb-2">
+                        <button class="btn btn-warning" (click)="filterRezagados()">Buscar Rezagados</button>
                     </div>
-                    <div class="col">
-                        <button class="btn btn-primary" type="button" (click)="filterMonto(montF.value)">Filtrar</button>
+                    
+                    <div class="form-row mb-2">
+                        <div class="col">
+                            <input #montF type="number" min="1" class="form-control" placeholder="Monto menor a">
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" type="button" (click)="filterMonto(montF.value)">Filtrar</button>
+                        </div>
                     </div>
+    
                 </div>
-
             </div>
 
             <!-- TICKETS -->
@@ -370,8 +376,16 @@
 
                 <ng-container *ngIf="checkVarios.checked">
                     <ng-container *ngFor="let ticket of tickets">
-                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" type="button" class="btn-5 border-0 m-1 text-center text-white pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado', 'btn-6': rifa.numeros > 1000}">
-                            <p class="mb-0 fw-bold fs-3"> {{ ticket.numero }} </p>
+                        <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" type="button" class="btn btn-6 m-1 border-0 pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
+                            <div [ngClass]="{'d-flex': ticket.pagos.length === 0  && ticket.estado === 'Apartado'}">
+                                <span class="fw-bold fs-3 text-white">
+                                    {{ ticket.numero }}
+                                </span> 
+                                <span *ngIf="ticket.estado === 'Apartado' && ticket.pagos.length === 0 " class="text-center ml-1">
+                                    <span class="badge badge-danger"> - </span>
+                                </span>
+                            </div>
+                            <p class="text-truncate text-white mb-0 fs-6"> {{ ticket.nombre || 'Disponible' }} </p>
                         </button>
                     </ng-container>
                 </ng-container>
