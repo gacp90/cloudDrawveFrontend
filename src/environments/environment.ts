@@ -34,6 +34,11 @@
   client: true,
   app: false
 
+  base_url: 'https://admin.ganayproduce.com/api',
+  local_url: 'https://admin.ganayproduce.com',
+  client: true,
+  app: false
+
   base_url: 'http://localhost:3000/api',
   local_url: 'http://localhost:4200',
   client: false,
@@ -43,10 +48,10 @@
 
 export const environment = {
   production: false,
-  base_url: 'https://cloud.rifari.com/api',
-  local_url: 'https://cloud.rifari.com',
-  client: false,
-  app: false
+  base_url: 'https://admin.rifacarssocopo.com/api',
+  local_url: 'https://admin.rifacarssocopo.com',
+  client: true,
+  app: true
 };
 
 /*

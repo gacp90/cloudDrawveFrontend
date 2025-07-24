@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.drawve.app',
-  appName: 'Rifas el mocho',
+  appId: 'com.rifari.app',
+  appName: 'rifari',
   webDir: '../drawveBackend/public'
 };
 

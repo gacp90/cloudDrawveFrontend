@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  base_url: 'https://cloud.rifari.com/api',
-  local_url: 'https://cloud.rifari.com',
-  client: false,
-  app: false
+  base_url: 'https://admin.rifacarssocopo.com/api',
+  local_url: 'https://admin.rifacarssocopo.com',
+  client: true,
+  app: true
 };
