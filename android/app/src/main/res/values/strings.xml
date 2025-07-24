@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Drawve</string>
-    <string name="title_activity_main">Drawve</string>
-    <string name="package_name">com.drawve.app</string>
-    <string name="custom_url_scheme">com.drawve.app</string>
+    <string name="app_name">rifari</string>
+    <string name="title_activity_main">rifari</string>
+    <string name="package_name">com.rifari.app</string>
+    <string name="custom_url_scheme">com.rifari.app</string>
 </resources>

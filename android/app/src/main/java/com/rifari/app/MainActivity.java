@@ -1,4 +1,4 @@
-package com.drawve.app;
+package com.rifari.app;
 
 import com.getcapacitor.BridgeActivity;
 
