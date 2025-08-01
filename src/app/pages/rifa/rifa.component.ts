@@ -1304,10 +1304,7 @@ export class RifaComponent implements OnInit {
           this.watiService.sendMessage(this.user.watitoken!, this.user.watilink!, this.ticketSelected.telefono.trim(), message)
               .subscribe( (resp: any) => {
 
-                this.sendM = false;
-
-                console.log(resp);
-                
+                this.sendM = false;                
 
                 if (!resp.result) {
                   Swal.fire('Error', resp.info, 'error');
@@ -1482,6 +1479,218 @@ export class RifaComponent implements OnInit {
           console.log(err);
           Swal.fire('Error', err.error.msg, 'error');          
         })
+
+  }
+
+  getRutaWebID(rutas:any) {
+    const rutaWeb = rutas.find((r:any) => r.name.trim().toLowerCase() === 'web');
+    return rutaWeb ? rutaWeb.ruid : null;
+  }
+
+  /** ================================================================
+   *   COMPRAS WEB
+  ==================================================================== */
+  public ticketsAg: any[] = [];
+  public metodosAg: any[] = [];
+  public loadingComprasWeb: boolean = true;
+  loadComprasWeb(){
+
+    // console.log(this.rutas);
+    let rutaW = this.getRutaWebID(this.rutas);
+    this.loadingComprasWeb = true;
+    
+    this.ticketsService.loadTickets({ rifa: this.rifa.rifid, estado: 'Apartado', ruta: rutaW})
+        .subscribe( ({tickets}) => {
+
+          this.loadingComprasWeb = false;
+          const grupos: { [clave: string]: any } = {};
+          const meto: { [clave: string]: any } = {};
+
+          for (const ticket of tickets) {
+            const telefono = ticket.telefono || '';
+            const clave = `${telefono}-${ticket.pagos[0].img}`;
+
+            if (!grupos[clave]) {
+              grupos[clave] = {
+                nombre: ticket.nombre,
+                estado: 'Pendiente',
+                ver: true,
+                referencia: ticket.pagos[0].referencia,
+                fecha: ticket.pagos[0].fecha,
+                telefono: telefono,
+                tasa: ticket.pagos[0].metodo['tasa'],
+                monto: 0,
+                equivalencia: 0,
+                img: ticket.pagos[0].img,
+                metodo: ticket.pagos[0].metodo._id,
+                metodoname: ticket.pagos[0].metodo.name,
+                tickets: []
+              };
+            }
+
+            grupos[clave].monto += ticket.monto;
+            grupos[clave].equivalencia += ticket.pagos[0].equivalencia;
+            grupos[clave].tickets.push(ticket);
+
+            if (!meto[ticket.pagos[0].metodo._id]) {
+              meto[ticket.pagos[0].metodo._id] = {
+                name: ticket.pagos[0].metodo.name,
+                id: ticket.pagos[0].metodo._id,
+                monto: 0,
+                equivalencia: 0
+              }
+            }
+            
+
+          }
+
+          // Convertir el objeto a array;
+          this.ticketsAg = Object.values(grupos);
+          this.metodosAg = Object.values(meto);
+
+          this.totalizarMetodos();
+          
+
+        }, (err)=> {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+  }
+
+  /** ================================================================
+   *   TOTALIZAR METODOS DE PAGO
+  ==================================================================== */
+  public totalPaidWeb: number = 0;
+  totalizarMetodos(){
+
+    this.totalPaidWeb = 0;
+    this.metodosAg.map( meto => {meto.monto = 0; meto.equivalencia = 0})
+
+    this.ticketsAg.map( ti => {
+
+      if (ti.ver) {
+        
+        this.metodosAg.map( met => {
+          if (met.id === ti.metodo) {
+            
+            met.monto += ti.monto;
+            met.equivalencia += ti.equivalencia;
+          }        
+        })      
+        this.totalPaidWeb += ti.monto;
+      }
+
+    })    
+
+  }
+  
+  /** ================================================================
+   *   TOTALIZAR METODOS DE PAGO
+  ==================================================================== */
+  filtrarMetodoWeb(metodo: string){
+
+    if (metodo === 'Todos') {
+      this.ticketsAg.map( t => t.ver = true)
+    }else{
+      this.ticketsAg.map( t => {
+
+        if(t.metodo === metodo){
+          t.ver = true
+        }else{
+          t.ver = false
+        }
+
+      })
+
+    }
+
+    this.totalizarMetodos();
+
+  }
+
+  /** ================================================================
+   *   PREPARE MENSAJE
+  ==================================================================== */
+  public wmwb: string = '';
+  public wtwb: string = '';
+  prepareWhatsappWeb(pago: any){
+
+    const numeros = pago.tickets.map((t:any) => '*#' + t.numero + '*').join(', ');    
+
+    if (pago.estado === 'Confirmado') {
+
+      this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, gracias por tu compra`
+      
+    }else{
+      this.wmwb = `Hola ${pago.nombre}, No hemos podido confirmar la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number, con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, porfavor vuelve a enviarnos los datos por este medio`
+    }
+
+    this.wmwb = this.wmwb.replace(/@number/g, numeros);
+    this.wtwb = pago.telefono;   
+
+  }
+
+   /** ================================================================
+   *   ENVAIR MENSAJE PAGOS WEB
+  ==================================================================== */
+  sendWW(){
+    
+
+    this.whatsappService.sendMessage(this.user.uid!, {message: this.wmwb, number: this.wtwb.trim()}, this.user.wp!)
+          .subscribe( ({ok, msg}) => {
+                this.sendM = false;
+  
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: "top-end",
+                  showConfirmButton: false,
+                  timer: 2000,
+                  timerProgressBar: true,
+                  didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                  }
+                });
+  
+                Toast.fire({
+                  icon: "success",
+                  title: msg
+                });
+                
+              }, (err)=> {
+                console.log(err);
+                Swal.fire('Error', err.error.msg, 'error');            
+                this.sendM = false;
+              }) 
+    
+
+  }
+
+  /** ================================================================
+   *   CONFIRMAR PAGOS WEB
+  ==================================================================== */
+  confirmarPagoWeb(pago: any){
+
+    Swal.fire({
+      title: "Estas seguro?",
+      text: "De confirmar este pago",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, confirmar!",
+      cancelButtonText: 'cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        
+        pago.estado = 'Confirmado';
+
+        for (const ticket of pago.tickets) {          
+          this.confirmarPago(ticket.tid, ticket.pagos[0]._id, 'Confirmado');
+        }
+      }
+    });
 
   }
 
@@ -2420,7 +2629,15 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
-   *   ELIMINAR MONTO
+   *   WRAP TEXT
+  ==================================================================== */
+  wrapText(text: string, lineLength: number): string[] {
+    const regex = new RegExp(`.{1,${lineLength}}`, 'g');
+    return text.match(regex) || [];
+  }
+
+  /** ================================================================
+   *   printTicket
   ==================================================================== */
   public app = environment.app;
   public imprimiendo: boolean = false;
@@ -2428,7 +2645,35 @@ export class RifaComponent implements OnInit {
     
     this.imprimiendo = true;
 
-    const content = document.getElementById('captureImprimir')?.innerText;
+    const content:any = document.getElementById('captureImprimir')?.innerText;  
+    
+
+    if (localStorage.getItem('typePrinter') === 'ESC') {
+      this.printTicketImpresora(content);
+    }else{
+      
+      // const lines = this.wrapText(content, 24); // asumiendo 32 caracteres por línea
+      // let y = 10;
+      // const commands = lines.map(line => {
+      //   const cmd = `TEXT 10,${y},"3",0,1,1,"${line}"`;
+      //   y += 30; // espacio entre líneas
+      //   return cmd;
+      // });
+
+      // const labelHeightDots = lines.length * 30;
+      // const labelHeightMM = Math.ceil(labelHeightDots / 8);
+
+      // const fullCommand = `SIZE 58 mm, ${labelHeightMM} mm\nOFFSET 0 \nDENSITY 10 \nSPEED 4 \nDIRECTION 1 \nREFERENCE 0,0\nCLS\n${commands.join('\n')}\nPRINT 1,1\n`;
+      
+      // this.printTicketImpresora(fullCommand);  
+      const comando = await this.generarComandoTSPL();
+      this.printTicketImpresora(comando);  
+            
+    }
+
+  }
+
+  async printTicketImpresora(content: any) {
     if (content) {
       this.bluetoothService.printText(content)
         .then(response => {
@@ -2439,6 +2684,77 @@ export class RifaComponent implements OnInit {
           console.error(error)
         });
     }
+  }
+
+  /** ================================================================
+   *   GENERAR TICKET TSPL
+  ==================================================================== */
+  generarComandoTSPL() {
+    let y = 10; // posición vertical inicial
+    const salto = 30; // salto vertical por línea (ajustable)
+    const comandos: string[] = [];
+
+    // Función auxiliar para agregar línea y sumar Y
+    const addLine = (text: string, fontSize = 1, center = false) => {
+      const x = center ? Math.max(0, (384 - (text.length * 12 * fontSize)) / 2) : 10;
+      comandos.push(`TEXT ${x},${y},"3",0,${fontSize},${fontSize},"${text}"`);
+      y += salto * fontSize;
+    };
+
+    const wrapText = (text: string, maxChars: number): string[] => {
+      const lines = [];
+      while (text.length > maxChars) {
+        lines.push(text.slice(0, maxChars));
+        text = text.slice(maxChars);
+      }
+      if (text) lines.push(text);
+      return lines;
+    };
+
+    // --- Comenzamos línea por línea según tu estructura ---
+    wrapText(this.rifa.admin.empresa, 23).forEach(line => addLine(line, 1, true));      
+    addLine(`#${this.ticketSelected.numero}`, 3, true); // triple tamaño y centrado
+    addLine(this.ticketSelected.estado === "Pagado" ? "Pagado" : "Apartado", 1, true);
+    addLine("-----------------------");
+
+    wrapText(this.rifa.name, 23).forEach(line => addLine(line));
+    addLine("-----------------------");
+
+    addLine(`Precio: ${this.ticketSelected.monto}$`);
+    addLine("--------fecha---------");
+    
+    let fecha = new Date(this.rifa.fecha)
+
+    addLine(`${fecha.getDate()}-${fecha.getMonth()+1}-${fecha.getFullYear()} ${fecha.getHours()}:${fecha.getMinutes()}`);
+    addLine("-------loteria--------");
+
+    wrapText(`${this.rifa.loteria}`, 23).forEach(line => addLine(line));
+    addLine("-------cliente--------");
+
+    wrapText(this.ticketSelected.nombre, 23).forEach(line => addLine(line));
+    wrapText(this.ticketSelected.telefono, 23).forEach(line => addLine(line));
+    addLine("--------pagos---------");
+    
+    this.ticketSelected.pagos.forEach((pago: any) => {
+
+      let fechap = new Date(pago.fecha);
+
+      wrapText(`-- ${pago.monto}$ - ${fechap.getDate()}/${fechap.getMonth()+1}/${fechap.getFullYear()}`, 23).forEach(line => addLine(line));
+    });
+    addLine("-----------------------");
+
+    let resta = this.ticketSelected.monto;
+    for (const pago of this.ticketSelected.pagos) {
+      resta -= pago.monto;
+    }
+
+    addLine(`resta: ${resta}$`);
+
+    const altoTotal = y + 20;
+
+    const fullCommand = `SIZE 58 mm, ${altoTotal} mm\nOFFSET 0 \nDENSITY 10 \nSPEED 4 \nDIRECTION 1 \nREFERENCE 0,0\nCLS\n${comandos.join('\n')}\nPRINT 1,1`;
+
+    return fullCommand;
   }
 
   /** ================================================================

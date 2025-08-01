@@ -131,4 +131,11 @@ export class UsersService {
   deleteUser( id: string ){
     return this.http.delete< { user: User, ok: boolean } >(`${base_url}/users/${id}`, this.headers);
   }
+
+  /** ================================================================
+   *   RECUPERAR PASSWORD
+  ==================================================================== */
+  recuperarPassword( formData: any ){
+    return this.http.post(`${base_url}/login/recuperar/password`, formData);
+  } 
 }

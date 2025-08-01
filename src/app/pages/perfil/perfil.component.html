@@ -65,13 +65,21 @@
                     <div *ngIf="devices.length > 0" class="form-group">
                         <label for="exampleFormControlSelect1">Seleccionar Dispositivo</label>
                         <select class="form-control" id="exampleFormControlSelect1" [(ngModel)]="selectedDevice">
-                            <option *ngFor="let device of devices" [value]="device.address">
+                            <option *ngFor="let device of devices" [ngValue]="device">
                                 {{ device.name || device.address }}
                             </option>
                         </select>
                     </div>
 
-                    <button *ngIf="devices.length > 0" type="button" (click)="connectPrinter()" class="btn btn-sm btn-outline-primary w-100"> <i class="bi-printer"></i> Conectar</button>
+                    <div class="form-group">
+                        <label for="exampleFormControlSelect1">Tipo</label>
+                        <select class="form-control" id="exampleFormControlSelect1" #typePrinter>
+                            <option value="ESC">ESC</option>
+                            <option value="TSPL">TSPL</option>
+                        </select>
+                    </div>
+
+                    <button *ngIf="devices.length > 0" type="button" (click)="connectPrinter(typePrinter.value)" class="btn btn-sm btn-outline-primary w-100"> <i class="bi-printer"></i> Conectar</button>
 
                     <hr>
 

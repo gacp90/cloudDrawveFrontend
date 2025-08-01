@@ -73,4 +73,56 @@ export class LoginComponent {
 
   }
 
+  /** =============================================================
+   * RECUPERAR CONTRASEÑA
+  =============================================================== */
+  public formPassSubmitted: boolean = false;
+  public btnFormPass: boolean = false;
+  public formPassRee = this.fb.group(
+    {
+      email: ['', [Validators.required, Validators.email]]
+    }
+  )
+
+  rePass(){
+
+    this.formPassSubmitted = true;
+    this.btnFormPass = true;
+    
+    if (this.formPassRee.invalid) {
+      this.btnFormPass = false;
+      return;
+    }
+    
+    this.usersService.recuperarPassword(this.formPassRee.value)
+    .subscribe( resp => {
+      
+      Swal.fire('Estupendo', 'Se ha enviado un correo con tu nueva contraseña, porfavor verificar los correos Spam o no deseados en caso de no llegar a tu bandeja de entrada', 'success');
+      this.formPassRee.reset();
+      this.formPassSubmitted = false;
+      this.btnFormPass = false;
+      
+    }, (err) => {
+      this.btnFormPass = false;
+      console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');
+    
+      });
+
+
+  }
+
+  /** =============================================================
+   * VALIDAR CAMPOS PASS
+  =============================================================== */
+  validatePass( campo: string): boolean{
+    
+    if ( this.formPassRee.get(campo)?.invalid && this.formPassSubmitted ) {
+      return true;
+    }else{
+      return false;
+    }
+
+  }
+
 }

@@ -40,9 +40,15 @@
                         </div>
                     </div>
 
+                    <div *ngIf="!client" class="form-group m-b-1">
+                        <div class="col-sm-12 text-center">
+                            <a class="nav-link-inline text-info fs-sm pointer" data-toggle="modal" data-target="#recuperarcontraseña">Olvide mi contraseña?</a>                          
+                        </div>
+                    </div>
+
                     <div *ngIf="!client" class="form-group m-b-0">
                         <div class="col-sm-12 text-center">
-                            Aún no tienes cuenta? <a routerLink="/registrarme" class="text-info m-l-5"><b>Registrarme</b></a>
+                            Aún no tienes cuenta? <a routerLink="/registrarme" class="text-info m-l-5"><b>Registrarme</b></a>                            
                         </div>
                     </div>
                 </form>
@@ -51,6 +57,43 @@
     </div>
 </section>
 
+<!-- RECUPERAR CONTRASEÑA -->
+<div class="modal fade" id="recuperarcontraseña" tabindex="-1" aria-labelledby="recuperarcontraseñaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recuperar contraseñaLabel">Recuperar Contraseña</h5>
+                <button type="button" class="close" data-dismiss="modal">×</button>
+            </div>
+            <div class="modal-body">
+
+                <form autocomplete="off" [formGroup]="formPassRee" (ngSubmit)="rePass()">
+
+                    <div class="mb-3">
+                        <label for="exampleFormControlInput1" class="form-label">Email</label>
+                        <input formControlName="email" type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+                        <small *ngIf="validatePass('email')" class="text-danger">El email es obligatorio</small>
+                    </div>
+
+                    <button type="submit" [disabled]="btnFormPass" class="btn btn-primary mb-3">
+                        <span *ngIf="!btnFormPass">
+                            Recuperar                            
+                        </span>
+                        <span *ngIf="btnFormPass">
+                            Enviando...
+                        </span>
+
+                    </button>
+
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- ============================================================== -->
 <!-- End Wrapper -->
 <!-- ============================================================== -->

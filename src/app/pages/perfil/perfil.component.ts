@@ -240,11 +240,15 @@ export class PerfilComponent implements OnInit {
    *   IMPRESORA BLUETOOTH
   ==================================================================== */
   devices: any[] = [];
-  selectedDevice: string = '';
+  selectedDevice: { address: string, name: string, type: 'ESC' | 'TSPL' } | null = null;
   // 🔍 Escanear dispositivos Bluetooth
   scanDevices() {
     this.bluetoothService.discoverDevices().then(devices => {
-      this.devices = devices;
+      this.devices = devices.map(d => ({
+        address: d.address,
+        name: d.name,
+        type: d.name?.toUpperCase().includes('TSC') ? 'TSPL' : 'ESC'  // Detección básica
+      }));
       console.log('Dispositivos encontrados:', devices);
     }).catch(error => {
       console.error('Error al escanear dispositivos:', error);
@@ -252,26 +256,55 @@ export class PerfilComponent implements OnInit {
   }
 
   // 🔗 Conectar a una impresora
-  connectPrinter() {
-    if (this.selectedDevice) {
-      this.bluetoothService.connectToDevice(this.selectedDevice).then(msg => {
+  connectPrinter(type: any) {
+  if (this.selectedDevice) {
+      this.selectedDevice.type = type;
+      localStorage.setItem('typePrinter', type);
+      this.bluetoothService.connectToDevice(this.selectedDevice.address).then(msg => {
         console.log(msg);
       }).catch(error => {
         console.error('Error al conectar con la impresora:', error);
       });
     }
   }
+  // connectPrinter() {
+  //   if (this.selectedDevice) {
+  //     this.bluetoothService.connectToDevice(this.selectedDevice).then(msg => {
+  //       console.log(msg);
+  //     }).catch(error => {
+  //       console.error('Error al conectar con la impresora:', error);
+  //     });
+  //   }
+  // }
 
   // 🖨️ Enviar texto a imprimir
   printReceipt(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const receiptText = this.generateReceipt();
-      bluetoothSerial.write(receiptText,
-        () => resolve('Factura impresa correctamente'),
-        (error: any) => reject(error)
-      );
-    });
-  }
+  return new Promise((resolve, reject) => {
+    const device = this.selectedDevice;
+    if (!device) {
+      reject('No hay impresora seleccionada');
+      return;
+    }
+
+    const dataToPrint = device.type === 'ESC'
+      ? this.generateReceipt()
+      : this.generateTsplReceipt();
+
+    bluetoothSerial.write(dataToPrint,
+      () => resolve('Factura impresa correctamente'),
+      (error: any) => reject(error)
+    );
+  });
+}
+  // printReceipt(): Promise<string> {
+  //   return new Promise((resolve, reject) => {
+  //     const receiptText = this.generateReceipt();
+  //     bluetoothSerial.write(receiptText,
+  //       () => resolve('Factura impresa correctamente'),
+  //       (error: any) => reject(error)
+  //     );
+  //   });
+  // }
 
   // 🔵 Función para generar el texto de la factura
   generateReceipt(): string {
@@ -280,6 +313,23 @@ export class PerfilComponent implements OnInit {
     receipt += '\n       Prueba de impresion exitosa\n';
 
     return receipt;
+  }
+
+  generateTsplReceipt(): string {
+  return `
+    SIZE 58 mm, 10 mm
+    OFFSET 0
+    DENSITY 10
+    SPEED 4
+    DIRECTION 1
+    REFERENCE 0,0
+    CLS
+    TEXT 10,10,"3",0,1,1,"Hola mundo"
+    TEXT 10,35,"3",0,1,1,"Esto es una prueba"
+    TEXT 10,60,"3",0,1,1,"Impresión Exitosa"
+    TEXT 10,85,"3",0,1,1,"Gracias"
+    PRINT 1,1
+    `;
   }
 
   /** ================================================================

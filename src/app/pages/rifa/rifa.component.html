@@ -46,6 +46,10 @@
             Abonos Pendientes
         </button>
 
+        <button (click)="loadComprasWeb()" type="button" class="m-1 btn btn-primary" data-toggle="modal" data-target="#comprasWeb">
+            Compras Web
+        </button>
+
         <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#ticketsMasivos">
             Subir Tickets Masivos
         </button>
@@ -422,7 +426,7 @@
     <!-- ========================================================= 
     MODAL UPDATE TICKET
     ======================================================== -->
-    <div id="modalTicket" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="modalTicket" #modalNewUser>
+    <div id="modalTicket" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="modalTicket" >
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -718,34 +722,36 @@
                                     <!-- TICKETS -->
                                     <ng-container *ngIf="ticketSelected.disponible === false">
                                         
-
-                                        <div class="card mb-3 shadow pb-5"  style="width: 250px;" #contentToCapture>
-                                            <div class="card-body">
-                                                
-                                                <div class="pro-img m-t-20 d-flex justify-content-center">
-                                                    <img [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
-                                                </div>
-
-                                                <div id="captureImprimir">
-                                                    <p class="card-text fw-bold mb-0 text-center text-dark"> {{ rifa.admin.empresa }} </p>
-                                                    <p class="card-text fs-sm mb-0" [ngClass]="{'text-warning': ticketSelected.estado === 'Apartado', 'text-danger': ticketSelected.estado === 'Pagado'}"> {{ ticketSelected.estado }} </p>
-                                                    <h5 class="card-title display-4"> #{{ ticketSelected.numero }} </h5>
-                                                    <p class="card-text fw-bold"> {{ rifa.name }} </p>
-
-                                                    <ul class="list-group list-group-flush">
-                                                        <li class="list-group-item"> Valor del ticket: {{ rifa.monto | currency }} </li>
-                                                        <li class="list-group-item"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
-                                                        <li class="list-group-item"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
-                                                        <li class="list-group-item"> Loteria: {{ rifa.loteria }}</li>
-                                                        <li class="list-group-item"> {{ ticketSelected.nombre }} </li>
-                                                        <li class="list-group-item"> {{ ticketSelected.telefono }} </li>
-                                                        <li class="list-group-item" *ngFor="let pago of ticketSelected.pagos">
-                                                            <span class="fw-bold">{{ pago.descripcion }}</span> - <small> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </small> - {{ pago.monto | currency }}
-                                                        </li>
-                                                        <li class="list-group-item"> <span class="fw-bold">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
-                                                    </ul>
+                                        <div class="shadow mb-3">
+                                            <div class="card pb-5"  style="width: 250px; background: #fff;" #contentToCapture>
+                                                <div class="card-body">
+                                                    
+                                                    <div class="pro-img m-t-20 d-flex justify-content-center">
+                                                        <img [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
+                                                    </div>
+    
+                                                    <div id="captureImprimir">
+                                                        <p class="card-text fw-bold mb-0 text-center text-dark"> {{ rifa.admin.empresa }} </p>
+                                                        <p class="card-text fs-sm mb-0" [ngClass]="{'text-warning': ticketSelected.estado === 'Apartado', 'text-danger': ticketSelected.estado === 'Pagado'}"> {{ ticketSelected.estado }} </p>
+                                                        <h5 class="card-title display-4"> #{{ ticketSelected.numero }} </h5>
+                                                        <p class="card-text fw-bold"> {{ rifa.name }} </p>
+    
+                                                        <ul class="list-group list-group-flush">
+                                                            <li class="list-group-item"> Valor del ticket: {{ rifa.monto | currency }} </li>
+                                                            <li class="list-group-item"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
+                                                            <li class="list-group-item"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
+                                                            <li class="list-group-item"> Loteria: {{ rifa.loteria }}</li>
+                                                            <li class="list-group-item"> {{ ticketSelected.nombre }} </li>
+                                                            <li class="list-group-item"> {{ ticketSelected.telefono }} </li>
+                                                            <li class="list-group-item" *ngFor="let pago of ticketSelected.pagos">
+                                                                <span class="fw-bold">{{ pago.descripcion }}</span> - <small> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </small> - {{ pago.monto | currency }}
+                                                            </li>
+                                                            <li class="list-group-item"> <span class="fw-bold">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
+
                                         </div>
 
                                     </ng-container>
@@ -1190,7 +1196,7 @@
     <!-- ========================================================= 
     MODAL UPDATE RIFA
     ======================================================== -->
-    <div id="updateRifa" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="updateRifa" #modalNewUser>
+    <div id="updateRifa" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="updateRifa" >
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1254,7 +1260,7 @@
     <!-- ========================================================= 
     MODAL ACTUALIZAR FECHA
     ======================================================== -->
-    <div id="cambiarFecha" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="cambiarFecha" #modalNewUser>
+    <div id="cambiarFecha" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="cambiarFecha" >
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1294,7 +1300,7 @@
     <!-- ========================================================= 
     MODAL INGRESOS Y EGRESOS
     ======================================================== -->
-    <div id="ingresosYegresos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="ingresosYegresos" #modalNewUser>
+    <div id="ingresosYegresos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="ingresosYegresos" >
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1444,7 +1450,7 @@
     <!-- ========================================================= 
     MODAL ABONOS PENDIENTES
     ======================================================== -->
-    <div id="abonosPendientes" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="abonosPendientes" #modalNewUser>
+    <div id="abonosPendientes" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="abonosPendientes" >
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1547,7 +1553,7 @@
     <!-- ========================================================= 
     MODAL GET QR
     ======================================================== -->
-    <div id="whatsappqr" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappqr" #modalNewUser>
+    <div id="whatsappqr" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappqr">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1579,7 +1585,7 @@
     <!-- ========================================================= 
     MODAL WHATSAPP MASIVE
     ======================================================== -->
-    <div id="whatsappmasive" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappmasive" #modalNewUser>
+    <div id="whatsappmasive" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappmasive">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1699,7 +1705,7 @@
     <!-- ========================================================= 
     MODAL AGREGAR MONTOS ADICIONALES
     ======================================================== -->
-    <div id="addMontos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="addMontos" #modalNewUser>
+    <div id="addMontos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="addMontos">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1767,7 +1773,7 @@
     <!-- ========================================================= 
     MODAL SUBIR TICKETS MASIVOS
     ======================================================== -->
-    <div id="ticketsMasivos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="ticketsMasivos" #modalNewUser>
+    <div id="ticketsMasivos" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="ticketsMasivos">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1807,4 +1813,161 @@
         <!-- /.modal-dialog -->
     </div>
 
+    <!-- ========================================================= 
+    MODAL COMPRAS WEB
+    ======================================================== -->
+    <div id="comprasWeb" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="comprasWeb">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="comprasWeb">Compras Web</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span class="lstick"></span>Lista tickets pendientes por confirmar</h4>
+
+                            <div class="d-flex justify-content-between flex-wrap mt-1">
+
+                                <div *ngIf="user.role === 'ADMIN'" class="">
+
+                                    <label for="metodosWb" class="me-2">Metodos de pagos: </label>
+                                    <select name="" id="metodosWb" #metodosWb (change)="filtrarMetodoWeb(metodosWb.value)">
+                                        <option value="Todos">Todos</option>
+                                        <option *ngFor="let met of metodosAg" [value]="met.id"> {{ met.name }} </option>
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            <!-- CREAR Y VER EGRESOS -->
+                            <div *ngIf="loadingComprasWeb">
+                                <p>Cargando...</p>
+                            </div>
+
+                            <div *ngIf="!loadingComprasWeb">
+                                
+                                <div class="table-responsive m-t-20">
+                                    <table class="table vm no-th-brd no-wrap pro-of-month">
+                                        <thead>
+                                            <tr>
+                                                <th>Tickets</th>
+                                                <th colspan="2">Cliente</th>
+                                                <th>Fecha</th>
+                                                <th>Metodo</th>
+                                                <th>Tasa</th>
+                                                <th>Monto</th>
+                                                <th>Equivalencia</th>
+                                                <th>Estado</th>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngIf="ticketsAg.length === 0">
+                                                <td class="text-center" colspan="6"> No se ha registrado ningún pago... </td>
+                                            </tr>
+
+                                            <ng-container *ngFor="let paid of ticketsAg; let i = index">
+                                                    <tr *ngIf="paid.ver">
+                                                        <td> 
+                                                            <div class="d-flex flex-wrap"> 
+                                                                <span class="badge bg-dark" style="font-size: 0.6rem" *ngFor="let tic of paid.tickets" > #{{ tic.numero }} </span>   
+                                                            </div> 
+                                                        </td>
+                                                        <td colspan="2">
+                                                            {{paid.nombre}}
+                                                            <br><small> {{paid.telefono || ''}} </small>
+                                                        </td>
+                                                        <td>{{ paid.fecha | date:'d/M/yy, h:mm a' }}</td>
+                                                        
+                                                        <td class="text-break">{{ paid.metodoname}}</td>
+                                                        <td>{{ paid.tasa | number }}</td>
+                                                        <td>{{ paid.equivalencia | currency }}</td>
+                                                        <td>{{ paid.monto | currency }}</td>
+                                                        <td>
+                                                            <button type="button" (click)="confirmarPagoWeb(paid)" [disabled]="user.role !== 'ADMIN' || paid.estado !== 'Pendiente'" class="btn btn-sm" [ngClass]="{'btn-warning': paid.estado === 'Pendiente', 'btn-success': paid.estado === 'Confirmado'}">
+                                                                <span> {{ paid.estado || 'Confirmado' }} </span>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <button (click)="prepareWhatsappWeb(paid)" type="button" [disabled]="user.role !== 'ADMIN'" class="btn btn-success btn-sm" data-toggle="modal" data-target="#mensajeWeb">
+                                                                <i class="ti-comment"></i>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <a *ngIf="paid.img" href="{{base_url}}/uploads/payments/{{paid.img}}" target="_blank">
+                                                                <img [src]=" paid.img | imagen: 'payments' " alt="user" width="40" class="img-circle" />
+                                                            </a>
+                                                        </td>
+                                                        
+                                                    </tr>
+                                                </ng-container>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="fw-bold" *ngFor="let met of metodosAg" >
+                                                <td colspan="6" class="text-right"> {{ met.name }} </td>
+                                                <td> {{ met.equivalencia }} </td>
+                                                <td> {{ met.monto | currency }} </td>
+                                            </tr>
+                                            <tr class="fw-bold" >
+                                                <td colspan="7" class="text-right"> TOTAL </td>
+                                                <td> {{ totalPaidWeb | currency }} </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL MENSAJE COMPRAS WEB
+    ======================================================== -->
+    <div class="modal fade" id="mensajeWeb" tabindex="-1" aria-labelledby="mensajeWebLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="mensajeWebLabel">Enviar Mensaje</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="mt-3">
+
+                <div class="form-group mb-3">
+                    <input type="text" class="form-control" placehodel="Numero" [(ngModel)]="wtwb">
+                </div>
+
+                <div class="form-group mb-1">
+                    <label>Mensaje</label>
+                    <textarea  class="form-control" rows="10" [(ngModel)]="wmwb"></textarea>
+                </div>
+                <button (click)="sendWW()" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
+                    Enviar
+                </button>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </section>
