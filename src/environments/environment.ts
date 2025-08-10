@@ -39,6 +39,16 @@
   client: true,
   app: false
 
+  base_url: 'https://admin.labendicionlif.com/api',
+  local_url: 'https://admin.labendicionlif.com',
+  client: true,
+  app: false
+
+  base_url: 'https://admin.rifalaplaya.com/api',
+  local_url: 'https://admin.rifalaplaya.com',
+  client: true,
+  app: false
+
   base_url: 'http://localhost:3000/api',
   local_url: 'http://localhost:4200',
   client: false,

@@ -81,7 +81,8 @@
                     <h3 class="mb-2 fw-bold fs-2"> {{ rifa.name }} </h3>
                     <div>
                         <strong class="fw-bold">Descripción</strong><br>
-                        <p class="text-muted"> {{ rifa.descripcion }} </p>
+                        <p   class="text-muted"[innerHTML]="sanitizeText(rifa.descripcion)"></p>
+                        <!-- <p class="text-muted"> {{ rifa.descripcion }} </p> -->
                     </div>
                 </div>
             </div>
@@ -1241,6 +1242,25 @@
                                     <small> Agrega la descripción de la rifa </small>
                                 </div>
                             </div>
+                            <div class="col-md-12 m-b-20">
+                                <div class="demo-switch-title">Visible Web</div>
+                                <div class="switch">
+                                    <label>
+                                    <input formControlName="visible" type="checkbox"><span class="lever switch-col-indigo"></span>
+                                </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="min" type="number" class="form-control" placeholder="Compra minima">
+                                <div *ngIf="validate('min')" class="form-control-feedback">
+                                    <small> La compra minima es obligatoria y tiene que ser mayor a 1 </small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 m-b-20">
+                                <input formControlName="max" type="number" class="form-control" placeholder="Compra maxima">
+                            </div>
 
                         </div>
 
@@ -1910,7 +1930,7 @@
                                         <tfoot>
                                             <tr class="fw-bold" *ngFor="let met of metodosAg" >
                                                 <td colspan="6" class="text-right"> {{ met.name }} </td>
-                                                <td> {{ met.equivalencia }} </td>
+                                                <td> {{ met.equivalencia | currency}} </td>
                                                 <td> {{ met.monto | currency }} </td>
                                             </tr>
                                             <tr class="fw-bold" >

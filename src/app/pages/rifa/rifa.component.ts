@@ -241,7 +241,10 @@ export class RifaComponent implements OnInit {
             loteria: this.rifa.loteria,
             descripcion: this.rifa.descripcion,
             promocion: this.rifa.promocion,
-            comision: this.rifa.comision
+            comision: this.rifa.comision,
+            visible: this.rifa.visible,
+            min: this.rifa.min,
+            max: this.rifa.max
           })
 
           this.loadGanador();
@@ -294,6 +297,9 @@ export class RifaComponent implements OnInit {
     comision: 0,
     loteria: ['', [Validators.required]],
     descripcion: ['', [Validators.required]],
+    visible: false,
+    min: [1, [Validators.min(1)]],
+    max: 50,
   })
 
   update(){
@@ -1506,9 +1512,16 @@ export class RifaComponent implements OnInit {
           const grupos: { [clave: string]: any } = {};
           const meto: { [clave: string]: any } = {};
 
+          
+          
           for (const ticket of tickets) {
+            if (!ticket.pagos[0].metodo || ticket.pagos.length === 0) {
+              console.log(ticket)
+              continue
+            }
+
             const telefono = ticket.telefono || '';
-            const clave = `${telefono}-${ticket.pagos[0].img}`;
+            const clave = `${telefono}-${ticket.pagos[0]!.img || ''}`;
 
             if (!grupos[clave]) {
               grupos[clave] = {
@@ -1518,7 +1531,7 @@ export class RifaComponent implements OnInit {
                 referencia: ticket.pagos[0].referencia,
                 fecha: ticket.pagos[0].fecha,
                 telefono: telefono,
-                tasa: ticket.pagos[0].metodo['tasa'],
+                tasa: ticket.pagos[0].metodo['tasa'] || 1,
                 monto: 0,
                 equivalencia: 0,
                 img: ticket.pagos[0].img,
@@ -1548,6 +1561,7 @@ export class RifaComponent implements OnInit {
           this.ticketsAg = Object.values(grupos);
           this.metodosAg = Object.values(meto);
 
+
           this.totalizarMetodos();
           
 
@@ -1556,6 +1570,12 @@ export class RifaComponent implements OnInit {
           Swal.fire('Error', err.error.msg, 'error');          
         })
 
+  }
+  /** ================================================================
+   *   TOTALIZAR METODOS DE PAGO
+  ==================================================================== */
+  sanitizeText(text: string): string {
+    return text.replace(/\n/g, '<br>');
   }
 
   /** ================================================================
