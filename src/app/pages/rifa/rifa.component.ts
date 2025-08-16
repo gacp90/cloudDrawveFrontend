@@ -1944,6 +1944,39 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
+   *   LOGOUT WHATSAPP
+  ==================================================================== */
+  public logoutW: boolean = false;
+  logoutWhatsapp(){
+
+    this.logoutW = true;
+    Swal.fire({
+      title: "Estas seguro?",
+      text: "de cerrar la session de whatsapp?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, cerrar!",
+      cancelButtonText: "cancelar"
+    }).then((result) => {
+      
+      this.whatsappService.logoutWhatsapp(this.user.wp!)
+          .subscribe( ({msg, ok}) => {
+            this.logoutW = false;
+            Swal.fire('Aternción', msg, 'success');
+
+          }, (err) => {
+            this.logoutW = false;
+            console.log(err);
+            Swal.fire('Error', err.error.msg, 'error')
+          })
+
+    });
+
+  }
+
+  /** ================================================================
    *   ENVIAR IMG WHATSAPP
   ==================================================================== */
   public sendImage: boolean = false;

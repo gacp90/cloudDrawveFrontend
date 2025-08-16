@@ -81,7 +81,7 @@
                     <h3 class="mb-2 fw-bold fs-2"> {{ rifa.name }} </h3>
                     <div>
                         <strong class="fw-bold">Descripción</strong><br>
-                        <p   class="text-muted"[innerHTML]="sanitizeText(rifa.descripcion)"></p>
+                        <p   class="text-muted" [innerHTML]="sanitizeText(rifa.descripcion)"></p>
                         <!-- <p class="text-muted"> {{ rifa.descripcion }} </p> -->
                     </div>
                 </div>
@@ -1582,10 +1582,19 @@
                 </div>
                 <div class="modal-body">
 
-                    <button [disabled]="generando" (click)="generarQR()" type="button" class="btn btn-success">
-                        <span *ngIf="generando">Generando codigo...</span>
-                        <span *ngIf="!generando">Generar codigo QR</span>
-                    </button>
+
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
+
+                        <button [disabled]="generando" (click)="generarQR()" type="button" class="btn btn-success">
+                            <span *ngIf="generando">Generando codigo...</span>
+                            <span *ngIf="!generando">Generar codigo QR</span>
+                        </button>
+                        
+                        <button [disabled]="generando" (click)="logoutWhatsapp()" type="button" class="btn btn-danger">
+                            <span *ngIf="logoutW">Cerrando sesión...</span>
+                            <span *ngIf="!logoutW">Cerrar Sesión</span>
+                        </button>
+                    </div>
 
                     <div *ngIf="qr">
                         <qrcode [qrdata]="qr" [width]="200" [errorCorrectionLevel]="'M'"></qrcode>

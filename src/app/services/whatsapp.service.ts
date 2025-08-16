@@ -64,4 +64,11 @@ export class WhatsappService {
     return this.http.post<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/masive/img/${id}`, formData);
   }
 
+  /** ================================================================
+   *  LOGOUT
+  ==================================================================== */
+  logoutWhatsapp(wp: string){
+    return this.http.get<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/logout`);
+  }
+
 }

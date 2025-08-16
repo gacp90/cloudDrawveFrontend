@@ -14,8 +14,8 @@
   client: true,
   app: false
   
-  base_url: 'https://admin.rifasaurinegro.com/api',
-  local_url: 'https://admin.rifasaurinegro.com',
+  base_url: 'https://admin.ganaconbeltran.com/api',
+  local_url: 'https://admin.ganaconbeltran.com',
   client: true,
   app: false
 
@@ -58,8 +58,8 @@
 
 export const environment = {
   production: false,
-  base_url: 'https://admin.rifacaracasyei.com/api',
-  local_url: 'https://admin.rifacaracasyei.com',
+  base_url: 'https://admin.ganayproduce.com/api',
+  local_url: 'https://admin.ganayproduce.com',
   client: true,
   app: false
 };

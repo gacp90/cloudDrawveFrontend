@@ -28,4 +28,12 @@ export class HeaderComponent {
     this.usersService.logout();
   }
 
+   /** ================================================================
+   *   TOTALIZAR METODOS DE PAGO
+  ==================================================================== */
+  sanitizeText(text: string) {
+    // return text.replace(/\n/g, '<br>');
+    ''
+  }
+
 }
