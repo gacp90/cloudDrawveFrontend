@@ -43,6 +43,13 @@ export class TicketsService {
   loadTicketID(id: string){
     return this.http.get<{ok: boolean, ticket: Ticket}>( `${base_url}/tickets/${id}`, this.headers );
   }
+  
+  /** ================================================================
+   *  EXPORT TICKETS AVAILABLES
+  ==================================================================== */
+  exportTicketsAvailable(id: string){
+    return this.http.get<{ok: boolean, ticket: Ticket}>( `${base_url}/tickets/pdf/${id}`, this.headers );
+  }
 
   /** ================================================================
    *  LOAD TICKET ID

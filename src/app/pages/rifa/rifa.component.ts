@@ -54,6 +54,7 @@ export class RifaComponent implements OnInit {
 
   public user!: User;
   public base_url = environment.base_url;
+  public local_url = environment.local_url;
   public client = environment.client || false;
 
   constructor(  private activatedRoute: ActivatedRoute,
@@ -618,6 +619,55 @@ export class RifaComponent implements OnInit {
         })
 
   }
+
+  /** ================================================================
+   *   CLEAR TICKETS WEB
+  ==================================================================== */
+  clearTicketsWeb(p: any, i: any){
+    
+    Swal.fire({
+      title: "Estas seguro de limpiar este pago?",
+      text: "Si haces esto!, se eliminara toda la información del ticket o los tickets automaticamente",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, limpiar!",
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        for (const ticket of p.tickets) {
+
+          setTimeout( () => {
+            this.ticketsService.clearTicket(ticket.tid)
+                .subscribe( ({ticket}) => {
+    
+                  this.tickets.map( (tic) => {
+                    if (tic.tid === ticket.tid) {
+                      tic.estado = ticket.estado;
+                      tic.nombre = ticket.nombre;
+                    }
+                  });
+                      
+                }, (err) => {
+                  console.log(err);
+                  Swal.fire('Error', err.error.msg, 'error');              
+                })
+          }, 300)
+          
+        }
+
+        Swal.fire('Estupendo', 'Se ha limpiado el ticket exitosamente este pago', 'success');
+        this.ticketsAg.splice(i, 1)
+        
+
+      }
+    });
+    
+
+  }
+
 
   /** ================================================================
    *   CLEAR TICKET
@@ -1647,8 +1697,66 @@ export class RifaComponent implements OnInit {
     }
 
     this.wmwb = this.wmwb.replace(/@number/g, numeros);
-    this.wtwb = pago.telefono;   
+    this.wtwb = pago.telefono;
+    
+    this.showWhatsAppForm()
 
+  }
+
+  /** ================================================================
+   *   SEND MENSAJE
+  ==================================================================== */
+  async showWhatsAppForm() {
+
+    // 1. Hacer el modal de Bootstrap "inert" temporalmente
+    document.getElementById('comprasWeb')?.setAttribute('inert', '');
+    
+
+    const { value: formValues } = await Swal.fire({
+      title: 'Enviar mensaje por WhatsApp',
+      html:
+        `<div class="form-group mb-3">
+          <input id="swal-number" class="form-control" 
+                placeholder="Número de teléfono" 
+                value="${this.wtwb || ''}">
+        </div>
+        <div class="form-group mb-3">
+          <label>Mensaje</label>
+          <textarea id="swal-message" class="form-control" rows="6">${this.wmwb || ''}</textarea>
+        </div>`,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: '<i class="mdi mdi-whatsapp"></i> Enviar',
+      confirmButtonColor: '#25D366',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        return {
+          number: (document.getElementById('swal-number') as HTMLInputElement).value,
+          message: (document.getElementById('swal-message') as HTMLTextAreaElement).value
+        }
+      },
+      // Opcional: Validación básica
+      didOpen: () => {
+        Swal.getConfirmButton()?.addEventListener('click', () => {
+          const number = (document.getElementById('swal-number') as HTMLInputElement).value;
+          if (!number) {
+            Swal.showValidationMessage('El número es requerido');
+          }
+        });
+      }
+    });
+
+    if (formValues) {
+      // Actualizamos las variables solo si el usuario confirmó
+      this.wtwb = formValues.number;
+      this.wmwb = formValues.message;
+      
+      this.sendWW();
+    }
+
+    // 3. Remover el atributo inert después
+    document.getElementById('comprasWeb')?.removeAttribute('inert');
+  
   }
 
    /** ================================================================
