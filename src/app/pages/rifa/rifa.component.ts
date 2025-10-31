@@ -138,12 +138,62 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
+   *  ADD ADVERTENCIAS CLIENTE
+  ==================================================================== */
+  addAlerts(cid: string){
+    document.getElementById('modalTicket')?.setAttribute('inert', '');
+    
+
+    Swal.fire({
+      title: "Agrega advertencias sobre este clientes para notificaciones futuras o en las proximas rifas.",
+      input: "text",
+      inputAttributes: {
+        autocapitalize: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Agregar',
+      showLoaderOnConfirm: true,
+       preConfirm: (resp)=> {
+
+        return resp;
+
+       }
+      
+    }).then((result) => {
+
+      if (!result.isConfirmed ) {
+        document.getElementById('modalTicket')?.removeAttribute('inert');
+        return;
+      }
+
+      this.clientesService.updateCliente({alerts: result.value}, cid)
+          .subscribe( () =>{
+
+            Swal.fire('Estupendo', 'Se ha agregado la advertencia a este cliente exitosamente', 'success');
+            document.getElementById('modalTicket')?.removeAttribute('inert');
+
+          }, (err) => {
+            console.log(err);
+            document.getElementById('modalTicket')?.removeAttribute('inert');
+            Swal.fire('Error', err.error.msg, 'error');            
+          })
+
+    });
+
+  }
+
+  /** ================================================================
    *  SELECCIONAR CLIENTE
   ==================================================================== */
   selectClient(client: Client){
+    
+    if (client.alerts) {
+      Swal.fire( 'Atención', client.alerts, 'warning');
+    }
 
     this.searchIC.nativeElement.value = '';
-    this.listClients = []
+    this.listClients = [],
+
 
     this.ticketUpdate.setValue({
       tid: this.ticketSelected.tid!,
@@ -1178,18 +1228,19 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   search(busqueda: string){
 
-    if (busqueda.length === 0) {
-      return;
+    if (busqueda.length < 2 || busqueda.length === 0) {
+      delete this.query['$or'];
+    }else{
+      const regex = { $regex: busqueda, $options: 'i' }; // Construir regex      
+      this.query.$or = [
+        { telefono: regex },
+        { nombre: regex },
+        { correo: regex },
+        { cedula: regex }
+      ];
     }
 
-    this.ticketsService.searchTicket(busqueda, this.rifa.rifid!)
-        .subscribe( ({tickets}) => {
-          this.tickets = tickets;
-        }, (err) => {
-          console.log(err);
-          Swal.fire('Error', err.error.msg, 'error');
-          
-        })
+    this.loadTickets();
 
   }
 

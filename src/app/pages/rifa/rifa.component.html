@@ -565,6 +565,12 @@
 
                                 <hr>
 
+                                <div class="d-flex justify-content-end" *ngIf="ticketSelected.cliente" >
+                                    <button type="button" class="btn btn-warning" (click)="addAlerts(ticketSelected.cliente)">
+                                        <i class="ti ti-alert"></i>
+                                    </button>
+                                </div>
+
                                 <form class="form-horizontal form-material" autocomplete="off" [formGroup]="ticketUpdate" (ngSubmit)="updateTicket()">
 
                                     <div class="form-group has-danger">

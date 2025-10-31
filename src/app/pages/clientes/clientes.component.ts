@@ -135,6 +135,25 @@ export class ClientesComponent implements OnInit {
     })
 
   }
+
+  /** ======================================================================
+   * DELETE ALERT
+  ====================================================================== */
+  deleteAlerts(){
+
+    this.clientsService.updateCliente({alerts: ''}, this.clienteSelect.cid!)
+        .subscribe( ({cliente}) => {
+
+          this.clienteSelect.alerts = cliente.alerts;
+          Swal.fire('Estupendo', 'la advertencia fue eliminada exitosamente!', 'success');
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');
+          
+        })
+
+  }
     
   
   /** ======================================================================

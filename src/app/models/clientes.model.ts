@@ -4,7 +4,7 @@ import { User } from "./users.model";
 interface _alerts{
     titulo: string,
     msg: string,
-    icon: string,
+    icon: 'success' | 'warning' | 'error' | 'info' | 'question',
     _id: string
 }
 
@@ -22,7 +22,7 @@ export class Client{
         public ruta: Ruta,
         public status: boolean,
         public sms: boolean,
-        public alerts: boolean,
+        public alerts: string,
         public fecha: Date,
         public _id?: string,
         public cid?: string,
