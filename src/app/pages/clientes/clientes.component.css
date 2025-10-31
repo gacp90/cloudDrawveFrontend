@@ -1,16 +1,3 @@
-/* FILE UPLOAD IMGS */
-.text-negro{
-    color: #000000;
-}
-.text-negro-imp{
-    color: #000000;
-    line-height: 1rem !important; 
-    font-weight: 600; 
-    font-size: 1rem !important; 
-    border-top: 1px solid #000 !important; 
-    padding-left: 1px
-}
-
 .file-area {
     width: 100%;
     position: relative;
@@ -59,39 +46,4 @@
 
 .file-area input[type=file]:valid+.file-dummy .default {
     display: none;
-}
-
-.btn-5{
-    width: 5rem;
-}
-
-.btn-6{
-    width: 6.5rem;
-    min-height: 63px;
-}
-
-.btn-6:focus{
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5)!important;
-}
-
-/* ===================================================
-SWIPER
-====================================================*/
-
-.swiper {
-    height: auto;
-    max-height: 500px;
-}
-
-.swiper2 {
-    height: auto;
-    max-height: 350px;
-}
-
-.swiper-slide {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 2rem !important;
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px !important;
 }

@@ -239,6 +239,7 @@
                         <option value="1000">1000</option>
                         <option value="2500">2500</option>
                         <option value="5000">5000</option>
+                        <option value="10000">10000</option>
                     </select>
                 </div>
 
@@ -455,6 +456,12 @@
                     <ng-container *ngIf="!loadingTicket">
 
                         <ul class="nav nav-tabs customtab" role="tablist">
+                            <li class="nav-item ">
+                                <a class="nav-link" data-toggle="tab" href="#newClient" role="tab" aria-expanded="true">
+                                    <span class=""><i class="ti-user"></i>
+                                    </span> 
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link active" data-toggle="tab" href="#ticketDetails" role="tab" aria-expanded="true">
                                     <span class="hidden-sm-up"><i class="ti-receipt"></i>
@@ -483,6 +490,17 @@
 
                         <div class="tab-content" *ngIf="ticketSelected">
 
+                            <!-- NUEVO CLIENTE -->
+                            <div class="tab-pane " id="newClient" role="tabpanel" aria-expanded="false">
+
+                                <div class="mt-3">
+                                    <h3 class="fw-bold mt-4">Crear Cliente</h3>
+                                    <app-newclient (actualizar)="selectClient($event)"></app-newclient>
+                                </div>
+
+                            </div>
+                            <!-- NUEVO CLIENTE -->
+
                             <!-- DETALLES DEL TICKET -->
                             <div class="tab-pane active" id="ticketDetails" role="tabpanel" aria-expanded="true">
 
@@ -496,6 +514,30 @@
                                     </button>                                    
 
                                 </div>
+
+                                <hr>
+
+                                <!-- Input de búsqueda con dropdown -->
+                                <div class="form-group">
+                                    <label for="searchIC">Buscar Clientes</label>
+                                    <div class="dropdown">
+                                        <input type="text" class="form-control" id="searchIC" placeholder="Buscar cliente" #searchIC (input)="searchClients(searchIC.value)">                                        
+                                        <!-- Resultados de búsqueda -->
+                                        <div class="dropdown-menu w-100 show" aria-labelledby="searchIC"  *ngIf="listClients.length > 0 && searchIC.value">
+                                            <a class="dropdown-item" 
+                                                *ngFor="let cliente of listClients; let i = index" 
+                                                (click)="selectClient(cliente)">
+                                                <strong>{{ cliente.nombre }}</strong>
+                                                <br>
+                                                <small class="text-muted"> <i class="ti ti-mobile"></i> {{ cliente.telefono }}</small>
+                                                <small class="text-muted"> <i class="ti ti-location-pin"></i> {{ cliente.direccion }}</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr>
+
                                 <div class="mt-2">
 
 
@@ -730,35 +772,44 @@
                                     <span *ngIf="!imprimiendo">Imprimir</span>
                                 </button>
 
+                                <button *ngIf="!app && user.termica" [disabled]="imprimiendo" class="btn btn-info my-3" (click)="printTemplate()">
+                                    <span *ngIf="imprimiendo">Imprimiendo...</span>
+                                    <span *ngIf="!imprimiendo">Imprimir</span>
+                                </button>
+
                                 <div class="d-flex flex-wrap justify-content-center my-5">
                                     <!-- TICKETS -->
                                     <ng-container *ngIf="ticketSelected.disponible === false">
                                         
-                                        <div class="shadow mb-3">
+                                        <div class="shadow mb-3" id="PrintTemplateTpl" #PrintTemplateTpl>
                                             <div class="card pb-5"  style="width: 250px; background: #fff;" #contentToCapture>
                                                 <div class="card-body">
                                                     
                                                     <div class="pro-img m-t-20 d-flex justify-content-center">
-                                                        <img [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
+                                                        <img class="mx-auto" [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
                                                     </div>
     
                                                     <div id="captureImprimir">
-                                                        <p class="card-text fw-bold mb-0 text-center text-dark"> {{ rifa.admin.empresa }} </p>
-                                                        <p class="card-text fs-sm mb-0" [ngClass]="{'text-warning': ticketSelected.estado === 'Apartado', 'text-danger': ticketSelected.estado === 'Pagado'}"> {{ ticketSelected.estado }} </p>
-                                                        <h5 class="card-title display-4"> #{{ ticketSelected.numero }} </h5>
-                                                        <p class="card-text fw-bold"> {{ rifa.name }} </p>
+                                                        <p class="fs-4 fw-bold mb-3 text-center text-negro"> {{ rifa.admin.empresa }} </p>
+                                                        <h5 class="fs-1 text-center text-negro mb-2"> #{{ ticketSelected.numero }} </h5>
+                                                        <p  class="mb-0 text-center" style="border-top: 1px solid #000!important; border-bottom: 1px solid #000!important;"> 
+                                                            <span class="text-negro fw-bold">
+                                                                {{ ticketSelected.estado }} 
+                                                            </span> 
+                                                        </p>
+                                                        <p class="fs-6 fw-bold text-negro mb-0"> {{ rifa.name }} </p>
     
                                                         <ul class="list-group list-group-flush">
-                                                            <li class="list-group-item"> Valor del ticket: {{ rifa.monto | currency }} </li>
-                                                            <li class="list-group-item"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
-                                                            <li class="list-group-item"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
-                                                            <li class="list-group-item"> Loteria: {{ rifa.loteria }}</li>
-                                                            <li class="list-group-item"> {{ ticketSelected.nombre }} </li>
-                                                            <li class="list-group-item"> {{ ticketSelected.telefono }} </li>
-                                                            <li class="list-group-item" *ngFor="let pago of ticketSelected.pagos">
-                                                                <span class="fw-bold">{{ pago.descripcion }}</span> - <small> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </small> - {{ pago.monto | currency }}
+                                                            <li class="list-group-item text-negro-imp py-1"> Valor del ticket: {{ rifa.monto | currency }} </li>
+                                                            <li class="list-group-item text-negro-imp py-1"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
+                                                            <li class="list-group-item text-negro-imp py-1"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
+                                                            <li class="list-group-item text-negro-imp py-1"> Loteria: {{ rifa.loteria }}</li>
+                                                            <li class="list-group-item text-negro-imp py-1"> {{ ticketSelected.nombre }} </li>
+                                                            <li class="list-group-item text-negro-imp py-1"> {{ ticketSelected.telefono }} </li>
+                                                            <li class="list-group-item text-negro-imp py-1" *ngFor="let pago of ticketSelected.pagos">
+                                                                <span class="fw-bold text-negro">{{ pago.descripcion }}</span> - <span class="text-negro"> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </span> - {{ pago.monto | currency }}
                                                             </li>
-                                                            <li class="list-group-item"> <span class="fw-bold">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
+                                                            <li class="list-group-item text-negro-imp py-1"> <span class="fw-bold text-negro">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -834,6 +885,25 @@
                         </div>
                     </div>
 
+                    <hr>
+                    <!-- Input de búsqueda con dropdown -->
+                    <div class="form-group">
+                        <label for="searchICC">Buscar Clientes</label>
+                        <div class="dropdown">
+                            <input type="text" class="form-control" id="searchICC" placeholder="Buscar cliente" #searchICC (input)="searchClients(searchICC.value)">                                        
+                            <!-- Resultados de búsqueda -->
+                            <div class="dropdown-menu w-100 show" aria-labelledby="searchICC"  *ngIf="listClients.length > 0 && searchICC.value">
+                                <a class="dropdown-item" 
+                                    *ngFor="let cliente of listClients; let i = index" 
+                                    (click)="selectClient2(cliente)">
+                                    <strong>{{ cliente.nombre }}</strong>
+                                    <br>
+                                    <small class="text-muted"> <i class="ti ti-mobile"></i> {{ cliente.telefono }}</small>
+                                    <small class="text-muted"> <i class="ti ti-location-pin"></i> {{ cliente.direccion }}</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                     <hr>
 
                     <form class="form-horizontal form-material" autocomplete="off" [formGroup]="ticketUpdate" (ngSubmit)="updateListTikcets()">
@@ -978,7 +1048,14 @@
                         </div>
                     </div>
 
-                    <button (click)="addMetodoPaid(nameM.value, descM.value, cuentaM.value, tasaM.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+                    <div class="form-group mb-3">
+                        <input type="number" min="1" class="form-control" placeholder="Compra Minima" #minM>
+                        <div class="form-control-feedback">
+                            <small> La compra minima es obligatoria </small>
+                        </div>
+                    </div>
+
+                    <button (click)="addMetodoPaid(nameM.value, descM.value, cuentaM.value, tasaM.value, minM.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
 
                     <hr>
 
@@ -993,6 +1070,8 @@
                                             <th>Descripción</th>
                                             <th>Cuenta</th>
                                             <th>Tasa</th>
+                                            <th>min</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1001,13 +1080,20 @@
                                         </tr>
                                         <tr *ngFor="let paid of rifa.metodos; let i = index">
                                             <td colspan="2">
-                                                <button (click)="deleteMetodoPaid(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
-                                                    <i class="ti-trash"></i>
-                                                </button> {{paid.name}}
+                                                {{paid.name}}
                                             </td>
                                             <td>{{ paid.descripcion }}</td>
                                             <td>{{ paid.cuenta }}</td>
                                             <td>{{ paid.tasa }}</td>
+                                            <td>{{ paid.min }}</td>
+                                            <td>
+                                                <button (click)="editMetodoPaid(paid)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-info">
+                                                    <i class="ti-pencil"></i>
+                                                </button>
+                                                <button (click)="deleteMetodoPaid(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                    <i class="ti-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1258,6 +1344,15 @@
                                 <div class="switch">
                                     <label>
                                     <input formControlName="visible" type="checkbox"><span class="lever switch-col-indigo"></span>
+                                </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 m-b-20">
+                                <div class="demo-switch-title">Mostrar tickets</div>
+                                <div class="switch">
+                                    <label>
+                                    <input formControlName="lista" type="checkbox"><span class="lever switch-col-indigo"></span>
                                 </label>
                                 </div>
                             </div>
@@ -1750,55 +1845,180 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">×</button>
-                    <h4 class="modal-title" id="addMontos">Agregar Montos adicionales</h4>
+                    <h4 class="modal-title" id="addMontos">Agregar Montos y botones adicionales</h4>
                 </div>
                 <div class="modal-body">
 
-                    <h3 class="fw-bold mt-4">Agregar nuevo monto para tickets</h3>
+                    <ul class="nav nav-tabs customtab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#addMontonsTab" role="tab" aria-expanded="true">
+                                <span class="hidden-sm-up"><i class="ti-money"></i>
+                            </span> <span class="hidden-xs-down">Montos</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#addBotonesWebTab" role="tab" aria-expanded="true">
+                                <span class="hidden-sm-up"><i class="ti-target"></i></span>
+                                <span class="hidden-xs-down">Botones web</span>
+                            </a>
+                        </li>
+                    </ul>
 
-                    <div class="form-group mb-3">
-                        <input type="text" class="form-control" placeholder="Monto" #newMontoI>
-                        <div class="form-control-feedback">
-                            <small> El monto es obligatorio </small>
-                        </div>
-                    </div>                    
+                    <div class="tab-content">
 
-                    <button (click)="addMonto(newMontoI.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+                            <!-- Montos -->
+                            <div class="tab-pane active" id="addMontonsTab" role="tabpanel" aria-expanded="true">
+                                <h3 class="fw-bold mt-4">Agregar nuevo monto para tickets</h3>
 
-                    <hr>
+                                <div class="form-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Monto" #newMontoI>
+                                    <div class="form-control-feedback">
+                                        <small> El monto es obligatorio </small>
+                                    </div>
+                                </div>
 
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title"><span class="lstick"></span>Montos para tickets adicionales</h4>
-                            <div class="table-responsive m-t-20">
-                                <table class="table table-sm vm no-th-brd no-wrap pro-of-month">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Monto</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngIf="rifa.montos.length === 0">
-                                            <td class="text-center" colspan="4"> No se ha registrado ningún monto adicional... </td>
-                                        </tr>
-                                        <tr *ngFor="let monto of rifa.montos; let i = index">
-                                            <td>
-                                                 {{ i + 1}}
-                                            </td>
-                                            <td>{{ monto.monto }}</td>
-                                            <td>
-                                                <button (click)="delMonto(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
-                                                    <i class="ti-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="form-group mb-3">
+                                    <input type="number" min="0" class="form-control" placeholder="Tickets" #newMontoQty>
+                                </div>
+
+                                <button (click)="addMonto(newMontoI.value, newMontoQty.value)" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
+
+                                <hr>
+
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title"><span class="lstick"></span>Montos para tickets adicionales</h4>
+                                        <div class="table-responsive m-t-20">
+                                            <table class="table table-sm vm no-th-brd no-wrap pro-of-month">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Monto</th>
+                                                        <th>Tickets</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngIf="rifa.montos.length === 0">
+                                                        <td class="text-center" colspan="4"> No se ha registrado ningún monto adicional... </td>
+                                                    </tr>
+                                                    <tr *ngFor="let monto of rifa.montos; let i = index">
+                                                        <td>
+                                                            {{ i + 1}}
+                                                        </td>
+                                                        <td>{{ monto.monto }}</td>
+                                                        <td>{{ monto.qty }}</td>
+                                                        <td>
+                                                            <button (click)="delMonto(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                                <i class="ti-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                            
+                            <!-- Botones Web -->
+                            <div class="tab-pane" id="addBotonesWebTab" role="tabpanel" aria-expanded="false">
+
+                                <h3 class="fw-bold mt-4">Agregar nuevos botones para la web</h3>
+
+                                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="newBtnForm" (ngSubmit)="addBtn()">
+
+                                    <div class="form-group has-danger mb-3">
+
+                                        <div class="col-md-12">
+                                            <input formControlName="name" type="text" class="form-control" placeholder="Nombre o Titulo">
+                                            <div *ngIf="validateBtn('name')" class="form-control-feedback">
+                                                <small> El nombre es obligatorio </small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="form-group has-danger mb-3">
+
+                                        <div class="col-md-12">
+                                            <input formControlName="monto" type="number" min="0" class="form-control" placeholder="Monto">
+                                            <div *ngIf="validateBtn('monto')" class="form-control-feedback">
+                                                <small> El monto es obligatorio y mas de 0 </small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    
+                                    <div class="form-group has-danger mb-3">
+
+                                        <div class="col-md-12">
+                                            <input formControlName="qty" type="number" min="0" class="form-control" placeholder="Cantidad">
+                                            <div *ngIf="validateBtn('qty')" class="form-control-feedback">
+                                                <small> La cantidad de tcikets es obligatoria  y mas de 0 </small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="form-group has-danger mb-3">
+                                        <div class="col-md-12">
+                                            <label for="colorrr" class="">Color del texto</label>
+                                            <input formControlName="color" class="form-control" type="color" id="colorrr">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group has-danger mb-3">
+                                        <div class="col-md-12">
+                                            <label for="fondooo" class="">Fondo del boton</label>
+                                            <input formControlName="fondo" class="form-control" type="color" id="fondooo">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-info waves-effect btn-block">Agregar</button>
+                                </form>
+
+                                <hr>
+
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title"><span class="lstick"></span>Botones de Compras</h4>
+                                        <div class="table-responsive m-t-20">
+                                            <table class="table table-sm vm no-th-brd no-wrap pro-of-month">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nombre</th>
+                                                        <th>Monto</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Colores</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngIf="rifa.botones.length === 0">
+                                                        <td class="text-center" colspan="4"> No se ha registrado ningún monto adicional... </td>
+                                                    </tr>
+                                                    <tr *ngFor="let boton of rifa.botones; let i = index">
+                                                        
+                                                        <td>{{ boton.name }}</td>
+                                                        <td>{{ boton.monto | currency }}</td>
+                                                        <td>{{ boton.qty }}</td>
+                                                        <td> <button type="button" class="btn bnt-sm" [ngStyle]="{'color': boton.color, 'background': boton.fondo}" > {{ boton.name }} </button> </td>
+                                                        <td>
+                                                            <button (click)="delBoton(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                                <i class="ti-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                     </div>
+
+                    
 
                 </div>
                 <div class="modal-footer">

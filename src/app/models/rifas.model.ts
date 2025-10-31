@@ -1,10 +1,11 @@
 import { User } from "./users.model";
 
-interface _metodos{
+export interface _metodos{
     name: string,
     descripcion: string,
     cuenta: string,
-    tasa: number
+    tasa: number,
+    min: number,
 }
 
 interface _premios{
@@ -19,8 +20,18 @@ interface _img {
     _id?: string
 }
 
-interface _montos{
+export interface _montos{
     monto: number,
+    qty?: number,
+    _id?: string
+}
+
+export interface _botones{
+    name?: string,
+    monto?: number,
+    qty?: number,
+    color?: string,
+    fondo?: string,    
     _id?: string
 }
 
@@ -42,6 +53,8 @@ export class Rifa{
         public estado: string,
         public admin: User,
         public visible: boolean,
+        public lista: boolean,
+        public botones: _botones[],
         public min: number,
         public max: number,
         public status: boolean,

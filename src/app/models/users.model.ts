@@ -24,6 +24,7 @@ export class User {
         public wati?: boolean,
         public watilink?: string,
         public watitoken?: string,
+        public termica?: boolean,
         public msg?: string,
         public uid?: string,
         public _id?: string

@@ -54,6 +54,26 @@
   client: true,
   app: false
 
+  base_url: 'https://admin.rifasmacuto.com/api',
+  local_url: 'https://admin.rifasmacuto.com',
+  client: true,
+  app: false
+
+  base_url: 'https://admin.tuticketdorado.com/api',
+  local_url: 'https://admin.tuticketdorado.com',
+  client: true,
+  app: false
+
+  base_url: 'https://admin.rifasgranoriente.com/api',
+  local_url: 'https://admin.rifasgranoriente.com',
+  client: true,
+  app: false
+  
+  base_url: 'https://admin.grupolosmagicos.com/api',
+  local_url: 'https://admin.grupolosmagicos.com',
+  client: true,
+  app: false
+
   base_url: 'http://localhost:3000/api',
   local_url: 'http://localhost:4200',
   client: false,
@@ -63,9 +83,9 @@
 
 export const environment = {
   production: false,
-  base_url: 'https://admin.ganaconkingjesus.com/api',
-  local_url: 'https://admin.ganaconkingjesus.com',
-  client: true,
+  base_url: 'http://localhost:3000/api',
+  local_url: 'http://localhost:4200',
+  client: false,
   app: false
 };
 

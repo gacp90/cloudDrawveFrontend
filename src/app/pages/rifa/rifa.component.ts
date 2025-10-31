@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -13,7 +13,7 @@ import SwiperCore, { FreeMode, Navigation, Pagination, Scrollbar, A11y, Autoplay
 // install Swiper modules
 SwiperCore.use([FreeMode, Navigation, Pagination, Scrollbar, A11y, Autoplay, EffectFade]);
 
-import { Rifa } from 'src/app/models/rifas.model';
+import { _metodos, Rifa } from 'src/app/models/rifas.model';
 import { Ruta } from 'src/app/models/rutas.model';
 import { Ticket, _pagos } from 'src/app/models/ticket.model';
 import { User } from 'src/app/models/users.model';
@@ -30,6 +30,9 @@ import { WhatsappService } from 'src/app/services/whatsapp.service';
 import { environment } from '../../../environments/environment';
 import { BluetoothService } from 'src/app/services/bluetooth.service';
 import { WatiService } from 'src/app/services/wati.service';
+import { NgxPrinterService } from 'ngx-printer';
+import { ClientesService } from 'src/app/services/clientes.service';
+import { Client } from 'src/app/models/clientes.model';
 
 interface templateIn{
   id: string,
@@ -67,7 +70,9 @@ export class RifaComponent implements OnInit {
                 private whatsappService: WhatsappService,
                 private bluetoothService: BluetoothService,
                 private watiService: WatiService,
-                private fb: FormBuilder){
+                private fb: FormBuilder,
+                private clientesService: ClientesService,
+                private printerService: NgxPrinterService){
 
     this.user = usersService.user;
 
@@ -92,6 +97,93 @@ export class RifaComponent implements OnInit {
           console.log(err);
           Swal.fire('Error', err.error.msg, 'error');          
         })
+
+  }
+
+  /** ================================================================
+   *  BUSCAR CLIENTES
+  ==================================================================== */
+  @ViewChild ('searchIC') searchIC!:ElementRef;
+  @ViewChild ('searchICC') searchICC!:ElementRef;
+  public listClients: Client[] = [];
+  searchClients(busqueda: string){
+
+    let query: any = {
+      desde: 0,
+      hasta: 50
+    }
+
+    if (busqueda.length < 2 || busqueda.length === 0) {
+      this.listClients = [];
+      delete query['$or'];
+    }else{
+      const regex = { $regex: busqueda, $options: 'i' }; // Construir regex      
+      query.$or = [
+        { telefono: regex },
+        { nombre: regex },
+        { correo: regex },
+        { cedula: regex }
+      ];
+    }
+
+    this.clientesService.loadClientes(query)
+          .subscribe( ({clientes}) => {                     
+            this.listClients = clientes;            
+          }, (err) => {
+            this.listClients = [];
+            console.log(err);
+            Swal.fire('Error', err.error.msg, 'error');          
+          })
+
+  }
+
+  /** ================================================================
+   *  SELECCIONAR CLIENTE
+  ==================================================================== */
+  selectClient(client: Client){
+
+    this.searchIC.nativeElement.value = '';
+    this.listClients = []
+
+    this.ticketUpdate.setValue({
+      tid: this.ticketSelected.tid!,
+      nombre: client.nombre,
+      telefono: client.codigo + client.telefono,
+      cedula: client.cedula,
+      direccion: client.direccion,
+      ruta: (client.ruta)? client.ruta._id!:'',
+      estado: this.ticketSelected.estado,
+      nota: this.ticketSelected.nota || '',
+      vendedor: this.user.uid!,
+      monto: this.ticketSelected.monto,
+      disponible: false,
+      cliente: client.cid!
+    })    
+
+  }
+
+  /** ================================================================
+   *  SELECCIONAR CLIENTE Agrupado
+  ==================================================================== */
+  selectClient2(client: Client){
+
+    this.searchICC.nativeElement.value = '';
+    this.listClients = []
+
+    this.ticketUpdate.setValue({
+      tid: '',
+      nombre: client.nombre,
+      telefono: client.codigo + client.telefono,
+      cedula: client.cedula,
+      direccion: client.direccion,
+      ruta: (client.ruta)? client.ruta._id!:'',
+      estado: 'Disponible',
+      nota: '',
+      vendedor: this.user.uid!,
+      monto: this.rifa.monto,
+      disponible: false,
+      cliente: client.cid!
+    })    
 
   }
 
@@ -225,7 +317,7 @@ export class RifaComponent implements OnInit {
   loadRifa(id: string){
 
     this.rifasService.loadRifaID(id)
-        .subscribe( ({rifa}) => {    
+        .subscribe( ({rifa}) => {  
 
           this.rifa = rifa;
           this.query.rifa = rifa.rifid!;          
@@ -244,6 +336,7 @@ export class RifaComponent implements OnInit {
             promocion: this.rifa.promocion,
             comision: this.rifa.comision,
             visible: this.rifa.visible,
+            lista: this.rifa.lista,
             min: this.rifa.min,
             max: this.rifa.max
           })
@@ -299,6 +392,7 @@ export class RifaComponent implements OnInit {
     loteria: ['', [Validators.required]],
     descripcion: ['', [Validators.required]],
     visible: false,
+    lista: true,
     min: [1, [Validators.min(1)]],
     max: 50,
   })
@@ -321,6 +415,7 @@ export class RifaComponent implements OnInit {
           this.rifa.promocion = rifa.promocion;
           this.rifa.comision = rifa.comision;
           this.rifa.loteria = rifa.loteria;
+          this.rifa.lista = rifa.lista;
           this.rifa.descripcion = rifa.descripcion;
           
           Swal.fire('Estupendo', 'Se ha actualizado la rifa exitosamente', 'success');
@@ -495,7 +590,8 @@ export class RifaComponent implements OnInit {
               nota: ticket.nota || '',
               vendedor: this.user.uid!,
               monto: ticket.monto,
-              disponible: false
+              disponible: false,
+              cliente: (ticket.cliente)? ticket.cliente: null
             })
   
             
@@ -510,7 +606,7 @@ export class RifaComponent implements OnInit {
    *   UPDATE TICKET
   ==================================================================== */
   public ticketUpdateSubmitted: boolean = false;
-  public ticketUpdate = this.fb.group({
+  public ticketUpdate: any = this.fb.group({
     tid: [''],
     nombre: ['', [Validators.required]],
     telefono: ['', [Validators.required]],
@@ -521,7 +617,8 @@ export class RifaComponent implements OnInit {
     nota: '',
     vendedor: '',
     monto: 0,
-    disponible: false
+    disponible: false,
+    cliente: null 
   })
 
   updateTicket(){
@@ -1104,11 +1201,12 @@ export class RifaComponent implements OnInit {
   @ViewChild('cuentaM') cuentaM!: ElementRef;
   @ViewChild('tasaM') tasaM!: ElementRef;
 
-  addMetodoPaid(name: string, descripcion: string, cuenta: string, tasa: any){
+  addMetodoPaid(name: string, descripcion: string, cuenta: string, tasa: any, min: any = 0){
 
     tasa = Number(tasa);
+    min = Number(min);
     
-    if (name.length === 0 || descripcion.length === 0 || cuenta.length === 0 || tasa <= 0) {
+    if (name.length === 0 || descripcion.length === 0 || cuenta.length === 0 || tasa <= 0 || min < 0) {
       Swal.fire('Atención', 'Debes de llenar los campos obligatorios', 'warning');
       return;
     }
@@ -1117,7 +1215,8 @@ export class RifaComponent implements OnInit {
       name,
       descripcion,
       cuenta,
-      tasa
+      tasa,
+      min
     })
 
     this.rifasService.updateRifa({metodos: this.rifa.metodos}, this.rifa.rifid!)
@@ -1169,6 +1268,89 @@ export class RifaComponent implements OnInit {
 
       }
     });
+
+  }
+
+  /** ================================================================
+   *   EDIT PAID
+  ==================================================================== */
+  async editMetodoPaid(paid : _metodos){
+
+    // 1. Hacer el modal de Bootstrap "inert" temporalmente
+    document.getElementById('addMetodoPaid')?.setAttribute('inert', '');
+
+    const { value: formValues } = await Swal.fire({
+      title: 'Editar metodo de pago',
+      html:
+        `<div class="form-group mb-3">
+            <input id="swal-name" type="text" class="form-control" placeholder="Nombre" value="${paid.name}">
+            
+        </div>
+        <div class="form-group mb-3">
+            <input id="swal-descripcion" type="text" class="form-control" placeholder="Descripción" value="${paid.descripcion}">
+        </div>
+        <div class="form-group mb-3">
+            <input id="swal-cuenta" type="text" class="form-control" placeholder="Cuenta" value="${paid.cuenta}">
+        </div>
+        <div class="form-group mb-3">
+            <input id="swal-tasa" type="number" min="1" class="form-control" placeholder="Tasa" value="${paid.tasa}">
+        </div>
+        <div class="form-group mb-3">
+            <input id="swal-min" type="number" min="1" class="form-control" placeholder="Compra Minima" value="${paid.min}">
+        </div>
+        `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Actualizar',
+      confirmButtonColor: '#25D366',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        return {
+          name: (document.getElementById('swal-name') as HTMLInputElement).value,
+          descripcion: (document.getElementById('swal-descripcion') as HTMLInputElement).value,
+          cuenta: (document.getElementById('swal-cuenta') as HTMLInputElement).value,
+          tasa: (document.getElementById('swal-tasa') as HTMLInputElement).value,
+          min: (document.getElementById('swal-min') as HTMLInputElement).value,
+        }
+      },
+      // Opcional: Validación básica
+      didOpen: () => {
+        Swal.getConfirmButton()?.addEventListener('click', () => {
+          const name = (document.getElementById('swal-name') as HTMLInputElement).value;
+          const descripcion = (document.getElementById('swal-descripcion') as HTMLInputElement).value;
+          const cuenta = (document.getElementById('swal-cuenta') as HTMLInputElement).value;
+          const tasa = (document.getElementById('swal-tasa') as HTMLInputElement).value;
+          const min = (document.getElementById('swal-min') as HTMLInputElement).value;
+          if (!name ||
+              !descripcion ||
+              !cuenta ||
+              !tasa ||
+              !min) {
+            Swal.showValidationMessage('Todos los campos son requeridos');
+          }
+        });
+      }
+    });
+
+    if (formValues) {
+      // Actualizamos las variables solo si el usuario confirmó
+      
+      paid.name = formValues.name
+      paid.descripcion = formValues.descripcion
+      paid.cuenta = formValues.cuenta
+      paid.tasa = formValues.tasa
+      paid.min = formValues.min
+
+      this.rifasService.updateRifa({metodos: this.rifa.metodos}, this.rifa.rifid!)
+          .subscribe( () => {
+            Swal.fire('Estupendo', 'Se ha actualizado el metodo pago exitosamente!', 'success');
+          }, (err) => {
+            console.log(err);
+            Swal.fire('Error', err.error.msg, 'error');            
+          })
+    }
+
+    document.getElementById('addMetodoPaid')?.removeAttribute('inert');
 
   }
 
@@ -1562,12 +1744,24 @@ export class RifaComponent implements OnInit {
           const grupos: { [clave: string]: any } = {};
           const meto: { [clave: string]: any } = {};
 
+          let metodoDesconocido = {
+            name: 'Desconocido',
+            tasa: 1,
+            descripcion: 'No hay descripcion',
+            cuenta: 'verificar capture',
+            _id: '00000000001'
+          }
           
           
           for (const ticket of tickets) {
-            if (!ticket.pagos[0].metodo || ticket.pagos.length === 0) {
-              console.log(ticket)
-              continue
+
+            if (ticket.pagos.length === 0) {
+              continue;
+            }
+
+            if (!ticket.pagos[0].metodo) {
+              ticket.pagos[0].metodo = metodoDesconocido;
+              // continue
             }
 
             const telefono = ticket.telefono || '';
@@ -1690,7 +1884,8 @@ export class RifaComponent implements OnInit {
 
     if (pago.estado === 'Confirmado') {
 
-      this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, gracias por tu compra`
+      // this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, gracias por tu compra`
+      this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, Ya sabes ponte bonit@ y espera la llamada ganadora`
       
     }else{
       this.wmwb = `Hola ${pago.nombre}, No hemos podido confirmar la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number, con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, porfavor vuelve a enviarnos los datos por este medio`
@@ -2283,7 +2478,7 @@ export class RifaComponent implements OnInit {
         message: mensaje
       });
     }
-
+    
     if (imgS) {
       this.whatsappService.sendMessageMasiveImg(this.user.uid!, {contacts: messages}, this.user.wp!, this.subirImagenMasive)
           .subscribe( ({msg}) => {
@@ -2541,6 +2736,7 @@ export class RifaComponent implements OnInit {
 
   exportarAgrupado() {
   let agrupado: { [telefono: string]: any } = {};
+  let maxPagos = 0;
 
   for (const ticket of this.tickets) {
     const telefono = ticket.telefono?.trim()?.replace(/\s/g, '') || 'SinTeléfono';
@@ -2573,6 +2769,9 @@ export class RifaComponent implements OnInit {
         agrupado[telefono].Pagos.push({ monto: String(monto), fecha: String(fecha) });
       }
     }
+
+    // Actualizar el máximo número de pagos
+    maxPagos = Math.max(maxPagos, agrupado[telefono].Pagos.length);
   }
 
   const resultado: any[] = [];
@@ -2583,6 +2782,7 @@ export class RifaComponent implements OnInit {
       Cedula: cliente.Cedula,
       Telefono: cliente.Telefono,
       Direccion: cliente.Direccion,
+      CantidadTickets: cliente.Números.length, 
       Números: cliente.Números.join(', '),
       Estado: Array.from(cliente.Estados).join(', '),
       MontoTotal: Number(cliente.MontoTotal || 0),
@@ -2591,26 +2791,11 @@ export class RifaComponent implements OnInit {
       Vendedor: cliente.Vendedor
     };
 
-    cliente.Pagos.forEach((pago: any, index: number) => {
-      row[`Pago${index + 1}`] = pago.monto;
-      row[`Fecha${index + 1}`] = pago.fecha;
-    });
-
-    // Sanitizar todos los campos para evitar errores de tipos
-    for (const key in row) {
-      const value = row[key];
-      if (
-        typeof value !== 'string' &&
-        typeof value !== 'number' &&
-        typeof value !== 'boolean'
-      ) {
-        row[key] = String(value ?? '');
-      }
-
-      // Eliminar NaN o undefined
-      if (value === undefined || value === null || Number.isNaN(value)) {
-        row[key] = '';
-      }
+    // Rellenar todos los pagos hasta maxPagos
+    for (let i = 0; i < maxPagos; i++) {
+      const pago = cliente.Pagos[i];
+      row[`Pago${i + 1}`] = pago ? pago.monto : '';
+      row[`Fecha${i + 1}`] = pago ? pago.fecha : '';
     }
 
     resultado.push(row);
@@ -2634,6 +2819,100 @@ export class RifaComponent implements OnInit {
 
 
 //   exportarAgrupado() {
+//   let agrupado: { [telefono: string]: any } = {};
+
+//   for (const ticket of this.tickets) {
+//     const telefono = ticket.telefono?.trim()?.replace(/\s/g, '') || 'SinTeléfono';
+
+//     if (!agrupado[telefono]) {
+//       agrupado[telefono] = {
+//         Nombres: String(ticket.nombre || ''),
+//         Cedula: String(ticket.cedula || ''),
+//         Telefono: String(ticket.telefono || ''),
+//         Direccion: String(ticket.direccion || ''),
+//         Números: [],
+//         Estados: new Set(),
+//         MontoTotal: 0,
+//         Abonado: 0,
+//         Pagos: [],
+//         Ruta: String(ticket.ruta?.name || ''),
+//         Vendedor: String(ticket.vendedor?.name || '')
+//       };
+//     }
+
+//     agrupado[telefono].Números.push(`#${ticket.numero}`);
+//     agrupado[telefono].Estados.add(ticket.estado);
+//     agrupado[telefono].MontoTotal += Number(ticket.monto || 0);
+
+//     if (ticket.pagos?.length) {
+//       for (const pago of ticket.pagos) {
+//         const monto = Number(pago.monto || 0);
+//         const fecha = pago.fecha ? new Date(pago.fecha).toLocaleDateString() : '';
+//         agrupado[telefono].Abonado += monto;
+//         agrupado[telefono].Pagos.push({ monto: String(monto), fecha: String(fecha) });
+//       }
+//     }
+//   }
+
+//   const resultado: any[] = [];
+
+//   Object.values(agrupado).forEach((cliente: any) => {
+//     const row: any = {
+//       Nombres: cliente.Nombres,
+//       Cedula: cliente.Cedula,
+//       Telefono: cliente.Telefono,
+//       Direccion: cliente.Direccion,
+//       Números: cliente.Números.join(', '),
+//       Estado: Array.from(cliente.Estados).join(', '),
+//       MontoTotal: Number(cliente.MontoTotal || 0),
+//       Abonado: Number(cliente.Abonado || 0),
+//       Ruta: cliente.Ruta,
+//       Vendedor: cliente.Vendedor
+//     };
+
+//     cliente.Pagos.forEach((pago: any, index: number) => {
+//       row[`Pago${index + 1}`] = pago.monto;
+//       row[`Fecha${index + 1}`] = pago.fecha;
+//     });
+
+//     // Sanitizar todos los campos para evitar errores de tipos
+//     for (const key in row) {
+//       const value = row[key];
+//       if (
+//         typeof value !== 'string' &&
+//         typeof value !== 'number' &&
+//         typeof value !== 'boolean'
+//       ) {
+//         row[key] = String(value ?? '');
+//       }
+
+//       // Eliminar NaN o undefined
+//       if (value === undefined || value === null || Number.isNaN(value)) {
+//         row[key] = '';
+//       }
+//     }
+
+//     resultado.push(row);
+//   });
+
+//   const ws = XLSX.utils.json_to_sheet(resultado);
+
+//   Object.keys(ws).forEach(cell => {
+//     if ((cell.startsWith('C') || cell.startsWith('B')) && cell !== 'C1' && cell !== 'B1') {
+//       ws[cell].t = 's';
+//       ws[cell].z = '@';
+//     }
+//   });
+
+//   const wb = XLSX.utils.book_new();
+//   XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+
+//   const title = `${this.rifa.name}_agrupado.xls`;
+//   XLSX.writeFile(wb, title);
+// }
+
+
+// exportarAgrupado2() {
 //   let agrupado: { [telefono: string]: any } = {};
 
 //   for (const ticket of this.tickets) {
@@ -2722,8 +3001,10 @@ export class RifaComponent implements OnInit {
    *   AGREGAR MONTO
   ==================================================================== */
   @ViewChild ('newMontoI') newMontoI!: ElementRef;
-  addMonto(monto: any){
+  @ViewChild ('newMontoQty') newMontoQty!: ElementRef;
+  addMonto(monto: any, qty: any){
     monto = Number(monto);
+    qty = Number(qty);
 
     if (monto < 0 || !monto) {
       Swal.fire('Atención', 'El monto debe ser mayor a cero', 'warning');
@@ -2731,7 +3012,8 @@ export class RifaComponent implements OnInit {
     }
 
     this.rifa.montos.push({
-      monto
+      monto,
+      qty
     })
 
     this.rifasService.updateRifa({montos: this.rifa.montos}, this.rifa.rifid!)
@@ -2739,6 +3021,7 @@ export class RifaComponent implements OnInit {
 
           Swal.fire('Estupendo', 'Se ha agregado el nuevo monto exitosamente', 'success');
           this.newMontoI.nativeElement.value = '';
+          this.newMontoQty.nativeElement.value = '';
 
         }, (err) => {
           console.log(err);
@@ -2764,6 +3047,85 @@ export class RifaComponent implements OnInit {
           Swal.fire('Error', err.error.msg, 'error');          
         })
 
+
+  }
+
+  /** ================================================================
+   *   AGREGAR BOTONES
+  ==================================================================== */
+  public newBtnFormSubmitted: boolean = false;
+  public newBtnForm = this.fb.group({
+    name: ['', [Validators.required]],
+    monto: [0, [Validators.required, Validators.min(1)]],
+    qty: [0, [Validators.required, Validators.min(1)]],
+    color: ['#000', [Validators.required]],
+    fondo: ['#ffffff', [Validators.required]],
+  })
+
+  addBtn(){
+
+    this.newBtnFormSubmitted = true;
+
+    if (this.newBtnForm.invalid) {
+      return;
+    }
+
+    this.rifa.botones.push({
+      name: (this.newBtnForm.value.name)? this.newBtnForm.value.name: '',
+      monto: (this.newBtnForm.value.monto)? this.newBtnForm.value.monto : 0,
+      qty: (this.newBtnForm.value.qty)? this.newBtnForm.value.qty : 0,
+      color: (this.newBtnForm.value.color)? this.newBtnForm.value.color: '',
+      fondo: (this.newBtnForm.value.fondo)? this.newBtnForm.value.fondo: ''
+    })
+
+    this.rifasService.updateRifa({botones: this.rifa.botones}, this.rifa.rifid!)
+        .subscribe( ({rifa}) => {
+
+          this.newBtnFormSubmitted = false;
+          this.newBtnForm.reset({
+            qty: 0,
+            monto: 0,
+            color: '#000000',
+            fondo: '#ffffff'
+          })
+          Swal.fire('Estupendo', 'Se ha agregado un boton nuevo', 'success');
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+
+  }
+
+  validateBtn(campo: string):boolean{
+
+    if (this.newBtnFormSubmitted && this.newBtnForm.get(campo)?.invalid ) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
+
+  /** ================================================================
+   *   ELIMINAR BOTON
+  ==================================================================== */
+  delBoton(i: any){
+
+
+    this.rifa.botones.splice(i, 1);
+
+    this.rifasService.updateRifa({botones: this.rifa.botones}, this.rifa.rifid!)
+        .subscribe( ({}) => {
+
+          Swal.fire('Estupendo', 'Se ha eliminado el boton exitosamente', 'success');
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
 
   }
 
@@ -2795,6 +3157,14 @@ export class RifaComponent implements OnInit {
   wrapText(text: string, lineLength: number): string[] {
     const regex = new RegExp(`.{1,${lineLength}}`, 'g');
     return text.match(regex) || [];
+  }
+
+  /** ================================================================
+   *  PRINT INVOICE
+  ==================================================================== */
+  @ViewChild('PrintTemplate') PrintTemplateTpl!: TemplateRef<any>;
+  printTemplate() {
+    this.printerService.printDiv('PrintTemplateTpl');
   }
 
   /** ================================================================

@@ -18,6 +18,9 @@ import { PerfilComponent } from './perfil/perfil.component';
 import { UsuariosComponent } from './usuarios/usuarios.component';
 import { RutasComponent } from './rutas/rutas.component';
 import { RifaComponent } from './rifa/rifa.component';
+import { NgxPrinterModule } from 'ngx-printer';
+import { ClientesComponent } from './clientes/clientes.component';
+import { NewclientComponent } from './clientes/newclient/newclient.component';
 
 
 @NgModule({
@@ -31,7 +34,9 @@ import { RifaComponent } from './rifa/rifa.component';
     PerfilComponent,
     UsuariosComponent,
     RutasComponent,
-    RifaComponent
+    RifaComponent,
+    ClientesComponent,
+    NewclientComponent
   ],
   exports: [
     DashboardComponent,
@@ -44,7 +49,8 @@ import { RifaComponent } from './rifa/rifa.component';
     SwiperModule,
     ReactiveFormsModule,
     PipesModule,
-    QRCodeModule
+    QRCodeModule,
+    NgxPrinterModule.forRoot({printOpenWindow: true})
   ]
 })
 export class PagesModule { }

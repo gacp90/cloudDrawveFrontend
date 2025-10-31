@@ -29,6 +29,7 @@
     "esc-pos-encoder": "^3.0.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.0",
+    "ngx-printer": "^1.1.0",
     "rxjs": "~7.5.0",
     "sweetalert2": "^11.7.27",
     "swiper": "^8.1.4",

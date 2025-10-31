@@ -12,6 +12,7 @@ import { PerfilComponent } from './perfil/perfil.component';
 import { UsuariosComponent } from './usuarios/usuarios.component';
 import { RutasComponent } from './rutas/rutas.component';
 import { RifaComponent } from './rifa/rifa.component';
+import { ClientesComponent } from './clientes/clientes.component';
 
 
 // COMPONENTS
@@ -24,6 +25,7 @@ const routes: Routes = [
       children:
       [
         { path: '', component: DashboardComponent, data:{ title: 'Dashboard' } },
+        { path: 'clientes', component: ClientesComponent, data:{ title: 'Clientes' } },
         { path: 'perfil/:id', component: PerfilComponent, data:{ title: 'Perfil' } },
         { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Rifa' } },
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },

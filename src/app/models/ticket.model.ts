@@ -39,6 +39,7 @@ export class Ticket{
         public img: any[],
         public _id?: string,
         public tid?: string,
+        public cliente?: string,
 
     ){}
 
