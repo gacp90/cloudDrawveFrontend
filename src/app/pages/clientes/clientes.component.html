@@ -35,9 +35,7 @@
                             <input type="search" #searchI (keydown)="search(searchI.value)" (keydown.enter)="search(searchI.value)" id="demo-input-search2" placeholder="Busca clientes" class="form-control"> 
                         </div>
 
-
-                    </div>
-                    
+                    </div>                    
 
                     <div class="gap-2">
                         <button *ngIf="user.whatsapp && user.wp" type="button" class="btn btn-success " data-toggle="modal" data-target="#whatsappmasive">
@@ -45,6 +43,9 @@
                         </button>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createClient">
                             Crear Cliente
+                        </button>
+                        <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#clientesMasivosModal">
+                            Subir Excel de clientes
                         </button>
 
                     </div>
@@ -61,7 +62,6 @@
                                 <th>Correo</th>
                                 <th>Dirección</th>
                                 <th>Ruta</th>
-                                <th>Status</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -76,16 +76,12 @@
                                     {{ cliente.nombre }}
                                 </td>
                                 <td>
-                                    {{ cliente.telefono}}
+                                    {{ cliente.codigo + cliente.telefono}}
                                 </td>
                                 <td>{{ cliente.cedula }}</td>
                                 <td>{{ cliente.correo }}</td>
-                                <td>{{ cliente.direccion }}</td>
+                                <td>{{ cliente.direccion || 'Sin Correo' }}</td>
                                 <td>{{ cliente.ruta.name }}</td>
-                                <td>
-                                    <button *ngIf="cliente.status" type="button" class="btn btn-sm btn-success">Activo</button>
-                                    <button *ngIf="cliente.status === false" type="button" class="btn btn-sm btn-danger">Desactivo</button>
-                                </td>
                                 <td>
                                     <button type="button" (click)="setForm(cliente)" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn" data-toggle="modal" data-target="#updateClient">
                                         <i class="ti ti-pencil" aria-hidden="true"></i>
@@ -380,4 +376,42 @@ MODAL WHATSAPP MASIVE
             <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
+</div>
+
+<!-- ========================================================= 
+MODAL SUBIR TICKETS MASIVOS
+======================================================== -->
+<div id="clientesMasivosModal" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="clientesMasivosModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title" id="clientesMasivosModal">Subir clientes Masivos</h4>
+            </div>
+            <div class="modal-body">
+                <h3 class="fw-bold mt-4">Subir clientes masivos desde un excel</h3>
+                <p class="mb-2">Puedes descargar la plantilla de ejemplo dando <a (click)="plantilla()" class="pointer text-decoration-none text-primary"><i class="ti ti-layout-grid4-alt"></i> click aquí  </a> </p>
+                <p class="text-dark"> <b class="fw-bold"> <i class="ti ti-alert"></i> Nota:</b> es importante agregar el codigo del pais sin caracteres ni espacios 58 para venezuela, y el numero de telefono debe ir separado, los correos son en minusculas, y si no desea
+                    agregar el numero de cedula puedes agregar el numero telefonico en la cedula tambien.
+                </p>
+                <hr>
+                <div class="form-row align-items-center">
+                    <div class="col-10">
+                        <input type="file" class="form-control form-control-sm" (change)="selectFileExcel($event)" placeholder="Importar" accept=".xlsx">
+                    </div>
+                    <div class="col-auto">
+                        <button [disabled]="sendExcel" type="button" class="btn btn-primary " (click)="UploadExcel()">
+                            <span *ngIf="!sendExcel" >Subir excel</span>
+                            <span *ngIf="sendExcel" >Cargando...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
 </div>

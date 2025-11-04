@@ -8,6 +8,13 @@ import { RutasService } from 'src/app/services/rutas.service';
 import { UsersService } from 'src/app/services/users.service';
 import { WatiService } from 'src/app/services/wati.service';
 import { WhatsappService } from 'src/app/services/whatsapp.service';
+
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
+// EXCEL
+import * as XLSX from 'xlsx';
+
 import Swal from 'sweetalert2';
 
 @Component({
@@ -788,9 +795,111 @@ export class ClientesComponent implements OnInit {
             this.sendMasive = false;          
           })
     }
-    
-
 
   }
+
+  /** ================================================================
+     *   DESCARGAR PLANTILLA DE EXCEL
+    ==================================================================== */
+    plantilla(){
+  
+      let clientes = [{
+          nombre: 'Pedro Perez',
+          codigo: '58',
+          telefono: '4240001234',
+          cedula: '11111111',
+          direccion: 'direccion 1',
+          correo: 'pedroperez@gmail.com',
+          ruta: 'nombre de la ruta',
+        },
+        {
+          nombre: 'Fulano',
+          codigo: '58',
+          telefono: '4240001234',
+          cedula: '2222222',
+          direccion: 'direccion 2',
+          correo: 'fulano@gmail.com',
+          ruta: 'nombre de la ruta',
+      
+        }
+      ];
+  
+      /* generate a worksheet */
+      var ws = XLSX.utils.json_to_sheet(clientes);
+  
+      /* add to workbook */
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "clientes");
+  
+      /* title */
+      let title = 'plantilla-clientes.xls';
+  
+      /* write workbook and force a download */
+      XLSX.writeFile(wb, title);
+    }
+
+    /** ================================================================
+     *   IMPORTAR CLIENTES CON EXCEL
+    ==================================================================== */
+    public arrayExceltUpdate:any;
+    public excelUpdate!:File;
+    public clientsMasivesJson: any[] = [];
+    public sendExcel: boolean = false;
+  
+    selectFileExcel(event: any){
+      this.excelUpdate= event.target.files[0]; 
+    }
+  
+    UploadExcel() {
+  
+      this.clientsMasivesJson = [];
+  
+      if (!this.excelUpdate) {
+        Swal.fire('Atención', 'No has seleccionado ningun archivo de excel', 'info');
+        return;
+      }
+  
+      this.sendExcel = true;
+  
+      let fileReader = new FileReader();
+        fileReader.onload = (e) => {
+  
+            this.arrayExceltUpdate = fileReader.result;
+            var data = new Uint8Array(this.arrayExceltUpdate);
+            var arr = new Array();
+  
+            for(var i = 0; i != data.length; ++i) arr[i] = String.fromCharCode(data[i]);
+            
+            var bstr = arr.join("");
+            var workbook = XLSX.read(bstr, {type:"binary"});
+            var first_sheet_name = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[first_sheet_name];
+            
+            this.clientsMasivesJson = XLSX.utils.sheet_to_json(worksheet,{raw:true});
+  
+            this.clientsService.saveClientMasive({clients: this.clientsMasivesJson})
+                .subscribe( ({msg, noCreados, rutasSinCoincidencia}) => {
+  
+                  this.query = {
+                    desde: 0,
+                    hasta: 1000,
+                    sort: {numero: 1}
+                  }
+                  this.loadClients();
+  
+                  Swal.fire('Estupendo', `${msg} ${(noCreados.length > 0)? `, Clientes no creados: ${noCreados.length}`: ''} ${(rutasSinCoincidencia.length > 0)? `, Rutas no encontradas ${rutasSinCoincidencia.length}`: ''} `, 'success');                
+                  this.sendExcel = false;
+                  
+                }, (err) => {
+                  this.sendExcel = false;
+                  console.log(err);
+                  Swal.fire('Error', err.error.msg, 'error');                
+                })
+            
+  
+        }
+        
+        fileReader.readAsArrayBuffer(this.excelUpdate);
+    };
 
 }

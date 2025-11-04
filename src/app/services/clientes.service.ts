@@ -50,6 +50,14 @@ export class ClientesService {
     createCliente(formData: any){
       return this.http.post<{ok: Boolean, cliente: Client}>(`${base_url}/clients`, formData, this.headers);
     }
+
+    /** ================================================================
+     *  SAVE CLIENTES MASIVE
+    ==================================================================== */
+    saveClientMasive(formData: any){
+      return this.http.post<{ok: Boolean, msg: string, noCreados: any[], rutasSinCoincidencia: any[]}>(`${base_url}/clients/save/masive`, formData, this.headers);
+    }
+
   
     /** ================================================================
      *  UPDATE CLIENTE
