@@ -33,6 +33,7 @@ import { WatiService } from 'src/app/services/wati.service';
 import { NgxPrinterService } from 'ngx-printer';
 import { ClientesService } from 'src/app/services/clientes.service';
 import { Client } from 'src/app/models/clientes.model';
+import { SmsService } from 'src/app/services/sms.service';
 
 interface templateIn{
   id: string,
@@ -72,6 +73,7 @@ export class RifaComponent implements OnInit {
                 private watiService: WatiService,
                 private fb: FormBuilder,
                 private clientesService: ClientesService,
+                private smsService: SmsService,
                 private printerService: NgxPrinterService){
 
     this.user = usersService.user;
@@ -612,7 +614,7 @@ export class RifaComponent implements OnInit {
             forma = 'PM';
           }
           
-          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  \n Apartado a tu nombre, mucha suerte!`;
+          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  `;
           // this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  \n\n Ticket ${this.ticketSelected.estado}, para estar enterado de nuestros sorteos, sigue nuestro canal de Whatsapp e Instagram abajo de dejo los links suerte. \n\n **Instagram** \nhttps://instagram.com/r_aurinegros \n\n **Whatsapp** \n https://whatsapp.com/channel/0029VbAM4QN5fM5hiVUOgQ0N`;
           
           setTimeout( () =>{
@@ -710,7 +712,7 @@ export class RifaComponent implements OnInit {
             forma = 'PM';
           }
           
-          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  \n Apartado a tu nombre, mucha suerte!`;
+          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  `;
           // this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  \n\n Ticket ${this.ticketSelected.estado}, para estar enterado de nuestros sorteos, sigue nuestro canal de Whatsapp e Instagram abajo de dejo los links suerte. \n\n **Instagram** \nhttps://instagram.com/r_aurinegros \n\n **Whatsapp** \n https://whatsapp.com/channel/0029VbAM4QN5fM5hiVUOgQ0N`;
           
           Swal.fire('Estupendo', 'Se ha actualizado el ticket exitosamente', 'success');
@@ -1043,7 +1045,7 @@ export class RifaComponent implements OnInit {
             forma = 'PM';
           }
           
-          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  \n Apartado a tu nombre, mucha suerte!`;
+          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  `;
           // this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  \n\n Ticket ${this.ticketSelected.estado}, para estar enterado de nuestros sorteos, sigue nuestro canal de Whatsapp e Instagram abajo de dejo los links suerte. \n\n **Instagram** \nhttps://instagram.com/r_aurinegros \n\n **Whatsapp** \n https://whatsapp.com/channel/0029VbAM4QN5fM5hiVUOgQ0N`;
           
 
@@ -1126,7 +1128,7 @@ export class RifaComponent implements OnInit {
             forma = 'PM';
           }
           
-          this.ticketWhatsapp = `Hola, * ${this.ticketSelected.nombre.toUpperCase()} * \n${this.rifa.admin.empresa || ''} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma} \n Apartado a tu nombre, mucha suerte!`;
+          this.ticketWhatsapp = `Hola, * ${this.ticketSelected.nombre.toUpperCase()} * \n${this.rifa.admin.empresa || ''} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma} `;
           // this.ticketWhatsapp = `Hola, * ${this.ticketSelected.nombre.toUpperCase()} * \n${this.rifa.admin.empresa || ''} \n*Premio:* ${this.rifa.name} \n*Numero:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Loteria:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma} \n\n Ticket ${this.ticketSelected.estado}, para estar enterado de nuestros sorteos, sigue nuestro canal de Whatsapp e Instagram abajo de dejo los links suerte. \n\n **Instagram** \nhttps://instagram.com/r_aurinegros \n\n **Whatsapp** \n https://whatsapp.com/channel/0029VbAM4QN5fM5hiVUOgQ0N`;
           
 
@@ -3452,6 +3454,139 @@ export class RifaComponent implements OnInit {
       
       fileReader.readAsArrayBuffer(this.excelUpdate);
   };
+
+  /** ================================================================
+   *   ENVIAR SMS
+  ==================================================================== */
+  public sendS: boolean = false;
+  sendSMS(message: string){
+
+
+    if (this.ticketSelected.telefono) {
+        
+        this.sendS = true;
+
+        this.smsService.sendMessageSMS({message: message, number: '+'+this.ticketSelected.telefono.trim()})
+          .subscribe( ({ok, msg}) => {
+
+                this.sendS = false;
+  
+                const Toast = Swal.mixin({
+                  toast: true,
+                  position: "top-end",
+                  showConfirmButton: false,
+                  timer: 2000,
+                  timerProgressBar: true,
+                  didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                  }
+                });
+  
+                Toast.fire({
+                  icon: "success",
+                  title: msg
+                });
+                
+              }, (err)=> {
+                console.log(err);
+                Swal.fire('Error', err.error.msg, 'error');            
+                this.sendM = false;
+              })  
+
+      }
+        
+  }
+
+  /** ================================================================
+   *   ENVIAR SMS
+  ==================================================================== */
+  public sendSMasive: boolean = false;
+  sendSmsMasives(){
+
+    let messages: any[] = [];
+    this.sendSMasive = true;
+
+    const groupedTickets: { [telefono: string]: any[] } = {};
+
+    // Agrupar los tickets por número de teléfono
+    for (let i = 0; i < this.tickets.length; i++) {
+      const ticket = this.tickets[i];
+    
+      if (ticket.estado !== 'Disponible') {
+        const number = ticket.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+        if (!groupedTickets[number]) {
+          groupedTickets[number] = [];
+        }
+        groupedTickets[number].push(ticket);
+      }
+    }
+
+    // Recorrer los grupos por número
+    for (const number in groupedTickets) {
+      const ticketsPersona = groupedTickets[number];
+      const primerTicket = ticketsPersona[0]; // Usamos el primer ticket para obtener nombre, etc.
+    
+      let mensaje = this.message;
+    
+      if (mensaje.includes('@name')) {
+        mensaje = mensaje.replace(/@name/g, '*' + primerTicket.nombre + '*');
+      }
+    
+      if (mensaje.includes('@premio')) {
+        mensaje = mensaje.replace(/@premio/g, '*' + this.rifa.name + '*');
+      }
+    
+      if (mensaje.includes('@empresa')) {
+        mensaje = mensaje.replace(/@empresa/g, '*' + (this.rifa.admin.empresa || '') + '*');
+      }
+    
+      if (mensaje.includes('@number')) {
+        // Concatenamos todos los números de los tickets
+        const numeros = ticketsPersona.map(t => '*#' + t.numero + '*').join(', ');
+        mensaje = mensaje.replace(/@number/g, numeros);
+      }
+
+      if (number.startsWith('58')) {
+        // El número es venezolano 
+        messages.push({
+          number: '+'+number,
+          message: mensaje
+        });
+      }
+    
+    }
+
+    this.smsService.sendMessageMasiveSMS({messages})
+          .subscribe( ({msg, total}) => {
+  
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              }
+            });
+  
+            Toast.fire({
+              icon: "success",
+              title: msg
+            });
+            
+            this.message = '';
+            this.sendSMasive = false;
+  
+          }, (err) => {
+            console.log(err);
+            Swal.fire('Error', err.error.msg, 'error');
+            this.sendSMasive = false;          
+          })
+
+  }
   
 
 }

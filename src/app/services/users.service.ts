@@ -83,9 +83,9 @@ export class UsersService {
     }).pipe(
       tap( (resp: any) => {        
         
-        const { email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, wati, watilink, watitoken, termica, msg, uid } = resp.usuario;
+        const { email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, wati, watilink, watitoken, termica, gsm, msg, uid } = resp.usuario;
 
-        this.user = new User(email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, wati, watilink, watitoken, termica, msg, uid);   
+        this.user = new User(email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, whatsapp, wp, wati, watilink, watitoken, termica, gsm, msg, uid);   
         
         localStorage.setItem('token', resp.token);
 

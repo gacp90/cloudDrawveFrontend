@@ -477,7 +477,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#whatsappTicket" role="tab" aria-expanded="false">
                                     <span class="hidden-sm-up"><i class="ti-comment"></i></span>
-                                    <span class="hidden-xs-down">Whatsapp </span>
+                                    <span class="hidden-xs-down">Mensaje </span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -761,10 +761,18 @@
                                         <textarea #tWhatp class="form-control" rows="10" [value]="ticketWhatsapp"></textarea>
                                     </div>
 
-                                    <button [disabled]="sendM" (click)="sendWhatsapp(tWhatp.value)" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
-                                        <span *ngIf="sendM">Enviando...</span>
-                                        <span *ngIf="!sendM">Enviar</span>
-                                    </button>
+                                    <div class="d-flex flex-wrap justify-content-between">
+                                        <button [disabled]="sendM" (click)="sendWhatsapp(tWhatp.value)" type="button" class="btn btn-success btn-rounded"><i class="mdi mdi-whatsapp"></i> 
+                                            <span *ngIf="sendM">Enviando...</span>
+                                            <span *ngIf="!sendM">Enviar</span>
+                                        </button>
+    
+                                        <button *ngIf="user.gsm" [disabled]="sendS" (click)="sendSMS(tWhatp.value)" type="button" class="d-none d-md-block btn btn-info btn-rounded "><i class="ti-control-play"></i> 
+                                            <span *ngIf="sendS">Enviando...</span>
+                                            <span *ngIf="!sendS"> <i></i> SMS</span>
+                                        </button>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -1823,11 +1831,19 @@
                                 <textarea [(ngModel)]="message" #whatMasive class="form-control" rows="5"></textarea>
                                 <small class="text-mute"> <span class="fw-bold">Nota: </span>Debes de agregar un mensaje con mas de 5 caracteres</small>
                             </div>
+                            
+                            <div class="d-flex flex-wrap justify-content-between">
+                                <button [disabled]="sendMasive || message.length < 5" (click)="sendMasiveW(addImgMasive.checked)" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
+                                    <span *ngIf="sendMasive">Enviando...</span>
+                                    <span *ngIf="!sendMasive">Enviar</span>
+                                </button>
     
-                            <button [disabled]="sendMasive || message.length < 5" (click)="sendMasiveW(addImgMasive.checked)" type="button" class="btn btn-success btn-rounded ms-auto"><i class="mdi mdi-whatsapp"></i> 
-                                <span *ngIf="sendMasive">Enviando...</span>
-                                <span *ngIf="!sendMasive">Enviar</span>
-                            </button>
+                                <button *ngIf="user.gsm" [disabled]="sendSMasive || message.length < 5" (click)="sendSmsMasives()" type="button" class="d-none d-md-block btn btn-info btn-rounded "><i class="ti-control-play"></i> 
+                                    <span *ngIf="sendSMasive">Enviando...</span>
+                                    <span *ngIf="!sendSMasive"> <i></i> SMS</span>
+                                </button>
+                            </div>
+
                         </div>
                     </ng-container>
                     

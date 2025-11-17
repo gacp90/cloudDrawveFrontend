@@ -12,9 +12,7 @@ interface _message{
 export class WhatsappService {
 
   constructor(  private http: HttpClient) { }
-
-  public url = 'https://www.whatsapp.drawve.com/api/whatsapp'
-
+  
   /** ================================================================
    *  GENERATE QR
   ==================================================================== */
