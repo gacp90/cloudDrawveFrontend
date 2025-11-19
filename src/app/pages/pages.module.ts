@@ -21,6 +21,7 @@ import { RifaComponent } from './rifa/rifa.component';
 import { NgxPrinterModule } from 'ngx-printer';
 import { ClientesComponent } from './clientes/clientes.component';
 import { NewclientComponent } from './clientes/newclient/newclient.component';
+import { MensajesComponent } from './mensajes/mensajes.component';
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { NewclientComponent } from './clientes/newclient/newclient.component';
     RutasComponent,
     RifaComponent,
     ClientesComponent,
-    NewclientComponent
+    NewclientComponent,
+    MensajesComponent
   ],
   exports: [
     DashboardComponent,

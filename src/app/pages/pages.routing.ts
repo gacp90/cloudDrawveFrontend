@@ -13,6 +13,7 @@ import { UsuariosComponent } from './usuarios/usuarios.component';
 import { RutasComponent } from './rutas/rutas.component';
 import { RifaComponent } from './rifa/rifa.component';
 import { ClientesComponent } from './clientes/clientes.component';
+import { MensajesComponent } from './mensajes/mensajes.component';
 
 
 // COMPONENTS
@@ -30,6 +31,7 @@ const routes: Routes = [
         { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Rifa' } },
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },
         { path: 'vendedores', component: UsuariosComponent, canActivate: [AdminGuard], data:{ title: 'Vendedores' } },
+        { path: 'mensajes', component: MensajesComponent, canActivate: [AdminGuard], data:{ title: 'Mensajes' } },
         
         { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
       ] 

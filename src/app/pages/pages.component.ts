@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
 declare function customInitFunction(): any;
+declare function chatFunction(): any;
+declare function scrollbarFunction(): any;
 
 @Component({
   selector: 'app-pages',
@@ -14,6 +16,8 @@ export class PagesComponent implements OnInit {
   ngOnInit(): void {
 
     customInitFunction();
+    scrollbarFunction();
+    chatFunction();
 
   }
 

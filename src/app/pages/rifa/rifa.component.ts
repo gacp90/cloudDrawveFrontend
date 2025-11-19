@@ -3461,6 +3461,12 @@ export class RifaComponent implements OnInit {
   public sendS: boolean = false;
   sendSMS(message: string){
 
+    message = message.replace(/[\r\n/*]+/g, ' ').trim();
+
+    if (message.length > 160) {
+      Swal.fire('Atención', 'para SMS el maximo de caracteres es de 160', 'warning');
+      return;
+    }
 
     if (this.ticketSelected.telefono) {
         
@@ -3491,7 +3497,7 @@ export class RifaComponent implements OnInit {
               }, (err)=> {
                 console.log(err);
                 Swal.fire('Error', err.error.msg, 'error');            
-                this.sendM = false;
+                this.sendS = false;
               })  
 
       }
@@ -3506,9 +3512,15 @@ export class RifaComponent implements OnInit {
 
     let messages: any[] = [];
     this.sendSMasive = true;
-
+    
+    this.message = this.message.replace(/[\r\n]+/g, '').trim();
+    if (this.message.length > 160) {
+      Swal.fire('Atención', 'para SMS el maximo de caracteres es de 160', 'warning');
+      return;
+    }
+    
     const groupedTickets: { [telefono: string]: any[] } = {};
-
+    
     // Agrupar los tickets por número de teléfono
     for (let i = 0; i < this.tickets.length; i++) {
       const ticket = this.tickets[i];
@@ -3526,24 +3538,24 @@ export class RifaComponent implements OnInit {
     for (const number in groupedTickets) {
       const ticketsPersona = groupedTickets[number];
       const primerTicket = ticketsPersona[0]; // Usamos el primer ticket para obtener nombre, etc.
-    
+      
       let mensaje = this.message;
     
       if (mensaje.includes('@name')) {
-        mensaje = mensaje.replace(/@name/g, '*' + primerTicket.nombre + '*');
+        mensaje = mensaje.replace(/@name/g, primerTicket.nombre);
       }
     
       if (mensaje.includes('@premio')) {
-        mensaje = mensaje.replace(/@premio/g, '*' + this.rifa.name + '*');
+        mensaje = mensaje.replace(/@premio/g, this.rifa.name);
       }
     
       if (mensaje.includes('@empresa')) {
-        mensaje = mensaje.replace(/@empresa/g, '*' + (this.rifa.admin.empresa || '') + '*');
+        mensaje = mensaje.replace(/@empresa/g, (this.rifa.admin.empresa || ''));
       }
     
       if (mensaje.includes('@number')) {
         // Concatenamos todos los números de los tickets
-        const numeros = ticketsPersona.map(t => '*#' + t.numero + '*').join(', ');
+        const numeros = ticketsPersona.map(t => '#' + t.numero).join(', ');
         mensaje = mensaje.replace(/@number/g, numeros);
       }
 

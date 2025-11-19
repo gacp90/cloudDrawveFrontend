@@ -73,7 +73,8 @@ export class ClientesComponent implements OnInit {
   public total: number = 0;
   public query: any = {
     desde: 0,
-    hasta: 50
+    hasta: 50,
+    sort: {}
   }
 
   loadClients(){

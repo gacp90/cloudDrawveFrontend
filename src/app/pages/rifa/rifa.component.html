@@ -758,7 +758,9 @@
 
                                     <div class="form-group mb-1">
                                         <label>Mensaje</label>
-                                        <textarea #tWhatp class="form-control" rows="10" [value]="ticketWhatsapp"></textarea>
+                                        <!-- <textarea #tWhatp class="form-control" rows="10" [value]="ticketWhatsapp"></textarea> -->
+                                        <textarea #tWhatp class="form-control" rows="10" [(ngModel)]="ticketWhatsapp"></textarea>
+                                        <p class="text-muted mb-0">Caracteres ({{ticketWhatsapp.length}})</p>
                                     </div>
 
                                     <div class="d-flex flex-wrap justify-content-between">
@@ -1829,6 +1831,7 @@
                             <div class="form-group mb-1">
                                 <label>Mensaje</label>
                                 <textarea [(ngModel)]="message" #whatMasive class="form-control" rows="5"></textarea>
+                                <p class="mb-0 text-muted">Caracteres: ({{message.length}})</p>
                                 <small class="text-mute"> <span class="fw-bold">Nota: </span>Debes de agregar un mensaje con mas de 5 caracteres</small>
                             </div>
                             
