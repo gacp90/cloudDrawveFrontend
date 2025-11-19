@@ -39,6 +39,10 @@ export class ClientesComponent implements OnInit {
   ngOnInit(): void {
     this.loadClients();
     this.loadRutas();
+
+    if (this.user.wati) {
+      this.loadTemplates();
+    }
   }
 
   /** ======================================================================
@@ -74,7 +78,9 @@ export class ClientesComponent implements OnInit {
   public query: any = {
     desde: 0,
     hasta: 50,
-    sort: {}
+    sort: {
+      fecha: -1
+    }
   }
 
   loadClients(){
@@ -112,6 +118,23 @@ export class ClientesComponent implements OnInit {
   limiteChange( cantidad: any ){  
 
     this.query.hasta = Number(cantidad);    
+    this.loadClients();
+
+  }
+
+  /** ================================================================
+   *   CHANGE ORDEN
+  ==================================================================== */
+  ordenChange( orden: any ){  
+
+    if (orden === 'ultimos') {
+      this.query.sort = { fecha: -1 }      
+    } else if(orden === 'primeros'){
+      this.query.sort = { fecha: 1 }
+    } else if(orden === 'nombre'){
+      this.query.sort = { nombre: 1 }
+    }
+
     this.loadClients();
 
   }

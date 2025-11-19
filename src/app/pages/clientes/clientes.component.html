@@ -11,13 +11,25 @@
                         <div>
                             <label for="mostrar" class="me-2">Mostrar: </label>
                             <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
-                                <option value="2">2</option>
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                                 <option value="100">100</option>
                                 <option value="250">250</option>
                                 <option value="500">500</option>
+                                <option value="1000">1000</option>
+                                <option value="2500">2500</option>
+                                <option value="5000">5000</option>
+                            </select>
+
+                        </div>
+
+                        <div>
+                            <label for="ordenar" class="me-2">Ordenar: </label>
+                            <select name="" id="" #ordenar (change)="ordenChange(ordenar.value)">
+                                <option value="ultimos">Ultimos Creados</option>
+                                <option value="primeros">Primeros Creados</option>
+                                <option value="nombre">Nombre</option>
                             </select>
 
                         </div>
@@ -52,6 +64,9 @@
 
                 </div>
 
+                <div class="d-flex justify-content-end">
+                    <small><span class="fw-bold">Total:</span> {{ total }} </small>
+                </div>
                 <div class="table-responsive">
                     <table id="demo-foo-addrow" class="table m-t-30 table-hover no-wrap contact-list" data-page-size="10">
                         <thead>
