@@ -77,6 +77,7 @@ export class RifaComponent implements OnInit {
                 private printerService: NgxPrinterService){
 
     this.user = usersService.user;
+    this.modulos = smsService.modulos;
 
     activatedRoute.params.subscribe( ({id}) => {
       this.loadRifa(id);      
@@ -3456,6 +3457,52 @@ export class RifaComponent implements OnInit {
   };
 
   /** ================================================================
+   *   LOAD MODULES
+  ==================================================================== */
+  public modulos: any[] = [];
+  loadModules(){
+
+    this.smsService.loadModules()
+        .subscribe( ({modulos}) => {
+
+          this.modulos = this.smsService.modulos;                  
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.eror.msg, 'error');          
+        })
+  }
+
+  /** ================================================================
+   *   SELECTED MODULE
+  ==================================================================== */
+  selectModule(module: any){
+
+    const modulo: any ={
+      "path": module.path,    
+      "url": this.local_url, 
+      "admin": this.user.uid
+    }
+    
+    this.smsService.selectModulo(modulo)
+    .subscribe( () => {
+        module.activo = true;
+        Swal.fire({
+          toast: true,
+          showConfirmButton: false,
+          text: 'Se ha activado el modulo exitosamente!',
+          icon: 'success',
+          timer: 1500
+        })
+      
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+  }
+
+  /** ================================================================
    *   ENVIAR SMS
   ==================================================================== */
   public sendS: boolean = false;
@@ -3597,6 +3644,29 @@ export class RifaComponent implements OnInit {
             Swal.fire('Error', err.error.msg, 'error');
             this.sendSMasive = false;          
           })
+
+  }
+
+  /** ================================================================
+   *   LLAMAR
+  ==================================================================== */
+  makeCall(number: string){
+
+    this.smsService.callClient('+'+number)
+        .subscribe( () => {
+
+          Swal.fire({
+            toast: true,
+            text: `Llamando al ${number}`,
+            showConfirmButton: false,
+            icon: 'success',
+            timer: 1500
+          })
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
 
   }
   

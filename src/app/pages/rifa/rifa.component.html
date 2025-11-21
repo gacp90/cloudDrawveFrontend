@@ -8,9 +8,13 @@
     </div>
 
     <!-- VINCULAR WHATSAPP -->
-    <div *ngIf="user.whatsapp && user.wp" class="d-flex flex-wrap gap-2">
+    <div *ngIf="user.wp && user.gsm" class="d-flex flex-wrap gap-2">
         <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappqr">
             Vincular Whatsapp
+        </button>
+
+        <button type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#modalGsm">
+            Modulo GSM
         </button>
     </div>
    
@@ -582,6 +586,7 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12 m-b-20">
+                                            <button *ngIf="user.gsm" [disabled]="!ticketSelected.telefono" class="btn btn-sm btn-info ms-auto"> <i class="ti ti-headphone-alt"></i> </button>
                                             <input formControlName="telefono" type="text" class="form-control" placeholder="Telefono del cliente">
                                             <div *ngIf="validateUpTicket('telefono')" class="form-control-feedback">
                                                 <small> El telefono es obligatorio </small>
@@ -1693,7 +1698,70 @@
     </div>
 
     <!-- ========================================================= 
-    MODAL GET QR
+    MODAL MODULES GSM
+    ======================================================== -->
+    <div id="modalGsm" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="modalGsm">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="modalGsm">Modulos GSM</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="d-flex justify-content-end">
+                        <button (click)="loadModules()" type="button" class="btn btn-sm btn-primary">
+                            Cargar Modulos
+                        </button>                        
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table class="table table-strip table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Puerto</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr *ngIf="modulos.length === 0" >
+                                    <td colspan="4">No se encontraron modulos conectados...</td>
+                                </tr>
+                                <tr *ngFor="let modulo of modulos; let i = index" >
+                                    <td scope="row"> {{i+1}} </td>
+                                    <td>  
+                                        <span *ngIf="modulo.isArduino">Modulo GSM A001</span>
+                                        <span *ngIf="!modulo.isArduino"> {{modulo.friendlyName}} </span>
+                                    </td>
+                                    <td> {{ modulo.path }} </td>
+                                    <td>
+                                        <button [disabled]="!modulo.isArduino" type="button" (click)="selectModule(modulo)" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn" [ngClass]="{'text-success': modulo.activo && modulo.isArduino, 'text-danger': !modulo.activo && modulo.isArduino}" >
+                                            <i class="ti ti-power-off" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- ========================================================= 
+    MODAL VINCULAR WHATSAPP
     ======================================================== -->
     <div id="whatsappqr" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="whatsappqr">
         <div class="modal-dialog modal-lg">

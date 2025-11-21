@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 declare function customInitFunction(): any;
-declare function chatFunction(): any;
 declare function scrollbarFunction(): any;
+declare function waves(): any;
+declare function sidebarMenu(): any;
+declare function chatFunction(): any;
 
 @Component({
   selector: 'app-pages',
@@ -17,6 +19,8 @@ export class PagesComponent implements OnInit {
 
     customInitFunction();
     scrollbarFunction();
+    waves();
+    sidebarMenu();
     chatFunction();
 
   }
