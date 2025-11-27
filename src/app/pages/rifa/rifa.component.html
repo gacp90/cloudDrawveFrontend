@@ -8,12 +8,12 @@
     </div>
 
     <!-- VINCULAR WHATSAPP -->
-    <div *ngIf="user.wp && user.gsm" class="d-flex flex-wrap gap-2">
+    <div *ngIf="user.wp || user.gsm" class="d-flex flex-wrap gap-2">
         <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappqr">
             Vincular Whatsapp
         </button>
 
-        <button type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#modalGsm">
+        <button *ngIf="user.gsm" type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#modalGsm">
             Modulo GSM
         </button>
     </div>
@@ -513,6 +513,8 @@
                                         Ticket Ganador
                                     </button>
 
+                                    <button *ngIf="user.gsm" [disabled]="!ticketSelected.telefono" (click)="makeCall(ticketSelected.telefono)" type="buttom" class="btn btn-sm btn-info ms-auto"> <i class="ti ti-headphone-alt"></i> </button>
+
                                     <button [disabled]="user.role !== 'ADMIN' || ticketSelected.disponible" type="button" class="btn btn-danger btn-sm" (click)="clearTicket(ticketSelected.tid!)">
                                         Limpiar Ticket
                                     </button>                                    
@@ -586,7 +588,7 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12 m-b-20">
-                                            <button *ngIf="user.gsm" [disabled]="!ticketSelected.telefono" class="btn btn-sm btn-info ms-auto"> <i class="ti ti-headphone-alt"></i> </button>
+                                            
                                             <input formControlName="telefono" type="text" class="form-control" placeholder="Telefono del cliente">
                                             <div *ngIf="validateUpTicket('telefono')" class="form-control-feedback">
                                                 <small> El telefono es obligatorio </small>

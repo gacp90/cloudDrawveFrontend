@@ -245,6 +245,44 @@ export class ClientesComponent implements OnInit {
 
   }
 
+  /** ================================================================
+     *   EXPORTAR EXCEL
+    ==================================================================== */
+    exportar(){
+  
+      let clientes: any[] = [];
+  
+      for (const clie of this.clients) {
+          
+        let cli: any = {
+          nombre: clie.nombre,
+          codigo: clie.codigo,
+          telefono: clie.telefono,
+          cedula: clie.cedula,
+          direccion: clie.direccion,
+          correo: clie.correo,
+          ruta: (clie.ruta)? clie.ruta.name : 'Sin ruta'           
+        }
+        
+        clientes.push(cli);  
+      }
+  
+      /* generate a worksheet */
+      var ws = XLSX.utils.json_to_sheet(clientes);
+        
+      /* add to workbook */
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Tickets");
+  
+      /* title */
+      let title = `clientes.xls`;
+  
+      /* write workbook and force a download */
+      XLSX.writeFile(wb, title);
+  
+  
+    }
+
   /** ======================================================================
    * VALIDATE
   ====================================================================== */
