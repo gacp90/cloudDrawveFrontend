@@ -309,7 +309,10 @@
                         <ng-container *ngFor="let ticket of listTicketsSelect; let i = index">
                             <button (click)="delTicketList(i)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
                                 <span class="btn-label"><i class="mdi mdi-close"></i></span>
-                                 {{ ticket.numero }}
+                                <span class="text-break text-wrap">
+                                    {{ ticket.numero }}
+
+                                </span>
                             </button>
                         </ng-container>
                     </ng-container>
@@ -399,7 +402,7 @@
                     <ng-container *ngFor="let ticket of tickets">
                         <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" type="button" class="btn btn-6 m-1 border-0 pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
                             <div [ngClass]="{'d-flex': ticket.pagos.length === 0  && ticket.estado === 'Apartado'}">
-                                <span class="fw-bold fs-3 text-white">
+                                <span class="fw-bold text-white" [ngClass]="{'fs-5': ticket.numero.length > 5, 'fs-3': ticket.numero.length < 5}">
                                     {{ ticket.numero }}
                                 </span> 
                                 <span *ngIf="ticket.estado === 'Apartado' && ticket.pagos.length === 0 " class="text-center ml-1">
@@ -415,7 +418,7 @@
                     <ng-container *ngFor="let ticket of tickets">
                         <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta" (click)="selectTicket(ticket)" data-toggle="modal" data-target="#modalTicket" type="button" class="btn btn-6 m-1 border-0 pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
                             <div [ngClass]="{'d-flex': ticket.pagos.length === 0  && ticket.estado === 'Apartado'}">
-                                <span class="fw-bold fs-3 text-white">
+                                <span class="fw-bold text-white" [ngClass]="{'fs-5': ticket.numero.length > 5, 'fs-3': ticket.numero.length < 5}">
                                     {{ ticket.numero }}
                                 </span> 
                                 <span *ngIf="ticket.estado === 'Apartado' && ticket.pagos.length === 0 " class="text-center ml-1">

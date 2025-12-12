@@ -113,17 +113,21 @@ export class DashboardComponent implements OnInit {
     descripcion: ['', [Validators.required]],
     promocion: 0,
     comision: 0,
+    agrupado: false
   })
 
   create(){
 
     this.newRifaFormSubmitted = true;
     this.btnCreate = true;
-    
+
     if (this.newRifaForm.invalid) {
       this.btnCreate = false;
       return;
     }
+
+    const fecha = new Date(this.newRifaForm.value.fecha!);
+    this.newRifaForm.value.fecha = fecha.toISOString();
 
     this.rifasService.createRifa(this.newRifaForm.value)
         .subscribe( ({rifa}) => {          

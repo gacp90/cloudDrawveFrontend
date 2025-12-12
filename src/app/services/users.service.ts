@@ -65,9 +65,7 @@ export class UsersService {
                       .pipe(
                         tap( (resp: any) => {
                           localStorage.setItem('token', resp.token);
-                        }),
-                        catchError( error => of(false) )
-                      );
+                        }));
   }
 
   /** ================================================================

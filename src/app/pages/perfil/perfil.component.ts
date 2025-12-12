@@ -74,9 +74,6 @@ export class PerfilComponent implements OnInit {
   ==================================================================== */
   getForm(){
 
-    console.log(this.user);
-    
-
     this.formUpdate.reset({
       email: this.user.email,
       name: this.user.name,

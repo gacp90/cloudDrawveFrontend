@@ -40,8 +40,8 @@ export class LoginComponent {
     }
 
     this.usersService.login(this.loginForm.value)
-        .subscribe( resp => {          
-
+        .subscribe( resp => {
+          
           if (resp === false) {
             Swal.fire('Atención', 'Credenciales incorrectas, porfavor verificar el email o contraseña', 'warning')
             return;
