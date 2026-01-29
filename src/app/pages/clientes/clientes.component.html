@@ -1,16 +1,36 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Lista de clientes</h4>
+            <div class="card-body"> 
 
-                <div class="d-flex justify-content-between flex-wrap mt-1">
+                <!-- TITULO Y BOTONES -->
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
 
-                    <div class="my-2">
+                    <h4 class="card-title">Lista de clientes</h4>
 
-                        <div>
+                    <div class="d-flex flex-wrap justify-content-betwenn gap-2">
+
+                        <button *ngIf="user.whatsapp && user.wp" type="button" class="btn btn-success " data-toggle="modal" data-target="#whatsappmasive">
+                            Enviar mensajes masivos
+                        </button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createClient">
+                            Crear Cliente
+                        </button>
+                        <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#clientesMasivosModal">
+                            Subir Excel de clientes
+                        </button>
+                    </div>
+
+
+                </div>
+
+                <div class="d-flex flex-wrap align-items-end justify-content-between">
+
+                    <div class="d-flex flex-wrap gap-2">
+    
+                        <div class="form-group mb-0">
                             <label for="mostrar" class="me-2">Mostrar: </label>
-                            <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
+                            <select class="form-control" name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
@@ -21,56 +41,57 @@
                                 <option value="2500">2500</option>
                                 <option value="5000">5000</option>
                             </select>
-
+    
                         </div>
-
-                        <div>
+    
+                        <div class="form-group mb-0">
                             <label for="ordenar" class="me-2">Ordenar: </label>
-                            <select name="" id="" #ordenar (change)="ordenChange(ordenar.value)">
+                            <select class="form-control" name="" id="" #ordenar (change)="ordenChange(ordenar.value)">
                                 <option value="ultimos">Ultimos Creados</option>
                                 <option value="primeros">Primeros Creados</option>
                                 <option value="nombre">Nombre</option>
                             </select>
+    
+                        </div>
 
+                        <div class="form-group mb-0">
+                            <label for="srifas" class="me-2">Rifas: </label>
+                            <select class="form-control" name="" id="" #srifas (change)="ordenRifa(srifas.value)">
+                                <option value="none">Niguna</option>
+                                <option *ngFor="let rifa of rifas" [value]="rifa.rifid" class="text-truncate"> {{ rifa.name }} </option>
+                            </select>
+    
                         </div>
                         
-                        <div>
+                        <div class="form-group mb-0">
                             <label for="rutasI" class="me-2">Rutas: </label>
-                            <select name="" id="" #rutasI (change)="changeRuta(rutasI.value)">
+                            <select class="form-control" name="" id="" #rutasI (change)="changeRuta(rutasI.value)">
                                 <option value="none">Todas</option>
                                 <option *ngFor="let ruta of rutas" [value]="ruta.ruid"> {{ ruta.name }} </option>
                             </select>
+    
+                        </div>  
+                        
+                    </div>
 
-                        </div>
-
-                        <div class="">
-                            <input type="search" #searchI (keydown)="search(searchI.value)" (keydown.enter)="search(searchI.value)" id="demo-input-search2" placeholder="Busca clientes" class="form-control"> 
-                        </div>
-
-                    </div>                    
-
-                    <div class="gap-2">
-                        <button *ngIf="user.whatsapp && user.wp" type="button" class="btn btn-success " data-toggle="modal" data-target="#whatsappmasive">
-                            Enviar mensajes masivos
-                        </button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createClient">
-                            Crear Cliente
-                        </button>
-                        <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#clientesMasivosModal">
-                            Subir Excel de clientes
-                        </button>
-
+                    <div class="form-group mb-0">
+                        <input type="search" #searchI (keydown)="search(searchI.value)" (keydown.enter)="search(searchI.value)" id="demo-input-search2" placeholder="Busca clientes" class="form-control"> 
                     </div>
 
                 </div>
 
+
+                <!-- EXPORTAR Y BUSCADOR -->                
                 <div class="d-flex justify-content-between mt-3">
-                    <button  type="button" (click)="exportar()" class="btn btn-sm btn-success">
-                        Exportar Excel
-                    </button>
                     
+                    <div>
+                        <button  type="button" (click)="exportar()" class="btn btn-sm btn-success">
+                            Exportar Excel
+                        </button>
+                    </div>
                     <small><span class="fw-bold">Total:</span> {{ total }} </small>
                 </div>
+
                 <div class="table-responsive">
                     <table id="demo-foo-addrow" class="table m-t-30 table-hover no-wrap contact-list" data-page-size="10">
                         <thead>
@@ -179,7 +200,7 @@ MODAL UPDATE
                     <div class="form-group has-danger">
                         <div class="col-md-12">
                             <label class="control-label">Codigo</label>
-                            <select #cs formControlName="codigo" class="form-control custom-select" [ngClass]="{'is-invalid': cs.value === '' && formSubmit, 'is-valid': cs.value !== '' && formSubmit }">
+                            <select class="form-control" #cs formControlName="codigo" class="form-control custom-select" [ngClass]="{'is-invalid': cs.value === '' && formSubmit, 'is-valid': cs.value !== '' && formSubmit }">
                                 <option value="">Seleccionar Codigo</option>
                                 <option *ngFor="let pais of paises" [value]="pais.phoneCode">
                                     {{ pais.nameES }} (+{{ pais.phoneCode }})
@@ -224,7 +245,7 @@ MODAL UPDATE
                     <div class="form-group has-danger">
                         <div class="col-md-12">
                             <label class="control-label">Ruta</label>
-                            <select formControlName="ruta" class="form-control custom-select">
+                            <select class="form-control" formControlName="ruta" class="form-control custom-select">
                                 <option value="">Seleccionar ruta</option>
                                 <option *ngFor="let ruta of rutas" [value]="ruta.ruid">
                                     {{ ruta.name }}
@@ -303,7 +324,7 @@ MODAL WHATSAPP MASIVE
 
                         <div class="form-group">
                             <label>Plantillas de WATI</label>
-                            <select class="custom-select col-12" id="templatesWati" (change)="seleccionarPlantilla(st.value)" #st>
+                            <select class="form-control" class="custom-select col-12" id="templatesWati" (change)="seleccionarPlantilla(st.value)" #st>
                                 <option value="none">seleccionar</option>
                                 <option *ngFor="let template of templates" [value]="template.id"> {{ template.elementName }} </option>
                             </select>

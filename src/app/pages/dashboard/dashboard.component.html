@@ -2,14 +2,27 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Lista de rifas</h4>
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+                    <h4 class="card-title">Lista de rifas</h4>
+                    <button *ngIf="user.role === 'ADMIN'" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRifa">
+                        Crear Rifa
+                    </button>
+                </div>
 
-                <div class="d-flex justify-content-between flex-wrap mt-1">
+                <div class="d-flex justify-content-between flex-wrap ">
 
-                    <div class="my-2">
+                    <div class="form-group">
+                        <label for="mostrar">Estado </label>
+                        <select class="form-control" name="" id="" #estado (change)="changeEstado(estado.value)">
+                            <option value="Abierta" selected >Abierta</option>
+                            <option value="Cerrada">Cerrada</option>
+                        </select>
 
-                        <label for="mostrar" class="me-2">Mostrar: </label>
-                        <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mostrar">Mostrar: </label>
+                        <select class="form-control" name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
@@ -17,20 +30,11 @@
                             <option value="250">250</option>
                             <option value="500">500</option>
                         </select>
-
                     </div>
-
-                    <div>
-                        <button *ngIf="user.role === 'ADMIN'" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRifa">
-                            Crear Rifa
-                        </button>
-
-                    </div>
-
                 </div>
 
                 <div class="table-responsive">
-                    <table id="demo-foo-addrow" class="table m-t-30 table-hover no-wrap contact-list" data-page-size="10">
+                    <table id="demo-foo-addrow" class="table table-hover no-wrap contact-list" data-page-size="10">
                         <thead>
                             <tr>
                                 <th>Rifa</th>

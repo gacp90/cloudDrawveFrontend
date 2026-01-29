@@ -40,6 +40,7 @@ export class DashboardComponent implements OnInit {
   public query: any = {
     desde: 0,
     hasta: 50,
+    abierta: true,
     sort: {fecha: 1}
   }
 
@@ -95,6 +96,21 @@ export class DashboardComponent implements OnInit {
   limiteChange( cantidad: any ){  
 
     this.query.hasta = Number(cantidad);    
+    this.loadRifas();
+
+  }
+
+  /** ================================================================
+   *   CHANGE ESTADO
+  ==================================================================== */
+  changeEstado( estado: any ){  
+    
+    if (estado === 'Abierta') {
+      this.query.abierta = true;
+    }else{
+      this.query.abierta = false;
+    }
+    
     this.loadRifas();
 
   }

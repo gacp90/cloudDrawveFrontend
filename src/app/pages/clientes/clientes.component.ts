@@ -16,6 +16,9 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 
 import Swal from 'sweetalert2';
+import { RifasService } from 'src/app/services/rifas.service';
+import { Rifa } from 'src/app/models/rifas.model';
+import { TicketsService } from 'src/app/services/tickets.service';
 
 @Component({
   selector: 'app-clientes',
@@ -27,10 +30,12 @@ export class ClientesComponent implements OnInit {
   public user!: User;
 
   constructor(  private clientsService: ClientesService,
+                private ticketsService: TicketsService,
                 private fb: FormBuilder,
                 private rutasService: RutasService,
                 private usersService: UsersService,
                 private watiService: WatiService,
+                private rifasService: RifasService,
                 private whatsappService: WhatsappService,
   ){
     this.user = usersService.user;
@@ -39,6 +44,7 @@ export class ClientesComponent implements OnInit {
   ngOnInit(): void {
     this.loadClients();
     this.loadRutas();
+    this.loadRifas();
 
     if (this.user.wati) {
       this.loadTemplates();
@@ -138,6 +144,44 @@ export class ClientesComponent implements OnInit {
     this.loadClients();
 
   }
+
+  /** ================================================================
+   *   ORDEN RIFA
+  ==================================================================== */
+  ordenRifa(rifaid: string){
+    if (rifaid === 'none') {
+      delete this.query._id;
+      this.loadClients();
+      return;
+    }
+
+    let queryT = {
+      rifa: rifaid,
+      estado: { $in: ['Apartado', 'Pagado'] }
+    }
+
+    this.ticketsService.loadTickets(queryT)
+        .subscribe( ({tickets}) => {
+          
+          const clientsSelect = [
+            ...new Set(
+              tickets
+                .filter(t => t.cliente)
+                .map(t => t.cliente)
+            )
+          ];
+          
+          this.query._id = { $nin: clientsSelect };
+          this.loadClients();
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+
+  }
+
 
   /** ================================================================
    *   ADD CLIENT
@@ -963,5 +1007,31 @@ export class ClientesComponent implements OnInit {
         
         fileReader.readAsArrayBuffer(this.excelUpdate);
     };
+
+  /** ================================================================
+   *   IMPORTAR CLIENTES CON EXCEL
+  ==================================================================== */
+  public rifas: Rifa[] = [];
+  public queryRifas: any = {
+    desde: 0,
+    hasta: 50,
+    abierta: true,
+    sort: {fecha: 1}
+  }
+
+  loadRifas(){
+    
+    if (this.user.role === 'ADMIN') {
+      this.query.admin = this.user.uid;
+    }else{
+      this.query.admin = this.user.admin;
+    }   
+
+    this.rifasService.loadRifas(this.query)
+        .subscribe( ({rifas, total}) => { 
+          this.rifas = rifas;
+        });
+
+  }
 
 }

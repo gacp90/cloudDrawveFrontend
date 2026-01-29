@@ -233,47 +233,44 @@
                     <h3> Filtros </h3>
                 </div>
 
-                <div class="my-2">
-                    <label for="mostrar" class="me-2">Mostrar: </label>
-                    <select name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="250">250</option>
-                        <option value="500">500</option>
-                        <option value="1000">1000</option>
-                        <option value="2500">2500</option>
-                        <option value="5000">5000</option>
-                        <option value="10000">10000</option>
-                    </select>
-                </div>
+                 <!-- RUTAS Y VENDEDORES -->
+                <div class="d-flex flex-wrap gap-2">                    
+                    <div class="form-group mb-0">
 
-            </div>
+                        <label for="rutas" class="me-2">Rutas: </label>
+                        <select class="form-control" name="" id="rutas" #rutaF (change)="filterRuta(rutaF.value)">
+                            <option value="Todos">Todos</option>                        
+                            <option *ngFor="let ruta of rutas" [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'"> {{ ruta.name }} </option>
+                        </select>
 
-            <!-- RUTAS Y VENDEDORES -->
-            <div class="d-flex justify-content-between flex-wrap mt-1">
+                    </div>
 
-                <div class="">
+                    <div class="form-group mb-0" *ngIf="user.role === 'ADMIN'" class="">
 
-                    <label for="rutas" class="me-2">Rutas: </label>
-                    <select name="" id="rutas" #rutaF (change)="filterRuta(rutaF.value)">
-                        <option value="Todos">Todos</option>                        
-                        <option *ngFor="let ruta of rutas" [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'"> {{ ruta.name }} </option>
-                    </select>
+                        <label for="vendedores" class="me-2">Vendedores: </label>
+                        <select class="form-control" name="" id="vendedores" #vendedoresF (change)="filterVendedor(vendedoresF.value)">
+                            <option value="Todos">Todos</option>
+                            <option *ngIf="rifa" [value]="rifa.admin._id"> {{ rifa.admin.name  }} </option>
+                            <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
+                        </select>
+                    </div>
 
-                </div>
+                    <div class="form-group mb-0">
+                        <label for="mostrar" class="me-2">Mostrar: </label>
+                        <select class="form-control" name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                            <option value="2500">2500</option>
+                            <option value="5000">5000</option>
+                            <option value="10000">10000</option>
+                        </select>
+                    </div>
+                </div>              
 
-                <div *ngIf="user.role === 'ADMIN'" class="">
-
-                    <label for="vendedores" class="me-2">Vendedores: </label>
-                    <select name="" id="vendedores" #vendedoresF (change)="filterVendedor(vendedoresF.value)">
-                        <option value="Todos">Todos</option>
-                        <option *ngIf="rifa" [value]="rifa.admin._id"> {{ rifa.admin.name  }} </option>
-                        <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
-                    </select>
-
-                </div>
-
-            </div>
+            </div>          
 
             <hr>
 
