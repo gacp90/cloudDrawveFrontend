@@ -34,6 +34,8 @@ import { NgxPrinterService } from 'ngx-printer';
 import { ClientesService } from 'src/app/services/clientes.service';
 import { Client } from 'src/app/models/clientes.model';
 import { SmsService } from 'src/app/services/sms.service';
+import { Venta } from 'src/app/models/ventas.model';
+import { VentasService } from 'src/app/services/ventas.service';
 
 interface templateIn{
   id: string,
@@ -74,6 +76,7 @@ export class RifaComponent implements OnInit {
                 private fb: FormBuilder,
                 private clientesService: ClientesService,
                 private smsService: SmsService,
+                private ventasService: VentasService,
                 private printerService: NgxPrinterService){
 
     this.user = usersService.user;
@@ -1248,6 +1251,24 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
+   *   SEARCH TICKET FOR CLIENT
+  ==================================================================== */
+  searchNumber(busqueda: string){
+
+    if (busqueda.length < 2 || busqueda.length === 0) {
+      delete this.query['$or'];
+    }else{
+      const regex = { $regex: busqueda, $options: 'i' }; // Construir regex      
+      this.query.$or = [
+        { numero: regex }
+      ];
+    }
+
+    this.loadTickets();
+
+  }
+
+  /** ================================================================
    *   ADD PAID
   ==================================================================== */
   @ViewChild('nameM') nameM!: ElementRef;
@@ -1703,7 +1724,8 @@ export class RifaComponent implements OnInit {
       }
     });
 
-    if (validarItem === -1) {      
+    if (validarItem === -1) {
+      ticket.select = true; 
       this.listTicketsSelect.push(ticket);
     }    
 
@@ -1712,7 +1734,8 @@ export class RifaComponent implements OnInit {
   /** ================================================================
    *   DELET TICKET LIST
   ==================================================================== */
-  delTicketList(i: number){
+  delTicketList(i: number, ticket: Ticket){
+    ticket.select = false;
     this.listTicketsSelect.splice(i,1);
   }
 
@@ -1762,8 +1785,7 @@ export class RifaComponent implements OnInit {
             this.totalTickets+= tick.monto;
           }
 
-          this.totalPendienteCobrar = (this.totalTickets - this.totalApartado);         
-          
+          this.totalPendienteCobrar = (this.totalTickets - this.totalApartado);
 
           this.loadEgresos();
           
@@ -1932,14 +1954,22 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   public wmwb: string = '';
   public wtwb: string = '';
-  prepareWhatsappWeb(pago: any){
+  prepareWhatsappWeb(pago: any, pasarela: boolean = false){
 
-    const numeros = pago.tickets.map((t:any) => '*#' + t.numero + '*').join(', ');    
+    let numeros: any;    
+    if (!pasarela) {
+      numeros = pago.tickets.map((t:any) => '*#' + t.numero + '*').join(', ');    
+    }else{
+      numeros = pago.tickets.map((t:any) => '*#' + t.ticket.numero + '*').join(', ');  
+      pago.telefono = pago.codigo+pago.telefono;
+      pago.metodoname = 'Wompi';
+      pago.referencia = pago.vid;
+    }
 
-    if (pago.estado === 'Confirmado') {
+    if (pago.estado === 'Confirmado' || pago.estado === 'Pagado') {
 
       // this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, gracias por tu compra`
-      this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, Ya sabes ponte bonit@ y espera la llamada ganadora`
+      this.wmwb = `Hola ${pago.nombre}, hemos confirmado exitosamente la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number , con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, gracias por tu compra`
       
     }else{
       this.wmwb = `Hola ${pago.nombre}, No hemos podido confirmar la compra de ${ (pago.tickets.length > 1)? 'tus tickets': 'tu ticket' } @number, con el metodo de pago ${pago.metodoname}, referencia ${pago.referencia}, porfavor vuelve a enviarnos los datos por este medio`
@@ -1959,6 +1989,7 @@ export class RifaComponent implements OnInit {
 
     // 1. Hacer el modal de Bootstrap "inert" temporalmente
     document.getElementById('comprasWeb')?.setAttribute('inert', '');
+    document.getElementById('comprasPasarelas')?.setAttribute('inert', '');
     
 
     const { value: formValues } = await Swal.fire({
@@ -2005,6 +2036,7 @@ export class RifaComponent implements OnInit {
 
     // 3. Remover el atributo inert después
     document.getElementById('comprasWeb')?.removeAttribute('inert');
+    document.getElementById('comprasPasarelas')?.removeAttribute('inert');
   
   }
 
@@ -3667,6 +3699,63 @@ export class RifaComponent implements OnInit {
           console.log(err);
           Swal.fire('Error', err.error.msg, 'error');          
         })
+
+  }
+
+  
+  /** ================================================================
+   *   COMPRAS POR PASARELAS
+  ==================================================================== */
+  public ventas: Venta[] = [];
+  public totalVentasP: number = 0;
+  public loadingComprasPasarelas: boolean = false;
+  public queryV: any = {
+    desde: 0,
+    hasta: 50
+  };
+
+  loadComprasPasarela(){
+
+    this.queryV.rifa = this.rifa.rifid;
+    this.loadingComprasPasarelas = true;
+    
+    this.ventasService.loadVentasQuery(this.queryV)
+    .subscribe( ({ventas, total}) => {
+          this.loadingComprasPasarelas = false;
+          this.ventas = ventas; 
+          this.totalVentasP = total;
+          
+        },(err) => {
+          console.log(err);
+          this.loadingComprasPasarelas = false;
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+  }
+
+  
+  /** ================================================================
+   *   CAMBIAR PAGINA
+  ==================================================================== */
+  @ViewChild('mostrarP') mostrarPasarela!: ElementRef;
+  cambiarPaginaPasarela (valor: number){
+    
+    this.queryV.desde += valor;
+
+    if (this.queryV.desde < 0) {
+      this.queryV.desde = 0;
+    }
+    
+    this.loadComprasPasarela();
+    
+  }
+  
+  /** ================================================================
+   *   CHANGE LIMITE
+  ==================================================================== */
+  limiteChangePasarela( cantidad: any ){  
+
+    this.queryV.hasta = Number(cantidad);    
+    this.loadComprasPasarela();
 
   }
   

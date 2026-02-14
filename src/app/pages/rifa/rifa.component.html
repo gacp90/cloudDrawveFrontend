@@ -54,6 +54,10 @@
             Compras Web
         </button>
 
+        <button (click)="loadComprasPasarela()" type="button" class="m-1 btn btn-primary" data-toggle="modal" data-target="#comprasPasarelas">
+            Compras Pasarelas
+        </button>
+
         <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#ticketsMasivos">
             Subir Tickets Masivos
         </button>
@@ -304,7 +308,7 @@
                         </div>
 
                         <ng-container *ngFor="let ticket of listTicketsSelect; let i = index">
-                            <button (click)="delTicketList(i)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
+                            <button (click)="delTicketList(i, ticket)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
                                 <span class="btn-label"><i class="mdi mdi-close"></i></span>
                                 <span class="text-break text-wrap">
                                     {{ ticket.numero }}
@@ -320,10 +324,15 @@
 
             <hr>
 
-            <div>
-                <div class="form-group">
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+                <div class="form-group flex-grow-1">
                     <label for="example-search-input" class="">Buscar</label>
                     <input class="form-control" #searchI (keydown)="search(searchI.value)" type="search" id="example-search-input" placeholder="Buscar por, Nombre, Telefono o cedula">
+                </div>
+
+                <div class="form-group">
+                    <label for="isearchN" class="">Buscar Numero</label>
+                    <input class="form-control" #searchNI (keydown)="searchNumber(searchNI.value)" type="search" id="isearchN" placeholder="Escibe el numero">
                 </div>
             </div>
 
@@ -400,13 +409,14 @@
                         <button [disabled]="rifa.estado === 'Pendiente' || !rifa.abierta || ticket.estado !== 'Disponible'" (click)="addTicketList(ticket)" type="button" class="btn btn-6 m-1 border-0 pointer" [ngClass]="{'bg-success': ticket.estado === 'Disponible', 'bg-warning': ticket.estado === 'Apartado', 'bg-danger': ticket.estado === 'Pagado'}">
                             <div [ngClass]="{'d-flex': ticket.pagos.length === 0  && ticket.estado === 'Apartado'}">
                                 <span class="fw-bold text-white" [ngClass]="{'fs-5': ticket.numero.length > 5, 'fs-3': ticket.numero.length < 5}">
+                                    
                                     {{ ticket.numero }}
                                 </span> 
                                 <span *ngIf="ticket.estado === 'Apartado' && ticket.pagos.length === 0 " class="text-center ml-1">
                                     <span class="badge badge-danger"> - </span>
                                 </span>
                             </div>
-                            <p class="text-truncate text-white mb-0 fs-6"> {{ ticket.nombre || 'Disponible' }} </p>
+                            <p class="text-truncate text-white mb-0 fs-6"> <span *ngIf="ticket.select "  class="badge badge-primary"> <i class="ti ti-check"></i> </span> {{ ticket.nombre || 'Disponible' }} </p>
                         </button>
                     </ng-container>
                 </ng-container>
@@ -461,7 +471,7 @@
 
                         <ul class="nav nav-tabs customtab" role="tablist">
                             <li class="nav-item ">
-                                <a class="nav-link" data-toggle="tab" href="#newClient" role="tab" aria-expanded="true">
+                                <a class="nav-link" data-toggle="tab" href="#newClient" role="tab" aria-expanded="false">
                                     <span class=""><i class="ti-user"></i>
                                     </span> 
                                 </a>
@@ -823,7 +833,7 @@
                                                         <p class="fs-6 fw-bold text-negro mb-0"> {{ rifa.name }} </p>
     
                                                         <ul class="list-group list-group-flush">
-                                                            <li class="list-group-item text-negro-imp py-1"> Valor del ticket: {{ rifa.monto | currency }} </li>
+                                                            <li class="list-group-item text-negro-imp py-1"> Valor del ticket: {{ ticketSelected.monto! | currency }} </li>
                                                             <li class="list-group-item text-negro-imp py-1"> Fecha: {{ rifa.fecha | date: ' d, MMM, y' }}</li>
                                                             <li class="list-group-item text-negro-imp py-1"> Hora: {{ rifa.fecha | date: 'h:mm a' }}</li>
                                                             <li class="list-group-item text-negro-imp py-1"> Loteria: {{ rifa.loteria }}</li>
@@ -832,7 +842,7 @@
                                                             <li class="list-group-item text-negro-imp py-1" *ngFor="let pago of ticketSelected.pagos">
                                                                 <span class="fw-bold text-negro">{{ pago.descripcion }}</span> - <span class="text-negro"> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </span> - {{ pago.monto | currency }}
                                                             </li>
-                                                            <li class="list-group-item text-negro-imp py-1"> <span class="fw-bold text-negro">resta: {{ (rifa.monto - totalPaid!) | currency }} </span> </li>
+                                                            <li class="list-group-item text-negro-imp py-1"> <span class="fw-bold text-negro">resta: {{ (ticketSelected.monto! - totalPaid!) | currency }} </span> </li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -888,137 +898,168 @@
                 </div>
                 <div class="modal-body">
 
-                    <!-- DETALLES DEL TICKET -->
-                    <div>
-                        <div class="d-flex justify-content-center flex-wrap w-100">
-                            <ng-container *ngIf="checkVarios.checked">
+                    <ul class="nav nav-tabs customtab" role="tablist">
+                        <li class="nav-item ">
+                            <a class="nav-link" data-toggle="tab" href="#newClientM" role="tab" aria-expanded="false">
+                                <span class=""><i class="ti-user"></i>
+                                </span> 
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#ticketDetailsM" role="tab" aria-expanded="true">
+                                <span class="hidden-sm-up"><i class="ti-receipt"></i>
+                            </span> <span class="hidden-xs-down">Ticket</span>
+                            </a>
+                        </li>
+                    </ul>
 
-                                <div *ngIf="listTicketsSelect.length === 0">
-                                    <p class="text-muted"> Aun no has seleccionado ningún ticket </p>
+                    <div class="tab-content">
+
+                            <!-- NUEVO CLIENTE -->
+                            <div class="tab-pane" id="newClientM" role="tabpanel" aria-expanded="false">
+
+                                <div class="mt-3">
+                                    <h3 class="fw-bold mt-4">Crear Cliente</h3>
+                                    <app-newclient (actualizar)="selectClient($event)"></app-newclient>
                                 </div>
 
-                                <ng-container *ngFor="let ticket of listTicketsSelect; let i = index">
-                                    <button (click)="delTicketList(i)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
-                                        <span class="btn-label"><i class="mdi mdi-close"></i></span>
-                                         {{ ticket.numero }}
-                                    </button>
-                                </ng-container>
-                            </ng-container>
-
-                        </div>
-                    </div>
-
-                    <hr>
-                    <!-- Input de búsqueda con dropdown -->
-                    <div class="form-group">
-                        <label for="searchICC">Buscar Clientes</label>
-                        <div class="dropdown">
-                            <input type="text" class="form-control" id="searchICC" placeholder="Buscar cliente" #searchICC (input)="searchClients(searchICC.value)">                                        
-                            <!-- Resultados de búsqueda -->
-                            <div class="dropdown-menu w-100 show" aria-labelledby="searchICC"  *ngIf="listClients.length > 0 && searchICC.value">
-                                <a class="dropdown-item" 
-                                    *ngFor="let cliente of listClients; let i = index" 
-                                    (click)="selectClient2(cliente)">
-                                    <strong>{{ cliente.nombre }}</strong>
-                                    <br>
-                                    <small class="text-muted"> <i class="ti ti-mobile"></i> {{ cliente.telefono }}</small>
-                                    <small class="text-muted"> <i class="ti ti-location-pin"></i> {{ cliente.direccion }}</small>
-                                </a>
                             </div>
-                        </div>
-                    </div>
-                    <hr>
 
-                    <form class="form-horizontal form-material" autocomplete="off" [formGroup]="ticketUpdate" (ngSubmit)="updateListTikcets()">
+                            <!-- TICKET -->
+                            <div class="tab-pane active" id="ticketDetailsM" role="tabpanel" aria-expanded="true">
 
-                        <div class="form-group has-danger">
+                                <!-- DETALLES DEL TICKET -->
+                                <div>
+                                    <div class="d-flex justify-content-center flex-wrap w-100">
+                                        <ng-container *ngIf="checkVarios.checked">
 
-                            <div class="col-md-12 m-b-20">
-                                <input formControlName="nombre" type="text" class="form-control" placeholder="Nombres del cliente">
-                                <div *ngIf="validateUpTicket('nombre')" class="form-control-feedback">
-                                    <small> El nombre es obligatorio </small>
-                                </div>
-                            </div>
-                            <div class="col-md-12 m-b-20">
-                                <input formControlName="telefono" type="text" class="form-control" placeholder="Telefono del cliente">
-                                <div *ngIf="validateUpTicket('telefono')" class="form-control-feedback">
-                                    <small> El telefono es obligatorio </small>
-                                </div>
-                            </div>
-                            <div class="col-md-12 m-b-20">
-                                <input formControlName="cedula" type="text" class="form-control" placeholder="Cedula">
-                                <div *ngIf="validateUpTicket('cedula')" class="form-control-feedback">
-                                    <small> La cedula es obligatoria </small>
-                                </div>
-                            </div>
-                            <div class="col-md-12 m-b-20">
-                                <input formControlName="direccion" type="text" class="form-control" placeholder="Dirección">
-                                <div *ngIf="validateUpTicket('direccion')" class="form-control-feedback">
-                                    <small> La dirección es obligatoria </small>
-                                </div>
-                            </div>
-                            <div class="col-md-12 m-b-20">
-                                <div class="form-group">
-                                    <label>Seleccionar ruta</label>
-                                    <select class="form-control" formControlName="ruta">
-                                        <option value="" disabled>Seleccionar</option>
-                                        <ng-container *ngFor="let ruta of rutas">                                                
-                                            <option  [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'" > {{ ruta.name }} </option>
+                                            <div *ngIf="listTicketsSelect.length === 0">
+                                                <p class="text-muted"> Aun no has seleccionado ningún ticket </p>
+                                            </div>
+
+                                            <ng-container *ngFor="let ticket of listTicketsSelect; let i = index">
+                                                <button (click)="delTicketList(i, ticket)" class="btn btn-sm btn-success waves-effect waves-light m-1" type="button">
+                                                    <span class="btn-label"><i class="mdi mdi-close"></i></span>
+                                                    {{ ticket.numero }}
+                                                </button>
+                                            </ng-container>
                                         </ng-container>
-                                    </select>
-                                </div>
-                            </div>
 
-                            <div class="col-md-12 m-b-20">
+                                    </div>
+                                </div>
+
+                                <hr>
+                                <!-- Input de búsqueda con dropdown -->
                                 <div class="form-group">
-                                    <label>Seleccionar Monto</label>
-                                    <select class="form-control" formControlName="monto">
-                                        <option [value]="rifa.monto"> $ {{rifa.monto}} </option>
-                                        <option *ngIf="rifa.promocion" [value]="rifa.promocion"> $ {{rifa.promocion}} </option>
-                                        <ng-container *ngIf="rifa.montos.length > 0">
-                                            <option *ngFor="let monto of rifa.montos"  [value]="monto.monto"> $ {{monto.monto}} </option>
-                                        </ng-container>
-                                        
-                                    </select>
+                                    <label for="searchICC">Buscar Clientes</label>
+                                    <div class="dropdown">
+                                        <input type="text" class="form-control" id="searchICC" placeholder="Buscar cliente" #searchICC (input)="searchClients(searchICC.value)">                                        
+                                        <!-- Resultados de búsqueda -->
+                                        <div class="dropdown-menu w-100 show" aria-labelledby="searchICC"  *ngIf="listClients.length > 0 && searchICC.value">
+                                            <a class="dropdown-item" 
+                                                *ngFor="let cliente of listClients; let i = index" 
+                                                (click)="selectClient2(cliente)">
+                                                <strong>{{ cliente.nombre }}</strong>
+                                                <br>
+                                                <small class="text-muted"> <i class="ti ti-mobile"></i> {{ cliente.telefono }}</small>
+                                                <small class="text-muted"> <i class="ti ti-location-pin"></i> {{ cliente.direccion }}</small>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
+                                <hr>
+
+                                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="ticketUpdate" (ngSubmit)="updateListTikcets()">
+
+                                    <div class="form-group has-danger">
+
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="nombre" type="text" class="form-control" placeholder="Nombres del cliente">
+                                            <div *ngIf="validateUpTicket('nombre')" class="form-control-feedback">
+                                                <small> El nombre es obligatorio </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="telefono" type="text" class="form-control" placeholder="Telefono del cliente">
+                                            <div *ngIf="validateUpTicket('telefono')" class="form-control-feedback">
+                                                <small> El telefono es obligatorio </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="cedula" type="text" class="form-control" placeholder="Cedula">
+                                            <div *ngIf="validateUpTicket('cedula')" class="form-control-feedback">
+                                                <small> La cedula es obligatoria </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <input formControlName="direccion" type="text" class="form-control" placeholder="Dirección">
+                                            <div *ngIf="validateUpTicket('direccion')" class="form-control-feedback">
+                                                <small> La dirección es obligatoria </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 m-b-20">
+                                            <div class="form-group">
+                                                <label>Seleccionar ruta</label>
+                                                <select class="form-control" formControlName="ruta">
+                                                    <option value="" disabled>Seleccionar</option>
+                                                    <ng-container *ngFor="let ruta of rutas">                                                
+                                                        <option  [value]="ruta.ruid" [style.color]="ruta.color || '#2d2d2d'" > {{ ruta.name }} </option>
+                                                    </ng-container>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+                                            <div class="form-group">
+                                                <label>Seleccionar Monto</label>
+                                                <select class="form-control" formControlName="monto">
+                                                    <option [value]="rifa.monto"> $ {{rifa.monto}} </option>
+                                                    <option *ngIf="rifa.promocion" [value]="rifa.promocion"> $ {{rifa.promocion}} </option>
+                                                    <ng-container *ngIf="rifa.montos.length > 0">
+                                                        <option *ngFor="let monto of rifa.montos"  [value]="monto.monto"> $ {{monto.monto}} </option>
+                                                    </ng-container>
+                                                    
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+
+                                            <div class="form-check form-check-inline">
+                                                <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado4" value="Disponible" checked>
+                                                <label class="form-check-label text-dark" for="estado4">
+                                                Disponible
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado5" value="Apartado">
+                                                <label class="form-check-label text-dark" for="estado5">
+                                                Apartado
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado6" value="Pagado">
+                                                <label class="form-check-label text-dark" for="estado6">
+                                                Pagado
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 m-b-20">
+                                            <textarea formControlName="nota" rows="5" type="text" class="form-control" placeholder="Nota"></textarea>
+                                            <div *ngIf="validateUpTicket('nota')" class="form-control-feedback">
+                                                <small> Puedes Agregar una nota </small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <button [disabled]="listTicketsSelect.length === 0" type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
+                                </form>
+                                <!-- DETALLES DEL TICKET -->
+
                             </div>
-
-                            <div class="col-md-12 m-b-20">
-
-                                <div class="form-check form-check-inline">
-                                    <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado4" value="Disponible" checked>
-                                    <label class="form-check-label text-dark" for="estado4">
-                                      Disponible
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado5" value="Apartado">
-                                    <label class="form-check-label text-dark" for="estado5">
-                                      Apartado
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input formControlName="estado" class="form-check-input" type="radio" name="estado" id="estado6" value="Pagado">
-                                    <label class="form-check-label text-dark" for="estado6">
-                                      Pagado
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="col-md-12 m-b-20">
-                                <textarea formControlName="nota" rows="5" type="text" class="form-control" placeholder="Nota"></textarea>
-                                <div *ngIf="validateUpTicket('nota')" class="form-control-feedback">
-                                    <small> Puedes Agregar una nota </small>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <button [disabled]="listTicketsSelect.length === 0" type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
-                    </form>
-                    <!-- DETALLES DEL TICKET -->
-
-
+                    </div>
 
                 </div>
                 <div class="modal-footer">
@@ -1608,8 +1649,6 @@
                 </div>
                 <div class="modal-body">
 
-
-
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title"><span class="lstick"></span> Lista de abonos pendientes</h4>
@@ -1641,6 +1680,7 @@
                                         <thead>
                                             <tr>
                                                 <th>#</th>
+                                                <th colspan="2">Cliente</th>
                                                 <th colspan="2">Descripción</th>
                                                 <th>Fecha</th>
                                                 <th>Estado</th>
@@ -1650,7 +1690,7 @@
                                         </thead>
                                         <tbody>
                                             <tr *ngIf="pendientes.length === 0">
-                                                <td class="text-center" colspan="6"> No se ha registrado ningún pago... </td>
+                                                <td class="text-center" colspan="9"> No se ha registrado ningún pago... </td>
                                             </tr>
 
                                             <ng-container *ngFor="let pendiente of pendientes; let i = index">
@@ -1658,6 +1698,10 @@
                                                 <ng-container *ngFor="let paid of pendiente.pagos; let i = index">
                                                     <tr *ngIf="paid.estado === 'Pendiente'">
                                                         <td> {{ pendiente.numero }} </td>
+                                                        <td colspan="2">
+                                                            {{pendiente.nombre}}
+                                                            <br><small> {{pendiente.ruta.name || ''}} </small>
+                                                        </td>
                                                         <td colspan="2">
                                                             {{paid.descripcion}}
                                                             <br><small *ngIf="paid.user"> {{paid.user.name || ''}} </small>
@@ -1680,7 +1724,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr class="fw-bold">
-                                                <td colspan="5" class="text-right">Total</td>
+                                                <td colspan="7" class="text-right">Total</td>
                                                 <td> {{ totalPendiente | currency }} </td>
                                             </tr>
                                         </tfoot>
@@ -2281,6 +2325,113 @@
                                             <tr class="fw-bold" >
                                                 <td colspan="7" class="text-right"> TOTAL </td>
                                                 <td> {{ totalPaidWeb | currency }} </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- ========================================================= 
+    MODAL COMPRAS PASARELAS
+    ======================================================== -->
+    <div id="comprasPasarelas" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="comprasPasarelas">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="comprasPasarelas">Compras Por Pasarelas</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span class="lstick"></span>Lista Compras</h4>
+
+                            <!-- CREAR Y VER EGRESOS -->
+                            <div *ngIf="loadingComprasPasarelas">
+                                <p>Cargando...</p>
+                            </div>
+
+                            <div *ngIf="!loadingComprasPasarelas">
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-group mb-0">
+                                        <label for="mostrarP" class="me-2">Mostrar: </label>
+                                        <select class="form-control" name="" id="mostrarP" [value]="queryV.hasta" #mostrarP (change)="limiteChangePasarela(mostrarP.value)">
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="250">250</option>
+                                        </select>
+                
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive m-t-20">
+                                    <table class="table vm no-th-brd no-wrap pro-of-month">
+                                        <thead>
+                                            <tr>
+                                                <th>Tickets</th>
+                                                <th colspan="2">Cliente</th>
+                                                <th>Fecha</th>
+                                                <th>Monto</th>
+                                                <th>Estado</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngIf="ventas.length === 0">
+                                                <td class="text-center" colspan="6"> No se ha registrado ningún pago... </td>
+                                            </tr>
+
+                                            <ng-container *ngFor="let venta of ventas; let i = index">
+                                                    <tr>
+                                                        <td> 
+                                                            <div class="d-flex flex-wrap"> 
+                                                                <span class="badge bg-dark" style="font-size: 0.6rem" *ngFor="let tic of venta.tickets" > #{{ tic.ticket.numero }} </span>   
+                                                            </div> 
+                                                        </td>
+                                                        <td colspan="2">
+                                                            {{venta.nombre}}
+                                                            <br><small> {{venta.telefono || ''}} </small>
+                                                        </td>
+                                                        <td>{{ venta.fecha | date:'d/M/yy, h:mm a' }}</td>
+                                                        <td>{{ venta.monto | currency }}</td>
+                                                        <td>
+                                                            <span class="badge" [ngClass]="{'bg-success': venta.estado === 'Pagado', 'bg-warning': venta.estado === 'Pendiente', 'bg-danger': venta.estado === 'Expirado' }"> {{ venta.estado  }} </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex gap-2">
+                                                                <button (click)="prepareWhatsappWeb(venta, true)" type="button" [disabled]="user.role !== 'ADMIN'" class="btn btn-success btn-sm">
+                                                                    <i class="ti-comment"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        
+                                                    </tr>
+                                                </ng-container>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="6">
+                                                    <div class="btn-group" role="group" aria-label="First group">
+                                                        <button [disabled]="queryV.desde === 0" (click)="cambiarPaginaPasarela(queryV.hasta * -1)" type="button" class="btn btn-dark text-white">Atras</button>
+                                                        <button [disabled]="( queryV.desde + queryV.hasta ) >= totalVentasP" (click)="cambiarPaginaPasarela(queryV.hasta)" type="button" class="btn btn-dark text-white">Siguiente</button>
+                                                    </div>
+
+                                                </td>
                                             </tr>
                                         </tfoot>
                                     </table>

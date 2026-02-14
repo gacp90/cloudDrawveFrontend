@@ -36,6 +36,7 @@ export class Ticket{
         public status: boolean,
         public disponible: boolean,
         public ganador: boolean,
+        public select: boolean,
         public img: any[],
         public _id?: string,
         public tid?: string,
