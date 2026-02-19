@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  base_url: 'https://admin.somosprime.co/api',
-  local_url: 'https://admin.somosprime.co',
-  client: true,
+  base_url: 'http://localhost:3000/api',
+  local_url: 'http://localhost:4200',
+  client: false,
   app: false
 };

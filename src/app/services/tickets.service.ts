@@ -36,6 +36,13 @@ export class TicketsService {
   loadTickets(query: any){
     return this.http.post<{ok: boolean, tickets: Ticket[], total: number, disponibles: number, apartados: number, pagados: number}>( `${base_url}/tickets/query`, query, this.headers );
   }
+  
+  /** ================================================================
+   *  LOAD TICKETS
+  ==================================================================== */
+  loadPagosPendientes(query: any){
+    return this.http.post<{ok: boolean, tickets: Ticket[], total: number}>( `${base_url}/tickets/pagos/pendientes`, query, this.headers );
+  }
 
   /** ================================================================
    *  LOAD TICKET ID

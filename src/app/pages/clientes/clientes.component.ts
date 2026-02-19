@@ -84,6 +84,7 @@ export class ClientesComponent implements OnInit {
   public query: any = {
     desde: 0,
     hasta: 50,
+    status: true,
     sort: {
       fecha: -1
     }
@@ -140,6 +141,21 @@ export class ClientesComponent implements OnInit {
     } else if(orden === 'nombre'){
       this.query.sort = { nombre: 1 }
     }
+
+    this.loadClients();
+
+  }
+
+  /** ================================================================
+   *   CHANGE ORDEN
+  ==================================================================== */
+  statusChange( orden: any ){  
+
+    if (orden === 'Activos') {
+      this.query.status = true      
+    } else {
+      this.query.status = false;
+    } 
 
     this.loadClients();
 
@@ -231,6 +247,31 @@ export class ClientesComponent implements OnInit {
   }
     
   
+  /** ======================================================================
+   * UPDATE STATUS
+  ====================================================================== */
+  updateSttatus(clienteP: Client){
+
+
+    this.clientsService.updateCliente({status: (clienteP.status)? false: true}, clienteP.cid!)
+        .subscribe( ({cliente}) => {
+
+          clienteP.status = cliente.status;
+          Swal.fire('Estupendo', 'el estado fue actualizado exitosamente!', 'success');
+          this.loadClients();
+
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');
+          
+        })
+
+  }
+
+
+          
+
+          
   /** ======================================================================
    * UPDATE
   ====================================================================== */

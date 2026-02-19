@@ -1796,6 +1796,50 @@ export class RifaComponent implements OnInit {
 
   }
 
+  /** ================================================================
+   *   ABONOS PENDIENTES
+  ==================================================================== */
+  public loadingPendientes:boolean = false;
+  loadPaidPen(userid: string = 'none' ){
+
+    this.loadingPendientes = true;
+    this.totalPendiente = 0;
+    this.pendientes = [];
+
+    let query: any = {
+      rifa: this.rifa.rifid
+    }
+
+    if (userid !== 'none') {
+      query.vendedor = userid;
+    }    
+
+    this.ticketsService.loadPagosPendientes(query)
+        .subscribe( ({tickets, total}) => {
+
+          this.pendientes = tickets; 
+          this.loadingPendientes = false;
+          for (const tick of this.pendientes) {
+
+            for (const paid of tick.pagos) {
+              
+              if (paid.estado === 'Pendiente') {                
+                this.totalPendiente += paid.monto;
+              }
+
+            }
+            
+          }
+          
+
+        }, (err) => {
+          this.loadingPendientes = false;
+          console.log(err);
+          Swal.fire('Error', err.error.msg, 'error');          
+        })
+
+  }
+
   getRutaWebID(rutas:any) {
     const rutaWeb = rutas.find((r:any) => r.name.trim().toLowerCase() === 'web');
     return rutaWeb ? rutaWeb.ruid : null;
@@ -2209,6 +2253,15 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   public vendedorSelect: string = '';
   async filterVendedorPendientes(vendedor: string){
+
+    if (vendedor === 'Todos') {
+      this.loadPaidPen('none');
+    }else{
+      this.loadPaidPen(vendedor);
+      
+    }
+
+    return;
 
     if(vendedor === 'Todos'){
       this.loadIngresos();

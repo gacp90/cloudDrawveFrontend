@@ -70,7 +70,15 @@
                                 <option *ngFor="let ruta of rutas" [value]="ruta.ruid"> {{ ruta.name }} </option>
                             </select>
     
-                        </div>  
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label for="statusSS" class="me-2">Estado: </label>
+                            <select class="form-control" name="statusSS" id="statusSS" #statusS (change)="statusChange(statusS.value)">
+                                <option value="Activos">Activos</option>
+                                <option value="Deshabilitados">Deshabilitados</option>
+                            </select>    
+                        </div>
                         
                     </div>
 
@@ -102,6 +110,7 @@
                                 <th>Correo</th>
                                 <th>Dirección</th>
                                 <th>Ruta</th>
+                                <th>Estado</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -122,6 +131,12 @@
                                 <td>{{ cliente.correo }}</td>
                                 <td>{{ cliente.direccion || 'Sin Correo' }}</td>
                                 <td>{{ cliente.ruta.name }}</td>
+                                <td>
+                                    <button (click)="updateSttatus(cliente)" type="button" class="btn btn-sm" [ngClass]="{'btn-success': cliente.status, 'btn-danger': !cliente.status}">
+                                        <span *ngIf="cliente.status" >Activo</span>
+                                        <span *ngIf="!cliente.status" >Deshabilitado</span>
+                                    </button>
+                                </td>
                                 <td>
                                     <button type="button" (click)="setForm(cliente)" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn" data-toggle="modal" data-target="#updateClient">
                                         <i class="ti ti-pencil" aria-hidden="true"></i>

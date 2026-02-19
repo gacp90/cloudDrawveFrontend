@@ -46,7 +46,7 @@
             Ingresos y Egresos
         </button>
 
-        <button (click)="loadIngresos()" type="button" class="m-1 btn btn-warning" data-toggle="modal" data-target="#abonosPendientes">
+        <button (click)="loadPaidPen('none')" type="button" class="m-1 btn btn-warning" data-toggle="modal" data-target="#abonosPendientes">
             Abonos Pendientes
         </button>
 
@@ -1655,10 +1655,10 @@
 
                             <div class="d-flex justify-content-between flex-wrap mt-1">
 
-                                <div *ngIf="user.role === 'ADMIN'" class="">
+                                <div *ngIf="user.role === 'ADMIN'" class="form-group">
 
                                     <label for="vendedores" class="me-2">Vendedores: </label>
-                                    <select name="" id="vendedores" #vendedoresF (change)="filterVendedorPendientes(vendedoresF.value)">
+                                    <select class="form-control" name="" id="vendedores" #vendedoresF (change)="filterVendedorPendientes(vendedoresF.value)">
                                         <option value="Todos">Todos</option>
                                         <option [value]="rifa.admin._id"> {{ rifa.admin.name }} </option>
                                         <option *ngFor="let vendedor of vendedores" [value]="vendedor.uid"> {{ vendedor.name }} </option>
@@ -1669,11 +1669,11 @@
                             </div>
 
                             <!-- CREAR Y VER EGRESOS -->
-                            <div *ngIf="loadingEgresos">
+                            <div *ngIf="loadingPendientes">
                                 <p>Cargando...</p>
                             </div>
 
-                            <div *ngIf="!loadingEgresos">
+                            <div *ngIf="!loadingPendientes">
 
                                 <div class="table-responsive m-t-20">
                                     <table class="table vm no-th-brd no-wrap pro-of-month">
