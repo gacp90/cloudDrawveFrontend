@@ -95,3 +95,36 @@ SWIPER
     border-radius: 2rem !important;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px !important;
 }
+
+/** ===============================
+MODAL VENTAS
+*/
+/* Efecto hover en la fila */
+.hover-venta:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* El envoltorio del grid de tickets */
+.tickets-grid-wrapper {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    border: 1px dashed #f3b111;
+}
+
+/* Grid dinámico */
+.tickets-grid {
+    display: flex;
+    flex-wrap: wrap; /* Hace que los números fluyan a la derecha */
+    gap: 8px;
+    max-height: 200px; /* Si son demasiados, scrollea aquí dentro */
+    overflow-y: auto;
+}
+
+.ticket-item {
+    background: #2d2d2d;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}

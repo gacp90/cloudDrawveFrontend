@@ -1,0 +1,58 @@
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fondo característico de los chats de WhatsApp */
+.whatsapp-bg {
+  background-color: #efeae2;
+  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+  border-radius: 12px;
+}
+
+/* Burbuja estilo iOS/Android WhatsApp */
+/* Burbuja estilo iOS/Android WhatsApp */
+.whatsapp-bubble {
+  background-color: #ffffff;
+  border-radius: 7.5px;
+  /* El padding ahora está en el div interno para no afectar a los botones */
+  position: relative;
+  box-shadow: 0 1px 0.5px rgba(11,20,26,.13);
+  max-width: 95%;
+  color: #111b21;
+  font-size: 14.2px;
+  line-height: 19px;
+}
+
+/* La colita de la burbuja a la izquierda */
+.whatsapp-bubble::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 0px solid transparent;
+  border-right: 10px solid #ffffff;
+  border-bottom: 10px solid transparent;
+}
+
+/* Botones de respuesta rápida integrados */
+.whatsapp-btn-preview {
+  border-top: 1px solid #e9edef; /* La línea delgada separadora */
+  color: #00a884; /* El azul/verde clásico de los enlaces en WhatsApp */
+  font-size: 15px;
+  cursor: default;
+  width: 100%;
+  background-color: #ffffff;
+}
+
+/* Para redondear las esquinas del último botón y que no se salga de la burbuja */
+.whatsapp-btn-preview:last-child {
+  border-bottom-left-radius: 7.5px;
+  border-bottom-right-radius: 7.5px;
+}

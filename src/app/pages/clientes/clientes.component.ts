@@ -19,6 +19,7 @@ import Swal from 'sweetalert2';
 import { RifasService } from 'src/app/services/rifas.service';
 import { Rifa } from 'src/app/models/rifas.model';
 import { TicketsService } from 'src/app/services/tickets.service';
+import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
   selector: 'app-clientes',
@@ -37,6 +38,7 @@ export class ClientesComponent implements OnInit {
                 private watiService: WatiService,
                 private rifasService: RifasService,
                 private whatsappService: WhatsappService,
+                private chatService: ChatService
   ){
     this.user = usersService.user;
   }
@@ -691,28 +693,26 @@ export class ClientesComponent implements OnInit {
   }
 
   /** ======================================================================
-     * LOAD PLANTILLAS WATI
-    ====================================================================== */
-    public templates: any[] = [];
-    loadTemplates(){
-  
-      this.watiService.loadPlantilla(this.user.watitoken!, this.user.watilink!)
-          .subscribe( (resp: any) => {
-            
-            for (const temp of resp.messageTemplates) {
-              
-              if (temp.status === "APPROVED") {
-                this.templates.push(temp)
-              }
-  
-            }          
-            
-          }, (err) => {
-            console.log(err);
-            Swal.fire('Error', err.error, 'error');          
-          })
-  
-    }
+   * LOAD PLANTILLAS WATI
+  ====================================================================== */
+  public templates: any[] = [];
+  loadTemplates(){
+
+    this.watiService.loadPlantilla(this.user.watitoken!, this.user.watilink!)
+        .subscribe( (resp: any) => {
+          
+          for (const temp of resp.messageTemplates) {            
+            if (temp.status === "APPROVED") {
+              this.templates.push(temp)
+            }
+          }          
+          
+        }, (err) => {
+          console.log(err);
+          Swal.fire('Error', err.error, 'error');          
+        })
+
+  }
 
   /** ================================================================
    *   SELECCIONAR PLANTILLA
@@ -734,78 +734,76 @@ export class ClientesComponent implements OnInit {
   }
 
   /** ================================================================
-     *   SEND MASIVE WITH WATI
-    ==================================================================== */
-    sendMassiveWATI() {
-  
-      if (!this.user.whatsapp) {
-        Swal.fire('Atención', 'No tienes habilitada esta función', 'warning');
-        return;
-      }
-  
-      if (!this.templateSelected || !this.templateSelected.customParams?.length) {
-        Swal.fire('Atención', 'Debes seleccionar una plantilla con parámetros', 'warning');
-        return;
-      }
+   *   SEND MASIVE WITH WATI
+  ==================================================================== */
+  sendMassiveWATI() {
 
-      
-      const receivers: any[] = [];
-  
-      // Construir estructura receivers
-      for (const cliente of this.clients) {
-
-        const number = cliente.codigo + cliente.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
-  
-        // Construir parámetros personalizados (basado en la plantilla seleccionada)
-        const customParams = this.templateSelected.customParams.map((param: any) => {
-          let value = '';
-  
-          switch (param.paramName) {
-            case 'nombre':
-            case 'name':
-              value = cliente.nombre || '';
-              break;
-            default:
-              value = '-'; // Por si el campo no existe
-          }
-  
-          return {
-            name: param.paramName,
-            value
-          };
-        });
-  
-        receivers.push({
-          whatsappNumber: number,
-          customParams
-        });
-      }
-  
-      // Construir cuerpo final para WATI
-      const body = {
-        template_name: this.templateSelected.elementName,
-        broadcast_name: this.templateSelected.elementName,
-        receivers
-      };
-  
-      this.watiService.sendTemplateMasive(this.user.watitoken!, this.user.watilink!, body)
-          .subscribe( (resp: any) => {
-  
-            if (!resp.result) {
-              Swal.fire('Error', resp.errors.error, 'error');
-              return;       
-            }
-  
-            Swal.fire('Estupendo', 'se estan enviando todos los mensajes', 'success');
-  
-          }, (err) =>{
-            console.log(err);
-            Swal.fire('Error', err.error, 'error');
-            
-          })
-  
+    if (!this.user.whatsapp) {
+      Swal.fire('Atención', 'No tienes habilitada esta función', 'warning');
+      return;
     }
-     /** ================================================================
+
+    if (!this.templateSelected || !this.templateSelected.customParams?.length) {
+      Swal.fire('Atención', 'Debes seleccionar una plantilla con parámetros', 'warning');
+      return;
+    }
+    
+    const receivers: any[] = [];
+
+    // Construir estructura receivers
+    for (const cliente of this.clients) {
+      const number = cliente.codigo + cliente.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+
+      // Construir parámetros personalizados (basado en la plantilla seleccionada)
+      const customParams = this.templateSelected.customParams.map((param: any) => {
+        let value = '';
+
+        switch (param.paramName) {
+          case 'nombre':
+          case 'name':
+            value = cliente.nombre || '';
+            break;
+          default:
+            value = '-'; // Por si el campo no existe
+        }
+
+        return {
+          name: param.paramName,
+          value
+        };
+      });
+
+      receivers.push({
+        whatsappNumber: number,
+        customParams
+      });
+    }
+
+    // Construir cuerpo final para WATI
+    const body = {
+      template_name: this.templateSelected.elementName,
+      broadcast_name: this.templateSelected.elementName,
+      receivers
+    };
+
+    this.watiService.sendTemplateMasive(this.user.watitoken!, this.user.watilink!, body)
+        .subscribe( (resp: any) => {
+
+          if (!resp.result) {
+            Swal.fire('Error', resp.errors.error, 'error');
+            return;       
+          }
+
+          Swal.fire('Estupendo', 'se estan enviando todos los mensajes', 'success');
+
+        }, (err) =>{
+          console.log(err);
+          Swal.fire('Error', err.error, 'error');
+          
+        })
+
+  }
+  /** ================================================================
    *   ACTUALIZAR IMAGEN
   ==================================================================== */
   @ViewChild('fileImgMasive') fileImgMasive!: ElementRef;
@@ -1075,4 +1073,96 @@ export class ClientesComponent implements OnInit {
 
   }
 
+  /** ================================================================
+   *   API OFICIAL DE WHATSAPP - ENVIAR PLANTILLA
+  ==================================================================== */
+
+  public templatesApi: any[] = [];
+  public templateSelectedApi: any = null;
+  public showTemplateModal: boolean = false;
+
+  // Función para cargar las plantillas desde Meta
+  cargarPlantillas() {
+    this.chatService.getTemplates(this.internalApiKey).subscribe({
+      next: (res: any) => {
+        // Meta devuelve un array de plantillas. Filtramos solo las 'APPROVED'
+        this.templates = res.filter((t: any) => t.status === 'APPROVED');
+        console.log('Plantillas cargadas:', this.templates);
+        this.showTemplateModal = true; // Abrimos el modal una vez cargadas
+      },
+      error: (err) => {
+        console.error('Error al obtener plantillas', err);
+        alert('No se pudieron cargar las plantillas de Meta');
+      }
+    });
+  }
+
+  isSending: boolean = false;
+  sendingIndex: number = 0;
+  showMassTemplateModal: boolean = false;
+  public internalApiKey: string = 'token_secreto_rifari_123';
+
+  async iniciarEnvioMasivo() {
+    if (!this.templateSelectedApi) return;
+
+    this.isSending = true;
+
+    // 1. Construir el array de clientes con la estructura que espera tu backend
+    const customersPayload = this.clients.map(cliente => {
+      // Limpieza del número de teléfono
+      const phone = cliente.codigo + cliente.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+      
+      // Aquí defines qué variables vas a inyectar en {{1}}, {{2}}, etc.
+      // Si la plantilla no usa variables, simplemente dejas el array vacío: []
+      const parametrosDinamicos = [cliente.nombre]; 
+
+      return {
+        phone: phone,
+        parameters: parametrosDinamicos
+        // buttons: [] // Si luego quieres inyectar botones dinámicos por cliente
+      };
+    }).filter(c => c.phone); // Evitamos enviar clientes sin número de teléfono válido
+
+    // 2. Armar el objeto maestro que se enviará al endpoint masivo
+    const payload = {
+      templateName: this.templateSelectedApi.name,
+      langCode: this.templateSelectedApi.language, // <-- Tomamos el idioma dinámicamente
+      customers: customersPayload
+      // mediaUrl: this.mediaUrlSelected, // Si vas a enviar una imagen global
+      // mediaType: this.mediaTypeSelected
+    };
+
+    console.log(this.templateSelectedApi);
+    console.log('========================');    
+    console.log(payload);
+    this.isSending = false;
+    return
+    try {
+      // 3. Enviamos toda la carga de trabajo al Backend (una sola petición HTTP)
+
+      
+
+      await this.chatService.sendTemplateBulk(this.internalApiKey, payload).toPromise();
+
+      // 4. Notificamos al usuario que el servidor ya está trabajando
+      Swal.fire({
+        icon: 'success',
+        title: '¡Envío Masivo Iniciado!',
+        text: `El servidor está procesando ${customersPayload.length} mensajes en segundo plano. Puedes seguir usando el sistema.`,
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido'
+      });
+
+    } catch (error) {
+      console.error('Error al iniciar el envío masivo:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Ocurrió un error al comunicar con el servidor para el envío masivo.',
+      });
+    } finally {
+      this.isSending = false;
+      this.showMassTemplateModal = false;
+    }
+  }
 }

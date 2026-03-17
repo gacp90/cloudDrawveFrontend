@@ -26,6 +26,7 @@ export class User {
         public watitoken?: string,
         public termica?: boolean,
         public gsm?: boolean,
+        public products?: boolean,
         public msg?: string,
         public uid?: string,
         public _id?: string

@@ -10,6 +10,10 @@
 
                     <div class="d-flex flex-wrap justify-content-betwenn gap-2">
 
+                        <button class="btn btn-primary" (click)="cargarPlantillas()">
+                            <i class="ti-email"></i> Enviar Masivo ({{ clients.length }})
+                        </button>
+
                         <button *ngIf="user.whatsapp && user.wp" type="button" class="btn btn-success " data-toggle="modal" data-target="#whatsappmasive">
                             Enviar mensajes masivos
                         </button>
@@ -470,3 +474,68 @@ MODAL SUBIR TICKETS MASIVOS
     </div>
     <!-- /.modal-dialog -->
 </div>
+
+<div class="modal fade" [class.show]="showTemplateModal" [style.display]="showTemplateModal ? 'block' : 'none'" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow-lg">
+      
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="ti-layout-grid2 mr-2"></i>Enviar Plantilla Masiva
+        </h5>
+        <button type="button" class="close text-white" (click)="showTemplateModal = false">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="alert alert-info py-2">
+          <small><i class="ti-info-alt mr-1"></i> Se enviará a <strong>{{ clients.length }}</strong> clientes filtrados.</small>
+        </div>
+
+        <div class="form-group">
+          <label class="font-weight-bold">Selecciona una plantilla aprobada:</label>
+          <select class="form-control custom-select" [(ngModel)]="templateSelectedApi">
+            <option [ngValue]="null">Elegir plantilla...</option>
+            <option *ngFor="let t of templates" [ngValue]="t">
+              {{ t.name }} ({{ t.language }})
+            </option>
+          </select>
+        </div>
+
+        <div *ngIf="templateSelectedApi" class="mt-4">
+          <label class="font-weight-bold text-muted small">VISTA PREVIA:</label>
+          <div class="p-3 rounded bg-light border" style="border-left: 5px solid #007bff !important;">
+            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ templateSelectedApi.components[0]?.text }}</p>
+          </div>
+          <small class="text-muted mt-2 d-block">* Los parámetros como {{1}} se enviarán según la configuración de Meta.</small>
+        </div>
+
+        <div class="mt-4" *ngIf="isSending">
+          <label class="small d-flex justify-content-between">
+            <span>Enviando...</span>
+            <span>{{ sendingIndex }} / {{ clients.length }}</span>
+          </label>
+          <div class="progress" style="height: 10px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                 [style.width]="(sendingIndex / clients.length) * 100 + '%'">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" (click)="showTemplateModal = false" [disabled]="isSending">
+          Cerrar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="iniciarEnvioMasivo()" [disabled]="!templateSelectedApi || isSending">
+          <span *ngIf="!isSending"><i class="ti-rocket mr-1"></i> Iniciar Envío</span>
+          <span *ngIf="isSending">Procesando...</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showTemplateModal"></div>

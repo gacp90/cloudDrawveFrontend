@@ -1,0 +1,195 @@
+<div class="container-fluid mt-3">
+
+  <div *ngIf="vistaActual === 'lista'" class="fade-in">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="ti-layout-grid2 text-primary mr-2"></i> Mis Plantillas</h4>
+        <div>
+          <button class="btn btn-outline-info mr-2">
+            <i class="ti-reload mr-1"></i> Sincronizar
+          </button>
+          <button class="btn btn-primary" (click)="cambiarVista('crear')">
+            <i class="ti-plus mr-1"></i> Crear Plantilla
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Idioma</th>
+              <th>Estado Meta</th>
+              <th>Activa (Envío)</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">
+                No hay plantillas cargadas. Haz clic en Sincronizar.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="vistaActual === 'crear'" class="fade-in">
+    <button class="btn btn-primary mb-2" (click)="cambiarVista('lista')">
+      <i class="ti-layout-grid2 mr-1"></i> Volver a las listas de plantillas
+    </button>
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <h4 class="mb-0"><i class="ti-pencil-alt mr-2"></i> Diseñar Nueva Plantilla</h4>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-7 col-md-12 mb-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            
+            <div class="row form-group">
+              <div class="col-md-5">
+                <label class="font-weight-bold">Nombre de la Plantilla</label>
+                <input type="text" class="form-control" [(ngModel)]="nuevaPlantilla.name" placeholder="ej: alerta_ganador">
+              </div>
+              <div class="col-md-4">
+                <label class="font-weight-bold">Categoría</label>
+                <select class="form-control" [(ngModel)]="nuevaPlantilla.category">
+                  <option value="MARKETING">Marketing</option>
+                  <option value="UTILITY">Utilidad</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="font-weight-bold">Idioma</label>
+                <select class="form-control" [(ngModel)]="nuevaPlantilla.language">
+                  <option value="es">Español</option>
+                  <option value="en">Inglés</option>
+                </select>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class="form-group bg-light p-3 rounded">
+              <label class="font-weight-bold"><i class="ti-layout-media-overlay mr-1"></i> Encabezado (Opcional)</label>
+              <select class="form-control mb-2" [(ngModel)]="nuevaPlantilla.headerType">
+                <option value="NONE">Sin encabezado</option>
+                <option value="TEXT">Solo Texto</option>
+                <option value="IMAGE">Imagen</option>
+                <option value="VIDEO">Video</option>
+              </select>
+              <input *ngIf="nuevaPlantilla.headerType === 'TEXT'" type="text" 
+                     class="form-control mt-2" [(ngModel)]="nuevaPlantilla.headerText" 
+                     placeholder="Escribe el título aquí (máx 60 caracteres)">
+            </div>
+
+            <div class="form-group border border-primary rounded p-3">
+              <label class="font-weight-bold text-primary">Mensaje Principal (Body) *</label>
+              
+              <div class="mb-2">
+                <span class="text-muted small mr-2">Insertar dato dinámico:</span>
+                <button class="btn btn-sm btn-outline-primary mr-1" (click)="insertarVariable('{{name}}', bodyTextArea)">
+                  {{'{'+'{name}'+'}'}}
+                </button>
+                <button class="btn btn-sm btn-outline-primary mr-1" (click)="insertarVariable('{{number}}', bodyTextArea)">
+                  {{'{'+'{number}'+'}'}}
+                </button>
+                <button class="btn btn-sm btn-outline-primary" (click)="insertarVariable('{{proyecto}}', bodyTextArea)">
+                  {{'{'+'{proyecto}'+'}'}}
+                </button>
+              </div>
+
+              <textarea #bodyTextArea class="form-control" rows="5" [(ngModel)]="nuevaPlantilla.bodyText"
+                        placeholder="Hola {{'{{name}}'}}, felicidades por participar..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold text-muted">Pie de página (Footer)</label>
+              <input type="text" class="form-control" [(ngModel)]="nuevaPlantilla.footerText" 
+                     placeholder="Texto gris pequeño al final (opcional, ej: Aplican términos y condiciones)">
+            </div>
+
+            <hr>
+
+            <div class="form-group">
+              <label class="font-weight-bold text-info"><i class="ti-back-right mr-1"></i> Respuestas Rápidas</label>
+              
+              <div class="input-group mb-3" *ngIf="nuevaPlantilla.quickReplies.length < 3">
+                <input type="text" class="form-control border-info" [(ngModel)]="nuevaRespuesta" 
+                       placeholder="Escribe una respuesta (ej: Quiero comprar)" maxlength="20"
+                       (keyup.enter)="agregarRespuestaRapida()">
+                <div class="input-group-append">
+                  <button class="btn btn-info" (click)="agregarRespuestaRapida()">
+                    <i class="ti-plus"></i> Agregar
+                  </button>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap" style="gap: 10px;">
+                <div *ngFor="let qr of nuevaPlantilla.quickReplies; let i = index" 
+                     class="bg-white border rounded px-3 py-2 shadow-sm d-flex align-items-center">
+                  <span class="mr-3 font-weight-bold text-primary">{{ qr.text }}</span>
+                  <button class="btn btn-sm btn-danger rounded-circle p-1" style="width: 25px; height: 25px; display: flex; align-items: center; justify-content: center;" (click)="eliminarRespuestaRapida(i)">
+                    <i class="ti-close"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button (click)="crearPlantilla()" class="btn btn-success btn-lg btn-block mt-4 text-white font-weight-bold shadow">
+              <i class="ti-rocket mr-1"></i> Guardar y Enviar a Meta
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5 col-md-12">
+        <div class="sticky-top" style="top: 20px;">
+          <h6 class="text-muted text-center mb-2 font-weight-bold">VISTA PREVIA DEL MENSAJE</h6>
+          
+          <div class="whatsapp-bg p-4 rounded shadow-lg border">
+            
+            <div class="whatsapp-bubble mb-2" style="padding: 0;">
+              
+              <div style="padding: 8px 10px;">
+                <div *ngIf="nuevaPlantilla.headerType === 'IMAGE'" class="mb-2 bg-light rounded d-flex align-items-center justify-content-center" style="height: 140px; background-color: #e2e5e7 !important;">
+                  <i class="ti-image text-muted" style="font-size: 3rem;"></i>
+                </div>
+                <div *ngIf="nuevaPlantilla.headerType === 'VIDEO'" class="mb-2 bg-light rounded d-flex align-items-center justify-content-center" style="height: 140px; background-color: #e2e5e7 !important;">
+                  <i class="ti-video-camera text-muted" style="font-size: 3rem;"></i>
+                </div>
+                <strong *ngIf="nuevaPlantilla.headerType === 'TEXT'" class="d-block mb-2" style="font-size: 1.05em; color: #000;">
+                  {{ nuevaPlantilla.headerText || 'Título del mensaje' }}
+                </strong>
+
+                <p class="mb-1" style="white-space: pre-wrap; word-wrap: break-word;">{{ nuevaPlantilla.bodyText || 'El contenido de tu mensaje aparecerá aquí...' }}</p>
+
+                <span *ngIf="nuevaPlantilla.footerText" class="text-muted d-block mt-2" style="font-size: 0.75em;">
+                  {{ nuevaPlantilla.footerText }}
+                </span>
+
+                <div class="text-right text-muted" style="font-size: 0.65em; margin-top: -2px;">
+                  10:42 AM <i class="ti-check text-info"></i>
+                </div>
+              </div>
+
+              <div *ngIf="nuevaPlantilla.quickReplies.length > 0" class="d-flex flex-column w-100">
+                <div *ngFor="let qr of nuevaPlantilla.quickReplies" class="whatsapp-btn-preview text-center py-2">
+                  <i class="ti-back-right mr-1 text-muted" style="font-size: 0.8em;"></i> 
+                  <strong>{{ qr.text }}</strong>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -3764,7 +3764,8 @@ export class RifaComponent implements OnInit {
   public loadingComprasPasarelas: boolean = false;
   public queryV: any = {
     desde: 0,
-    hasta: 50
+    hasta: 50,
+    sort: {fecha: -1}
   };
 
   loadComprasPasarela(){
@@ -3776,6 +3777,7 @@ export class RifaComponent implements OnInit {
     .subscribe( ({ventas, total}) => {
           this.loadingComprasPasarelas = false;
           this.ventas = ventas; 
+          this.ventas = ventas.map(v => ({ ...v, showTickets: false }));
           this.totalVentasP = total;
           
         },(err) => {
@@ -3809,6 +3811,101 @@ export class RifaComponent implements OnInit {
 
     this.queryV.hasta = Number(cantidad);    
     this.loadComprasPasarela();
+
+  }
+
+  /** ================================================================
+   *   CHANGE STATUS PASARELA
+  ==================================================================== */
+  statusChangePasarela(estado: string){
+    if (estado === 'Todos') {
+      delete this.queryV.estado;
+    } else {
+      this.queryV.estado = estado;  
+    }
+
+    this.loadComprasPasarela();
+  }
+
+  /** ================================================================
+   *   CHANGE DONADOS PASARELA
+  ==================================================================== */
+  changeDonado(donado: string){
+    if (donado === 'Todos') {
+      delete this.queryV.donado;
+    } else {
+      this.queryV.estado = (donado === 'Si')?true:false;  
+    }
+
+    this.loadComprasPasarela();
+  }
+
+  /** ================================================================
+   *   ABRIR SKYDROPX
+  ==================================================================== */
+  abrirSkydropx(venta: Venta){
+
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    });            
+
+    if(venta.donar){
+
+      Toast.fire({
+        icon: "success",
+        title: 'Esta venta a sido donada por el participante'
+      });
+      return;
+
+    }
+
+    if (venta.estado !== 'Pagado') {
+      Toast.fire({
+        icon: "warning",
+        title: `Pago ${venta.estado}`
+      });
+      return;
+    }
+
+    if (venta.pais !== 'Colombia') {
+      Swal.fire({
+        title: 'Venta exterior',
+        text: 'El cliente es del exterior, datos del cliente:',
+        html: `
+          <ul class="list-group">
+          <li class="list-group-item text-center"> <strong> INFORMACION DEL CLIENTE</strong></li>
+            <li class="list-group-item"> <strong> Nombres:</strong> ${venta.nombre}</li>
+            <li class="list-group-item"> <strong> Cedula:</strong> ${venta.cedula}</li>
+            <li class="list-group-item"> <strong> Telefono:</strong> ${venta.telefono}</li>
+            <li class="list-group-item"> <strong> Pais:</strong> ${venta.pais}</li>
+            <li class="list-group-item"> <strong> Estado / Depart.:</strong> ${venta.departamento}</li>
+            <li class="list-group-item"> <strong> Ciudad:</strong> ${venta.ciudad}</li>
+            <li class="list-group-item text-center"> <strong> INFORMACION DE LA COMPRA</strong></li>
+            <li class="list-group-item"> <strong> Producto:</strong> ${venta.item.name}</li>
+            <li class="list-group-item"> <strong> Cantidad:</strong> ${venta.item.qty}</li>
+            <li class="list-group-item"> <strong> Color:</strong> ${venta.item.color}</li>
+            <li class="list-group-item"> <strong> Talla:</strong> ${venta.item.size}</li>
+          </ul>
+
+        `,
+        icon: 'info',
+        showCancelButton: false,
+      })
+
+      return;
+    }
+
+    if (venta.guia) {
+      window.open(venta.guia, '_blank');      
+    }   
 
   }
   
