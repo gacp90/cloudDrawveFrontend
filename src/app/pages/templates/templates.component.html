@@ -1,38 +1,77 @@
 <div class="container-fluid mt-3">
 
   <div *ngIf="vistaActual === 'lista'" class="fade-in">
-    <div class="card shadow-sm">
-      <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0"><i class="ti-layout-grid2 text-primary mr-2"></i> Mis Plantillas</h4>
+    <div class="card shadow-sm border-0">
+      
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0 font-weight-bold"><i class="ti-layout-grid2 text-primary mr-2"></i> Mis Plantillas</h4>
         <div>
-          <button class="btn btn-outline-info mr-2">
-            <i class="ti-reload mr-1"></i> Sincronizar
+          <button class="btn btn-outline-info mr-2" (click)="sincronizarConMeta()" [disabled]="sincronizando">
+            <i class="ti-reload mr-1" [class.fa-spin]="sincronizando"></i> 
+            {{ sincronizando ? 'Sincronizando...' : 'Sincronizar' }}
           </button>
-          <button class="btn btn-primary" (click)="cambiarVista('crear')">
-            <i class="ti-plus mr-1"></i> Crear Plantilla
+          <button class="btn btn-primary shadow-sm" (click)="cambiarVista('crear')">
+            <i class="ti-plus mr-1"></i> Nueva Plantilla
           </button>
         </div>
       </div>
+
       <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-          <thead class="bg-light">
-            <tr>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Idioma</th>
-              <th>Estado Meta</th>
-              <th>Activa (Envío)</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="6" class="text-center py-4 text-muted">
-                No hay plantillas cargadas. Haz clic en Sincronizar.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        
+        <div *ngIf="cargandoLista" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Cargando plantillas...</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!cargandoLista">
+          <table class="table table-hover mb-0">
+            <thead class="bg-light text-muted">
+              <tr>
+                <th class="border-0">Nombre</th>
+                <th class="border-0">Categoría</th>
+                <th class="border-0">Idioma</th>
+                <th class="border-0 text-center">Estado (Meta)</th>
+                <th class="border-0 text-center">Activa</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr *ngIf="templates.length === 0">
+                <td colspan="5" class="text-center py-4 text-muted">
+                  <i class="ti-info-alt mb-2 d-block" style="font-size: 2rem;"></i>
+                  No tienes plantillas creadas. ¡Crea la primera!
+                </td>
+              </tr>
+
+              <tr *ngFor="let p of templates">
+                <td class="font-weight-bold align-middle">{{ p.name }}</td>
+                <td class="align-middle">
+                  <span class="badge badge-light border">{{ p.category }}</span>
+                </td>
+                <td class="align-middle text-uppercase">{{ p.language }}</td>
+                
+                <td class="text-center align-middle">
+                  <span class="badge badge-success px-2 py-1" *ngIf="p.status === 'APPROVED'">Aprobada</span>
+                  <span class="badge badge-warning px-2 py-1 text-white" *ngIf="p.status === 'PENDING'">
+                    <i class="ti-time mr-1"></i> En Revisión
+                  </span>
+                  <span class="badge badge-danger px-2 py-1" *ngIf="p.status === 'REJECTED'">Rechazada</span>
+                </td>
+                
+                <td class="text-center align-middle">
+                  <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" 
+                          [id]="'switch_' + p._id" 
+                          [(ngModel)]="p.active"
+                          (change)="toggleActiva(p)">
+                    <label class="custom-control-label" [for]="'switch_' + p._id"></label>
+                  </div>
+                </td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -102,8 +141,27 @@
                 </button>
               </div>
 
-              <textarea #bodyTextArea class="form-control" rows="5" [(ngModel)]="nuevaPlantilla.bodyText"
-                        placeholder="Hola {{'{{name}}'}}, felicidades por participar..."></textarea>
+              <textarea #bodyTextArea class="form-control" rows="5" 
+                      [(ngModel)]="nuevaPlantilla.bodyText"
+                      (ngModelChange)="actualizarVariables()"
+                      placeholder="Hola {{'{{name}}'}}, felicidades por participar...">
+              </textarea>
+            
+              <div *ngIf="variablesDetectadas.length > 0" class="mt-3 p-3 bg-light rounded border border-info">
+                <h6 class="text-info font-weight-bold mb-2"><i class="ti-info-alt mr-1"></i> Ejemplos para Meta</h6>
+                <p class="small text-muted mb-2">Meta requiere un ejemplo de qué datos irán aquí para aprobar la plantilla.</p>
+                
+                <div class="d-flex flex-column">
+                  <div *ngFor="let v of variablesDetectadas" class="col-md-12 mb-2">
+                    <div class="input-group input-group-sm align-items-center gap-2">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text font-weight-bold text-primary">{{ '{'+'{'+v+'}'+'}' }}</span>
+                      </div>
+                      <input type="text" class="form-control" [(ngModel)]="ejemplosVariables[v]" placeholder="Ej: Juan Pérez">
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="form-group">
@@ -139,8 +197,10 @@
               </div>
             </div>
 
-            <button (click)="crearPlantilla()" class="btn btn-success btn-lg btn-block mt-4 text-white font-weight-bold shadow">
-              <i class="ti-rocket mr-1"></i> Guardar y Enviar a Meta
+            <button [disabled]="sendTemplate" (click)="guardarYEnviar()" class="btn btn-success btn-lg btn-block mt-4 text-white font-weight-bold shadow">
+              <i class="ti-rocket mr-1"></i> 
+              <span *ngIf="sendTemplate">Enviando...</span>
+              <span *ngIf="!sendTemplate">Guardar y Enviar a Meta</span>              
             </button>
 
           </div>

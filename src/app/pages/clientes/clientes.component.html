@@ -10,7 +10,7 @@
 
                     <div class="d-flex flex-wrap justify-content-betwenn gap-2">
 
-                        <button class="btn btn-primary" (click)="cargarPlantillas()">
+                        <button class="btn btn-primary" (click)="loadTemplatesApi()">
                             <i class="ti-email"></i> Enviar Masivo ({{ clients.length }})
                         </button>
 
@@ -475,6 +475,9 @@ MODAL SUBIR TICKETS MASIVOS
     <!-- /.modal-dialog -->
 </div>
 
+<!-- ========================================================= 
+MODAL TEMPLATES API
+======================================================== -->
 <div class="modal fade" [class.show]="showTemplateModal" [style.display]="showTemplateModal ? 'block' : 'none'" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content shadow-lg">
@@ -506,7 +509,7 @@ MODAL SUBIR TICKETS MASIVOS
         <div *ngIf="templateSelectedApi" class="mt-4">
           <label class="font-weight-bold text-muted small">VISTA PREVIA:</label>
           <div class="p-3 rounded bg-light border" style="border-left: 5px solid #007bff !important;">
-            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ templateSelectedApi.components[0]?.text }}</p>
+            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ templateSelectedApi.bodyText }}</p>
           </div>
           <small class="text-muted mt-2 d-block">* Los parámetros como {{1}} se enviarán según la configuración de Meta.</small>
         </div>

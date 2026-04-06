@@ -20,6 +20,7 @@ import { RifasService } from 'src/app/services/rifas.service';
 import { Rifa } from 'src/app/models/rifas.model';
 import { TicketsService } from 'src/app/services/tickets.service';
 import { ChatService } from 'src/app/services/chat.service';
+import { TemplatesService } from 'src/app/services/templates.service';
 
 @Component({
   selector: 'app-clientes',
@@ -38,6 +39,7 @@ export class ClientesComponent implements OnInit {
                 private watiService: WatiService,
                 private rifasService: RifasService,
                 private whatsappService: WhatsappService,
+                private templatesService: TemplatesService,
                 private chatService: ChatService
   ){
     this.user = usersService.user;
@@ -1082,11 +1084,20 @@ export class ClientesComponent implements OnInit {
   public showTemplateModal: boolean = false;
 
   // Función para cargar las plantillas desde Meta
-  cargarPlantillas() {
-    this.chatService.getTemplates(this.internalApiKey).subscribe({
-      next: (res: any) => {
+  loadTemplatesApi() {
+
+    let query: any = {
+      desde: 0,
+      hasta: 1000,
+      sort: { createdAt: -1 },
+      active: true,
+      status: 'APPROVED'
+    }
+
+    this.templatesService.loadTemplates(this.internalApiKey, query).subscribe({
+      next: ({templates, total}) => {
         // Meta devuelve un array de plantillas. Filtramos solo las 'APPROVED'
-        this.templates = res.filter((t: any) => t.status === 'APPROVED');
+        this.templates = templates;
         console.log('Plantillas cargadas:', this.templates);
         this.showTemplateModal = true; // Abrimos el modal una vez cargadas
       },
@@ -1105,46 +1116,72 @@ export class ClientesComponent implements OnInit {
   async iniciarEnvioMasivo() {
     if (!this.templateSelectedApi) return;
 
+    // ==========================================
+    // 1. VALIDACIÓN DE CONTEXTO (MÓDULO CLIENTES)
+    // ==========================================
+    // Definimos qué variables somos capaces de llenar en ESTA pantalla
+    const variablesSoportadasAqui = ['name']; // Si luego agregas más, las pones aquí
+
+    // Extraemos el mapeo que guardamos en la base de datos (ej: ['name', 'number'])
+    const mapeoPlantilla = this.templateSelectedApi.bodyVariablesMapping || [];
+    
+    // Buscamos si la plantilla exige algo que no tenemos
+    const variablesFaltantes = mapeoPlantilla.filter((v: string) => !variablesSoportadasAqui.includes(v));
+
+    if (variablesFaltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Plantilla no compatible aquí',
+        html: `Esta plantilla requiere datos específicos <b>(${variablesFaltantes.join(', ')})</b> que no están disponibles en la vista general de clientes.<br><br>Por favor, usa esta plantilla desde el módulo de <b>Ventas / Tickets</b>.`,
+        confirmButtonColor: '#f39c12',
+        confirmButtonText: 'Entendido'
+      });
+      return; // 🛑 Detenemos la ejecución, no se envía nada
+    }
+
+    // ==========================================
+    // 2. CONSTRUCCIÓN DEL PAYLOAD
+    // ==========================================
     this.isSending = true;
 
-    // 1. Construir el array de clientes con la estructura que espera tu backend
     const customersPayload = this.clients.map(cliente => {
       // Limpieza del número de teléfono
       const phone = cliente.codigo + cliente.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
       
-      // Aquí defines qué variables vas a inyectar en {{1}}, {{2}}, etc.
-      // Si la plantilla no usa variables, simplemente dejas el array vacío: []
-      const parametrosDinamicos = [cliente.nombre]; 
+      // MAPEO DINÁMICO E INTELIGENTE:
+      // Llenamos el array en el orden exacto que requiere Meta basado en tu base de datos
+      const parametrosDinamicos = mapeoPlantilla.map((variable: string) => {
+        if (variable === 'name') return cliente.nombre;
+        // Si en el futuro agregas 'telefono' a las variables soportadas, harías:
+        // if (variable === 'telefono') return cliente.telefono;
+        
+        return ''; // Fallback de seguridad
+      }); 
 
       return {
         phone: phone,
         parameters: parametrosDinamicos
-        // buttons: [] // Si luego quieres inyectar botones dinámicos por cliente
       };
-    }).filter(c => c.phone); // Evitamos enviar clientes sin número de teléfono válido
+    }).filter(c => c.phone); // Evitamos clientes sin número
 
-    // 2. Armar el objeto maestro que se enviará al endpoint masivo
+    if (customersPayload.length === 0) {
+      this.isSending = false;
+      Swal.fire('Error', 'No hay clientes con números de teléfono válidos seleccionados.', 'error');
+      return;
+    }
+
     const payload = {
       templateName: this.templateSelectedApi.name,
-      langCode: this.templateSelectedApi.language, // <-- Tomamos el idioma dinámicamente
+      langCode: this.templateSelectedApi.language,
       customers: customersPayload
-      // mediaUrl: this.mediaUrlSelected, // Si vas a enviar una imagen global
-      // mediaType: this.mediaTypeSelected
     };
-
-    console.log(this.templateSelectedApi);
-    console.log('========================');    
-    console.log(payload);
-    this.isSending = false;
-    return
+    
+    // ==========================================
+    // 3. ENVÍO AL BACKEND
+    // ==========================================
     try {
-      // 3. Enviamos toda la carga de trabajo al Backend (una sola petición HTTP)
-
-      
-
       await this.chatService.sendTemplateBulk(this.internalApiKey, payload).toPromise();
 
-      // 4. Notificamos al usuario que el servidor ya está trabajando
       Swal.fire({
         icon: 'success',
         title: '¡Envío Masivo Iniciado!',
@@ -1162,7 +1199,7 @@ export class ClientesComponent implements OnInit {
       });
     } finally {
       this.isSending = false;
-      this.showMassTemplateModal = false;
+      this.showMassTemplateModal = false; // Ajusta el nombre de tu variable del modal
     }
   }
 }

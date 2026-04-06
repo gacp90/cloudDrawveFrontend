@@ -70,7 +70,9 @@ export class MensajesComponent implements OnInit {
   loadChatList() {
     this.chatService.getChatList(this.internalApiKey).subscribe({
       next: (data) => {
-        this.chats = data;        
+        this.chats = data;
+        console.log(this.chats);
+            
       },
       error: (err) => console.error('Error:', err)
     });
@@ -81,16 +83,36 @@ export class MensajesComponent implements OnInit {
     this.selectedChat = chat;
     this.showMobilePanel = false;
 
+    console.log(this.selectedChat);
+    
+
     // El _id en el aggregate que hicimos es el número de teléfono del cliente
     const customerPhone = chat._id;
+
+    console.log(this.selectedChat.lastMessage.wamid);
+    
 
     this.chatService.getChatHistory(this.internalApiKey, customerPhone).subscribe({
       next: (msgs) => {
         // .reverse() es necesario porque el backend los trae [nuevo...viejo]
         // y el chat se lee de [viejo...nuevo]
-        console.log(msgs);
-        
+        console.log(msgs);        
         this.messages = msgs.reverse();
+
+        // Si tiene mensajes sin leer, disparamos la lectura
+        if (this.selectedChat.unreadCount > 0) {
+          
+          // 1. Actualización visual instantánea (UX)
+          this.selectedChat.unreadCount = 0; 
+
+          // 2. Avisamos a NestJS para que le envíe el doble check azul a Meta
+          // Asumiendo que pasas el ID del mensaje o del teléfono
+          this.chatService.marcarComoLeido(this.internalApiKey, {wamid: this.selectedChat.lastMessage.wamid}).subscribe({
+            next: () => console.log('Doble check azul enviado'),
+            error: (err) => console.error('Error al marcar como leído', err)
+          });
+        }
+
         this.scrollToBottom();
       },
       error: (err) => console.error('Error cargando historial', err)
@@ -219,6 +241,10 @@ export class MensajesComponent implements OnInit {
       const { message, customer } = payload;
       if (message.direction === 'inbound') this.playNotificationSound();
       if (this.selectedChat && this.selectedChat._id === customer) {
+        console.log(message);
+        console.log(customer);
+
+        
         this.messages.push(message);
         this.scrollToBottom();
       }

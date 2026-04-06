@@ -8,13 +8,13 @@
       </div>
     </div>
 
-    <div class="search-bar">
+    <!-- <div class="search-bar">
       <i class="ti-search"></i>
       <input type="text" placeholder="Search">
-    </div>
+    </div> -->
 
     <div class="chat-list-container">
-      <div class="list-label">Recent Chats <i class="ti-angle-down"></i></div>
+      <div class="list-label px-2">Recent Chats <i class="ti-angle-down"></i></div>
       <div class="contact-card" 
            *ngFor="let chat of chats" 
            (click)="selectChat(chat)"
@@ -22,8 +22,16 @@
         <img src="assets/images/icon/staff.png" class="avatar">
         <div class="contact-info">
           <div class="contact-name">
-            <strong>{{ chat.cliente?.nombre || chat._id }}</strong>
-            <span class="time">5 min</span>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0">{{ chat.cliente?.nombre || chat._id }}</h6>
+                <small class="text-muted">{{ chat.ultimoMensaje }}</small>
+              </div>
+              
+              <span *ngIf="chat.unreadCount > 0" class="badge badge-success rounded-pill px-2 py-1 text-white">
+                {{ chat.unreadCount > 10 ? '10+' : chat.unreadCount }}
+              </span>
+            </div>
           </div>
           <p class="last-msg">{{ chat.lastMessage?.content?.text || '📷 Media file' }}</p>
         </div>

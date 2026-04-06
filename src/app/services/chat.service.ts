@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
 })
 export class ChatService {
   private socket: Socket;
-  private url = environment.wp_url; // Ej: http://localhost:3000 o tu URL de Cloudflare
+  private url = environment.wp_url;
   
   // Usaremos un Subject para avisar a los componentes cuando llegue un mensaje
   private newMessageSubject = new Subject<any>();
@@ -87,5 +87,11 @@ export class ChatService {
   sendTemplateBulk(apiKey: string, payload: any): Observable<any> {
     const headers = new HttpHeaders({ 'x-api-key': apiKey });
     return this.http.post(`${this.url}/whatsapp/send-template-bulk`, payload, { headers });
+  }
+
+  //CONFIRMACION DE LECTURA
+  marcarComoLeido(apikey: string, wamid: any): Observable<any> {
+    const headers = new HttpHeaders({ 'x-api-key': apikey });
+    return this.http.post(`${this.url}/whatsapp/read-status`, wamid, { headers });
   }
 }

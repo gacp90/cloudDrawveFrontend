@@ -36,6 +36,8 @@ import { Client } from 'src/app/models/clientes.model';
 import { SmsService } from 'src/app/services/sms.service';
 import { Venta } from 'src/app/models/ventas.model';
 import { VentasService } from 'src/app/services/ventas.service';
+import { TemplatesService } from 'src/app/services/templates.service';
+import { ChatService } from 'src/app/services/chat.service';
 
 interface templateIn{
   id: string,
@@ -62,6 +64,7 @@ export class RifaComponent implements OnInit {
   public base_url = environment.base_url;
   public local_url = environment.local_url;
   public client = environment.client || false;
+  public mostrarHoraGlobal: boolean = false;
 
   constructor(  private activatedRoute: ActivatedRoute,
                 private usersService: UsersService,
@@ -76,6 +79,8 @@ export class RifaComponent implements OnInit {
                 private fb: FormBuilder,
                 private clientesService: ClientesService,
                 private smsService: SmsService,
+                private templatesServices: TemplatesService,
+                private chatService: ChatService,
                 private ventasService: VentasService,
                 private printerService: NgxPrinterService){
 
@@ -3907,6 +3912,144 @@ export class RifaComponent implements OnInit {
       window.open(venta.guia, '_blank');      
     }   
 
+  }
+
+  /** ================================================================
+   *   API OFICIAL DE WHATSAPP - ENVIAR PLANTILLA
+  ==================================================================== */
+  
+    public templatesApi: any[] = [];
+    public templateSelectedApi: any = null;
+    public showTemplateModal: boolean = false;
+  
+  // Función para cargar las plantillas desde Meta
+  loadTemplatesApi() {
+
+    let query: any = {
+      desde: 0,
+      hasta: 1000,
+      sort: { createdAt: -1 },
+      active: true,
+      status: 'APPROVED'
+    }
+
+    this.templatesServices.loadTemplates(this.internalApiKey, query).subscribe({
+      next: ({templates, total}) => {
+        // Meta devuelve un array de plantillas. Filtramos solo las 'APPROVED'
+        this.templates = templates;
+        console.log('Plantillas cargadas:', this.templates);
+        this.showTemplateModal = true; // Abrimos el modal una vez cargadas
+      },
+      error: (err) => {
+        console.error('Error al obtener plantillas', err);
+        alert('No se pudieron cargar las plantillas de Meta');
+      }
+    });
+  }
+
+  isSending: boolean = false;
+  sendingIndex: number = 0;
+  showMassTemplateModal: boolean = false;
+  public internalApiKey: string = 'token_secreto_rifari_123';
+
+  /** ================================================================
+   *   ENVIAR MENSAJES MASIVOS
+  ==================================================================== */
+  //async iniciarEnvioMasivo() {
+  async iniciarEnvioMasivo() {
+    if (!this.templateSelectedApi) return;
+    // ==========================================
+    // 1. VALIDACIÓN DE CONTEXTO (MÓDULO RIFAS)
+    // ==========================================
+    // Aquí SÍ tenemos todas las variables disponibles
+    const variablesSoportadasAqui = ['name', 'number', 'proyecto'];
+    const mapeoPlantilla = this.templateSelectedApi.bodyVariablesMapping || [];
+    
+    const variablesFaltantes = mapeoPlantilla.filter((v: string) => !variablesSoportadasAqui.includes(v));
+    if (variablesFaltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Plantilla no compatible',
+        html: `Esta plantilla requiere variables <b>(${variablesFaltantes.join(', ')})</b> que no existen en este módulo.`,
+        confirmButtonColor: '#f39c12'
+      });
+      return;
+    }
+    this.isSending = true;
+    // ==========================================
+    // 2. LÓGICA DE AGRUPACIÓN (EL REEMPLAZO DE WATI)
+    // ==========================================
+    // Usamos un Map para agrupar usando el teléfono limpio como llave (key)
+    const ticketsAgrupados = new Map<string, any>();
+    // Asumo que iteramos sobre this.tickets (ajusta las propiedades según tu modelo de Mongoose/Angular)
+    this.tickets.forEach(ticket => {
+      // Limpieza del número de teléfono
+      const phone = ticket.telefono.trim().replace(/\s/g, '').replace(/[^\d]/g, '');
+      
+      if (!phone) return; // Si no hay teléfono, lo saltamos
+      // Si el teléfono ya existe en el grupo, le agregamos el ticket
+      if (ticketsAgrupados.has(phone)) {
+        ticketsAgrupados.get(phone).numeros.push(ticket.numero);
+      } else {
+        // Si no existe, lo creamos
+        ticketsAgrupados.set(phone, {
+          phone: phone,
+          nombre: ticket.nombre, // Tomamos el nombre del cliente
+          numeros: [ticket.numero]       // Iniciamos el array de números con este primer ticket
+        });
+      }
+    });
+    // ==========================================
+    // 3. CONSTRUCCIÓN DEL PAYLOAD FINAL
+    // ==========================================
+    // Convertimos el Map agrupado en el array que NestJS espera
+    const customersPayload = Array.from(ticketsAgrupados.values()).map(grupo => {
+      
+      // Formateamos los números: ['015', '300'] -> "#015, #300"
+      const ticketsString = grupo.numeros.map((n: string) => `#${n}`).join(', ');
+      // Mapeo dinámico e inteligente
+      const parametrosDinamicos = mapeoPlantilla.map((variable: string) => {
+        if (variable === 'name') return grupo.nombre;
+        if (variable === 'number') return ticketsString; // Aquí inyectamos el string agrupado
+        if (variable === 'proyecto') return this.rifa.name; // El nombre de la rifa actual
+        
+        return ''; 
+      }); 
+      return {
+        phone: grupo.phone,
+        parameters: parametrosDinamicos
+      };
+    });
+    if (customersPayload.length === 0) {
+      this.isSending = false;
+      Swal.fire('Error', 'No se encontraron tickets con números de teléfono válidos.', 'error');
+      return;
+    }
+    const payload = {
+      templateName: this.templateSelectedApi.name,
+      langCode: this.templateSelectedApi.language,
+      customers: customersPayload
+    };
+    
+    // ==========================================
+    // 4. ENVÍO AL BACKEND
+    // ==========================================
+    try {
+      await this.chatService.sendTemplateBulk(this.internalApiKey, payload).toPromise();
+      Swal.fire({
+        icon: 'success',
+        title: '¡Envío Masivo Iniciado!',
+        text: `Se enviarán ${customersPayload.length} mensajes consolidados (agrupando múltiples tickets). El servidor está trabajando.`,
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido'
+      });
+    } catch (error) {
+      console.error('Error al iniciar el envío masivo:', error);
+      Swal.fire('Oops...', 'Ocurrió un error al comunicar con el servidor.', 'error');
+    } finally {
+      this.isSending = false;
+      this.showMassTemplateModal = false; 
+    }
   }
   
 
