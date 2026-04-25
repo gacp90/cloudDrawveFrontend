@@ -69,4 +69,11 @@ export class WhatsappService {
     return this.http.get<{ok: boolean, msg: string}>( `${wp}/api/whatsapp/logout`);
   }
 
+  /** ================================================================
+   *  CHECK STATUS
+  ==================================================================== */
+  checkTokenAndRegister(payloadBackend: any){
+    return this.http.post('http://localhost:3000/api/whatsapp/exchange-token', payloadBackend);
+  }
+
 }

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Template } from 'src/app/models/template.model';
 import { TemplatesService } from 'src/app/services/templates.service';
+import { UsersService } from 'src/app/services/users.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -9,8 +10,8 @@ import Swal from 'sweetalert2';
   styleUrls: ['./templates.component.css']
 })
 export class TemplatesComponent {
-
-  public internalApiKey: string = 'token_secreto_rifari_123';
+  
+  public internalApiKey: string = 'none';
   vistaActual: 'lista' | 'crear' = 'lista'; // Iniciamos en 'crear' para probar directo
   
   nuevaPlantilla = {
@@ -26,8 +27,12 @@ export class TemplatesComponent {
 
   // Variable para el input independiente de respuestas rápidas
   nuevaRespuesta: string = '';
-
-  constructor(  private templatesService: TemplatesService) { }
+  
+  constructor(  private templatesService: TemplatesService,
+                private userService: UsersService
+  ) { 
+    this.internalApiKey = this.userService.user.internalApiKey!;
+  }
 
   ngOnInit(): void { 
     this.loadTemplates();
@@ -51,6 +56,9 @@ export class TemplatesComponent {
   loadTemplates(){
 
     this.cargandoLista = true;
+
+    console.log(this.internalApiKey);
+    
 
     this.templatesService.loadTemplates(this.internalApiKey, this.query)
       .subscribe({

@@ -16,6 +16,7 @@ import { ClientesComponent } from './clientes/clientes.component';
 import { MensajesComponent } from './mensajes/mensajes.component';
 import { ProductsComponent } from './products/products.component';
 import { TemplatesComponent } from './templates/templates.component';
+import { WhatsappSettingsComponent } from './whatsapp-settings/whatsapp-settings.component';
 
 
 // COMPONENTS
@@ -36,6 +37,7 @@ const routes: Routes = [
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },
         { path: 'plantillas', component: TemplatesComponent, canActivate: [AdminGuard], data:{ title: 'Plantillas' } },
         { path: 'vendedores', component: UsuariosComponent, canActivate: [AdminGuard], data:{ title: 'Vendedores' } },
+        { path: 'whatsapp-settings', component: WhatsappSettingsComponent, canActivate: [AdminGuard], data:{ title: 'Configuración de WhatsApp' } },
         
         { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
       ] 

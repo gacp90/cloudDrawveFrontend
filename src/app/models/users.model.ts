@@ -19,6 +19,7 @@ export class User {
         public referralCode: string,
         public referredBy: string,
         public walletBalance: number,
+        public internalApiKey?: string,
         public whatsapp?: boolean,
         public wp?: string,
         public wati?: boolean,

@@ -99,18 +99,34 @@
   client: true,
   app: false
 
+  wp_url: 'https://wpdemo.rifari.com/api',
+  base_url: 'https://demo.rifari.com/api',
+  local_url: 'https://demo.rifari.com',
+  client: false,
+  app: false
+
   base_url: 'http://localhost:3000/api',
   local_url: 'http://localhost:4200',
   client: false,
   app: false
 
+  1290484799111322
+
+  1310718371006155
+
+  {
+    "userID": null,
+    "expiresIn": null,
+    "code": "AQC9ND0iyILNKP6-SWwhlvccNJ8bapuxkSph6nDnXqzDowJsSw4QL5BvlXHSNhY6ToLO72o0s-Iau2HVxxfQiNAvUgjPM0a1e86HMuI4xHIlXeRKfSpyzgh19WcLUnnq4qZMraSJC8cgK0z4GK5fFf9qN-Q2HPl-bPU53WvO_BuNOM8400TidE2L-Zw_cYb9prOvJqozRC1sUstQ_ujGzkI2JNoQYkLBnXnTy2xYWLXugO-qUKpYfSnfNcmSfMYc8OMKHompTKW2YL1HNYfQGtvp07puI7hPjKZwx-lLud6QSweIzcEUPq6XzLtLqkDnTUPuaZRP8LmXSjZYbUhLDlh6p4IYzAXlWaNVUF-qvB4A_Ti3JsvkPIKNB1g3Q2EtGZtaWPnLBBNBBz3JjUtblhR9-JYmDnk67TAgXkDo8x6xNw"
+}
+
 */
 
 export const environment = {
   production: false,
-  wp_url: 'http://localhost:3000/api',
-  base_url: 'https://cloud.rifari.com/api',
-  local_url: 'https://cloud.rifari.com',
+  wp_url: 'https://wpdemo.rifari.com/api',
+  base_url: 'https://demo.rifari.com/api',
+  local_url: 'https://demo.rifari.com',
   client: false,
   app: false
 };

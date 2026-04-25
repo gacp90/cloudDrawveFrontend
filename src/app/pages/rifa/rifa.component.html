@@ -393,11 +393,11 @@
             </div>
 
             <!-- Exportar Disponibles -->
-            <div *ngIf="query.estado === 'Disponible'">
+            <div *ngIf="query.estado === 'Disponible' || query.estado === 'Apartado'">
                 <div class="d-flex justify-content-between flex-wrap mb-3">    
     
                     <div class="mb-2">
-                        <a class="btn btn-danger" href="{{base_url}}/tickets/pdf/{{rifa.rifid!}}">Exportar Disponibles</a>
+                        <a class="btn btn-danger" href="{{base_url}}/tickets/pdf/{{rifa.rifid!}}?estado={{query.estado}}">Exportar PDF</a>
                     </div>
     
                 </div>

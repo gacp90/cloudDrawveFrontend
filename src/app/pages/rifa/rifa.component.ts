@@ -86,6 +86,7 @@ export class RifaComponent implements OnInit {
 
     this.user = usersService.user;
     this.modulos = smsService.modulos;
+    this.internalApiKey = this.usersService.user.internalApiKey!;
 
     activatedRoute.params.subscribe( ({id}) => {
       this.loadRifa(id);      
@@ -3950,7 +3951,7 @@ export class RifaComponent implements OnInit {
   isSending: boolean = false;
   sendingIndex: number = 0;
   showMassTemplateModal: boolean = false;
-  public internalApiKey: string = 'token_secreto_rifari_123';
+  public internalApiKey: string = 'none';
 
   /** ================================================================
    *   ENVIAR MENSAJES MASIVOS

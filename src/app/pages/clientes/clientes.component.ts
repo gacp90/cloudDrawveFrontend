@@ -43,6 +43,7 @@ export class ClientesComponent implements OnInit {
                 private chatService: ChatService
   ){
     this.user = usersService.user;
+    this.internalApiKey = this.usersService.user.internalApiKey!;
   }
 
   ngOnInit(): void {
@@ -1171,6 +1172,7 @@ export class ClientesComponent implements OnInit {
     }
 
     const payload = {
+      templateid: this.templateSelectedApi._id,
       templateName: this.templateSelectedApi.name,
       langCode: this.templateSelectedApi.language,
       customers: customersPayload

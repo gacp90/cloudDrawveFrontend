@@ -24,6 +24,7 @@ import { NewclientComponent } from './clientes/newclient/newclient.component';
 import { MensajesComponent } from './mensajes/mensajes.component';
 import { ProductsComponent } from './products/products.component';
 import { TemplatesComponent } from './templates/templates.component';
+import { WhatsappSettingsComponent } from './whatsapp-settings/whatsapp-settings.component';
 
 
 @NgModule({
@@ -42,7 +43,8 @@ import { TemplatesComponent } from './templates/templates.component';
     NewclientComponent,
     MensajesComponent,
     ProductsComponent,
-    TemplatesComponent
+    TemplatesComponent,
+    WhatsappSettingsComponent
   ],
   exports: [
     DashboardComponent,
