@@ -3,6 +3,7 @@ import { User } from 'src/app/models/users.model';
 import { UsersService } from 'src/app/services/users.service';
 import { WhatsappService } from 'src/app/services/whatsapp.service';
 import Swal from 'sweetalert2';
+
 declare var FB: any;
 
 @Component({
@@ -56,6 +57,7 @@ export class WhatsappSettingsComponent implements OnInit {
   // 2. Escuchar los eventos en tiempo real de la ventana emergente (LA NOVEDAD)
   wabaIdRecibido: string = '';
   telefonoIdRecibido: string = '';
+  business_id: string = '';
   @HostListener('window:message', ['$event'])
   onMessage(event: MessageEvent) {
     if (!event.origin.endsWith('facebook.com')) return;
@@ -66,16 +68,23 @@ export class WhatsappSettingsComponent implements OnInit {
       if (payloadMeta.type === 'WA_EMBEDDED_SIGNUP') {
         console.log('Progreso del registro: ', payloadMeta);
         
-        // ¡LA PIEZA CLAVE!: Si el evento es FINISH, guardamos los IDs
-        if (payloadMeta.event === 'FINISH' && payloadMeta.data) {
+        // ¡LA PIEZA CLAVE!: Si el evento es FINISH, guardamos los IDs FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING
+        if (payloadMeta.event === 'FINISH' || payloadMeta.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING' && payloadMeta.data) {
           this.wabaIdRecibido = payloadMeta.data.waba_id;
           this.telefonoIdRecibido = payloadMeta.data.phone_number_id;
+          if (payloadMeta.data.business_id) {
+            this.business_id = payloadMeta.data.business_id
+          }
           console.log('✅ IDs capturados exitosamente en Angular');
         }
 
       } else if (payloadMeta.type === 'WA_SIGNUP_SUCCESS') {
         console.log('Registro exitoso: ', payloadMeta);
-      } 
+      }else{
+        console.log('Que fue lo q paso: ', payloadMeta);
+        
+      }
+      
     } catch (e) {
       // Ignoramos si no es JSON
     }
@@ -84,6 +93,10 @@ export class WhatsappSettingsComponent implements OnInit {
   // 3. Ejecutar la ventana emergente con todas las banderas
   launchWhatsAppSignup() {
     FB.login((response: any) => {
+
+      console.log('respuesta de FB: ', response);
+      
+
       if (response.authResponse) {
 
         const codigoMeta = response.authResponse.code;
@@ -92,8 +105,12 @@ export class WhatsappSettingsComponent implements OnInit {
         const payloadBackend = {
           code: codigoMeta,
           wabaId: this.wabaIdRecibido,
-          phoneNumberId: this.telefonoIdRecibido
+          phoneNumberId: this.telefonoIdRecibido,
+          business_id: (this.business_id.length > 0)? this.business_id: ''
         };
+
+        console.log('Payload para wp:', payloadBackend);
+        
 
         // Disparamos la petición a tu endpoint
         this.whatsappService.checkTokenAndRegister(payloadBackend)
@@ -107,7 +124,7 @@ export class WhatsappSettingsComponent implements OnInit {
               const internalApiKey = canal.internalApiKey;
 
               // 2. Disparamos la actualización hacia tu Backend Principal de Rifari
-              this.usersService.updateUser({whatsappApiKey: internalApiKey, gsm: true}, this.user.uid!).subscribe({
+              this.usersService.updateUser({internalApiKey: internalApiKey, gsm: true}, this.user.uid!).subscribe({
                 next: (userUpdateResponse: any) => {
                   
                   // 3. Actualizamos el estado global de la app en Angular (Memoria/LocalStorage)

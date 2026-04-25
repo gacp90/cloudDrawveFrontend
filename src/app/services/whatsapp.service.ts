@@ -1,6 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
+import { environment } from '../../environments/environment';
+const wp_url = environment.wp_url;
+
 interface _message{
   number: string,
   message: string
@@ -73,7 +76,7 @@ export class WhatsappService {
    *  CHECK STATUS
   ==================================================================== */
   checkTokenAndRegister(payloadBackend: any){
-    return this.http.post('http://localhost:3000/api/whatsapp/exchange-token', payloadBackend);
+    return this.http.post(`${wp_url}/whatsapp/exchange-token`, payloadBackend);
   }
 
 }
