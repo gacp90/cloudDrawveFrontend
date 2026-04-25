@@ -100,7 +100,7 @@
                             </li>
                             <li role="separator" class="divider"></li>
                             <li><a [routerLink]="['/dashboard/perfil', user.uid]" routerLinkActive="active"><i class="ti-user"></i> Mi Perfil</a></li>
-                            <li><a [routerLink]="['/dashboard/whatsapp-settings']" routerLinkActive="active"><i class="ti-settings"></i> Configuración de WhatsApp</a></li>
+                            <li *ngIf="user.whatsapp"><a [routerLink]="['/dashboard/whatsapp-settings']" routerLinkActive="active"><i class="ti-settings"></i> Configuración de WhatsApp</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a class="pointer" (click)="logout()"><i class="ti-power-off"></i> Salir</a></li>
                         </ul>
