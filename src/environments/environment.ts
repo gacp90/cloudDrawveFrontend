@@ -13,16 +13,6 @@
   local_url: 'https://admin.rifaselmocho.com',
   client: true,
   app: false
-  
-  base_url: 'https://admin.ganaconbeltran.com/api',
-  local_url: 'https://admin.ganaconbeltran.com',
-  client: true,
-  app: false
-
-  base_url: 'https://admin.rifacarssocopo.com/api',
-  local_url: 'https://admin.rifacarssocopo.com',
-  client: true,
-  app: false
 
   base_url: 'https://admin.ganaconkingjesus.com/api',
   local_url: 'https://admin.ganaconkingjesus.com',
@@ -34,38 +24,8 @@
   client: true,
   app: false
 
-  base_url: 'https://admin.ganayproduce.com/api',
-  local_url: 'https://admin.ganayproduce.com',
-  client: true,
-  app: false
-
-  base_url: 'https://admin.labendicionlif.com/api',
-  local_url: 'https://admin.labendicionlif.com',
-  client: true,
-  app: false
-
   base_url: 'https://admin.rifalaplaya.com/api',
   local_url: 'https://admin.rifalaplaya.com',
-  client: true,
-  app: false
-  
-  base_url: 'https://admin.tucarrorifas.com/api',
-  local_url: 'https://admin.tucarrorifas.com',
-  client: true,
-  app: false
-
-  base_url: 'https://admin.rifasmacuto.com/api',
-  local_url: 'https://admin.rifasmacuto.com',
-  client: true,
-  app: false
-
-  base_url: 'https://admin.tuticketdorado.com/api',
-  local_url: 'https://admin.tuticketdorado.com',
-  client: true,
-  app: false
-
-  base_url: 'https://admin.rifasgranoriente.com/api',
-  local_url: 'https://admin.rifasgranoriente.com',
   client: true,
   app: false
   
@@ -76,11 +36,6 @@
   
   base_url: 'https://admin.rifasmcg.com/api',
   local_url: 'https://admin.rifasmcg.com',
-  client: true,
-  app: false
-
-  base_url: 'https://admin.rifaexpres.com/api',
-  local_url: 'https://admin.rifaexpres.com',
   client: true,
   app: false
 
@@ -125,8 +80,8 @@
 export const environment = {
   production: false,
   wp_url: 'https://wpdemo.rifari.com/api',
-  base_url: 'https://demo.rifari.com/api',
-  local_url: 'https://demo.rifari.com',
+  base_url: 'https://cloud.rifari.com/api',
+  local_url: 'https://cloud.rifari.com',
   client: false,
   app: false
 };

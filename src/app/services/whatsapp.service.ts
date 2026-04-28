@@ -1,7 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { environment } from '../../environments/environment';
+import { tap } from 'rxjs';
+import { UsersService } from './users.service';
 const wp_url = environment.wp_url;
 
 interface _message{
@@ -14,7 +16,10 @@ interface _message{
 })
 export class WhatsappService {
 
-  constructor(  private http: HttpClient) { }
+  constructor(  private http: HttpClient
+  ) { }
+
+  public channel: any;
   
   /** ================================================================
    *  GENERATE QR
@@ -77,6 +82,19 @@ export class WhatsappService {
   ==================================================================== */
   checkTokenAndRegister(payloadBackend: any){
     return this.http.post(`${wp_url}/whatsapp/exchange-token`, payloadBackend);
+  }
+
+  /** ================================================================
+   *  HEALT STATUS
+  ==================================================================== */
+  healt(apiKey: string){
+    const headers = new HttpHeaders({ 'x-api-key': apiKey });
+    return this.http.get(`${wp_url}/whatsapp/health`, { headers })
+      .pipe(
+        tap( (resp: any) => {
+          this.channel = resp.data;
+        })
+      )
   }
 
 }

@@ -21,6 +21,7 @@ export class MensajesComponent implements OnInit {
 
   ){
     this.user = usersService.user;
+    this.internalApiKey = this.user.internalApiKey!;
   }
 
 
@@ -217,7 +218,7 @@ export class MensajesComponent implements OnInit {
       this.socket.disconnect();
     }
 
-    this.socket = io('http://localhost:3000', {
+    this.socket = io('https://wpdemo.rifari.com', {
       auth: {
         'x-api-key': this.internalApiKey 
       },

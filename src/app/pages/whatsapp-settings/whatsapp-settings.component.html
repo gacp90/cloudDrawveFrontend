@@ -1,1 +1,160 @@
-<p>whatsapp-settings works!</p>
+<div *ngIf="!user.internalApiKey" class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-9">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-5">
+                    
+                    <div class="text-center mb-5">
+                        <div class="icon-box-lg bg-light-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                            <i class="bi bi-whatsapp text-success display-3"></i>
+                        </div>
+                        <h1 class="fw-bolder text-dark mb-2">Potencia Rifari con WhatsApp Business</h1>
+                        <p class="fs-5 text-muted mx-auto" style="max-width: 600px;">
+                            Automatiza la venta, entrega de tickets y atención al cliente conectando tu línea comercial oficial.
+                        </p>
+                    </div>
+
+                    <div class="row g-4 mb-5 text-center">
+                        <div class="col-md-4">
+                            <div class="benefit-card h-100 p-4 border rounded-3 bg-white">
+                                <i class="bi bi-currency-dollar text-primary display-6 mb-3"></i>
+                                <h5 class="fw-bold">Impulsa Ventas 24/7</h5>
+                                <p class="small text-muted mb-0">Permite a tus clientes comprar boletos automáticamente desde el chat.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card h-100 p-4 border rounded-3 bg-white">
+                                <i class="bi bi-ticket-perforated text-success display-6 mb-3"></i>
+                                <h5 class="fw-bold">Envío de Tickets Instantáneo</h5>
+                                <p class="small text-muted mb-0">Tus clientes reciben su comprobante y número al instante al confirmar pago.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card h-100 p-4 border rounded-3 bg-white">
+                                <i class="bi bi-robot text-warning display-6 mb-3"></i>
+                                <h5 class="fw-bold">Automatiza Consultas</h5>
+                                <p class="small text-muted mb-0">Responde dudas comunes sobre la rifa o premios sin intervención humana.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center bg-light p-4 rounded-3 border">
+                        <i class="bi bi-shield-check-fill text-muted me-2"></i>
+                        <span class="small text-muted">Proceso rápido y seguro guiado por Meta (Facebook).</span>
+                        <div class="mt-4">
+                            <button class="btn btn-whatsapp-primary btn-xl rounded-pill fw-bold" (click)="launchWhatsAppSignup()">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Comenzar Integración Segura
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="user.internalApiKey && channelHealth" class="container-fluid py-4">
+    
+    <div class="row g-4 mb-4">
+        
+        <div class="col-md-6">
+            <div class="card rifari-card h-100 p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="icon-circle bg-light-success me-3">
+                        <i class="bi bi-whatsapp text-success" style="font-size: 2rem;"></i>
+                    </div>
+                    <div>
+                        <span class="text-uppercase text-muted fw-bold small">Canal Conectado</span>
+                        <h2 class="fw-bold mb-0 text-dark">{{ channelHealth.telefono }}</h2>
+                    </div>
+                </div>
+                
+                <div class="mt-auto d-flex justify-content-between align-items-center bg-light p-3 rounded-3 border">
+                    <span class="fw-semibold text-secondary">Estado de la conexión</span>
+                    <span class="badge px-3 py-2 rounded-pill" 
+                          [ngClass]="channelHealth.estadoLinea === 'CONNECTED' ? 'bg-success' : 'bg-warning text-dark'">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                        {{ channelHealth.estadoLinea === 'CONNECTED' ? 'En línea' : 'Pendiente' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card rifari-card h-100 p-4 card-credits">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="text-white text-uppercase fw-bold small">Créditos Rifari</span>
+                    <i class="bi bi-wallet2 text-white" style="font-size: 1.5rem;"></i>
+                </div>
+                
+                <div class="mb-4">
+                    <span class="display-3 fw-bold text-white mb-0">{{ channelHealth.creditosRifari | currency}}</span>
+                    <p class="text-white ms-2 fs-5 mb-0">disponibles</p>
+                </div>
+                
+                <a href="https://wa.me/584120000000?text=Hola%20equipo%20de%20Rifari,%20deseo%20recargar%20cr%C3%A9ditos%20para%20mis%20campa%C3%B1as." 
+                   target="_blank" 
+                   class="btn btn-light btn-lg text-primary fw-bold w-100 mt-auto rounded-pill shadow-sm">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Recargar Saldo
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card rifari-card p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-0">Límites de Mensajería</h4>
+                        <span class="text-muted small">Cantidad máxima de personas a las que puedes iniciarles chat cada 24h.</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill border gap-2">
+                        <span class="small fw-bold text-muted me-2">Calidad:</span>
+                        <div class="quality-indicator" 
+                             [ngClass]="{
+                                'bg-quality-green': channelHealth.calidad === 'GREEN',
+                                'bg-quality-yellow': channelHealth.calidad === 'YELLOW',
+                                'bg-quality-red': channelHealth.calidad === 'RED',
+                                'bg-quality-unknown': channelHealth.calidad === 'UNKNOWN'
+                             }">
+                        </div>
+                        <span class="small fw-bolder text-uppercase" 
+                              [ngClass]="{
+                                'text-success': channelHealth.calidad === 'GREEN',
+                                'text-warning': channelHealth.calidad === 'YELLOW',
+                                'text-danger': channelHealth.calidad === 'RED'
+                              }">                        
+                        </span>
+                    </div>
+                </div>
+
+                <div class="tier-container">
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '250'">
+                        <span class="tier-number">250</span>
+                        <span class="tier-label">mensajes / día</span>
+                    </div>
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '1000' || channelHealth.limiteDiario == '2000'">
+                        <span class="tier-number">1K</span>
+                        <span class="tier-label">mensajes / día</span>
+                    </div>
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '10000'">
+                        <span class="tier-number">10K</span>
+                        <span class="tier-label">mensajes / día</span>
+                    </div>
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '100000'">
+                        <span class="tier-number">100K</span>
+                        <span class="tier-label">mensajes / día</span>
+                    </div>
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == 'UNLIMITED'">
+                        <span class="tier-number">∞</span>
+                        <span class="tier-label">Ilimitado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

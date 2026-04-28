@@ -9,6 +9,7 @@ import { Observable, catchError, map, of, tap } from 'rxjs';
 import { LoadUsers } from '../interfaces/load-users.interface';
 
 import { environment } from '../../environments/environment';
+import { WhatsappService } from './whatsapp.service';
 const base_url = environment.base_url;
 
 @Injectable({
@@ -17,9 +18,11 @@ const base_url = environment.base_url;
 export class UsersService {
 
   public user!: User;
+  public chanel!: any;
 
   constructor(  private http: HttpClient,
-                private router: Router) { }
+                private router: Router,
+                private whatsappService: WhatsappService) { }
 
   /** ================================================================
    *   GET TOKEN
@@ -86,6 +89,9 @@ export class UsersService {
         this.user = new User(email, name, phone, empresa, password, role, img, status, admin, fecha, referralCode, referredBy, walletBalance, internalApiKey, whatsapp, wp, wati, watilink, watitoken, termica, gsm, products, msg, uid);   
         
         localStorage.setItem('token', resp.token);
+        if (internalApiKey) {
+          this.whatsappService.healt(internalApiKey).subscribe();
+        }
 
       }),
       map( resp => true ),

@@ -5,19 +5,18 @@ import { WhatsappService } from 'src/app/services/whatsapp.service';
 import Swal from 'sweetalert2';
 
 declare var FB: any;
+interface channel {
+  creditosRifari: number,
+  telefono: string,
+  estadoLinea: string,
+  calidad: string,
+  limiteDiario: string,
+}
 
 @Component({
   selector: 'app-whatsapp-settings',  
   styleUrls: ['./whatsapp-settings.component.css'],
-  template: `
-    <div class="card p-4 text-center" style="background: #1e212b;">
-        <h3 class="text-white mb-3">Vincula tu WhatsApp</h3>
-        <p class="text-muted mb-4">Conecta tu número para empezar a enviar tickets y notificaciones a tus clientes.</p>
-        <button class="btn btn-primary btn-lg" (click)="launchWhatsAppSignup()">
-            <i class="bx bxl-whatsapp fs-lg me-2"></i> Conectar con Meta
-        </button>
-    </div>
-  `
+  templateUrl: './whatsapp-settings.component.html'
 })
 export class WhatsappSettingsComponent implements OnInit {
   
@@ -30,7 +29,11 @@ export class WhatsappSettingsComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.loadFacebookSDK();
+    if (this.user.internalApiKey) {
+      this.loadHealt();
+    }{
+      this.loadFacebookSDK();
+    }
   }
 
   // 1. Cargar el SDK de Facebook
@@ -39,7 +42,7 @@ export class WhatsappSettingsComponent implements OnInit {
       FB.init({
         appId      : '1797345757607881', 
         cookie     : true,
-        autoLogAppEvents: true,            
+        autoLogAppEvents: true,        
         xfbml      : true,               
         version    : 'v25.0'             // Apuntando a la versión más reciente
       });
@@ -136,9 +139,11 @@ export class WhatsappSettingsComponent implements OnInit {
                   Swal.fire({
                     icon: 'success',
                     title: '¡Vinculación exitosa!',
-                    text: '¡WhatsApp ha sido conectado permanentemente a tu cuenta de Rifari!',
+                    text: '¡WhatsApp ha sido conectado a tu cuenta de Rifari!',
                     confirmButtonColor: '#3085d6'
                   });
+
+                  this.loadHealt();
 
                 },
                 error: (errMainBackend) => {
@@ -178,8 +183,7 @@ export class WhatsappSettingsComponent implements OnInit {
       "extras": {
           setup: {},
           "featureType": "whatsapp_business_app_onboarding", // set to 'whatsapp_business_app_onboarding'
-          "sessionInfoVersion": "3",
-          "version": "4"
+          "sessionInfoVersion": "3"
         }
     });
   }
@@ -217,6 +221,32 @@ export class WhatsappSettingsComponent implements OnInit {
     // Aquí luego agregaremos tu servicio HttpClient para enviarlo a NestJS
     console.log("Token listo para ser procesado por NestJS:", token);
     alert("¡Token recibido! Revisa la consola.");
+  }
+
+  // HEALT
+  public channelHealth!: channel;
+  loadHealt(){
+
+    if (this.user.internalApiKey) {
+      this.whatsappService.healt(this.user.internalApiKey)
+        .subscribe({ 
+          next: (resp: any) =>{
+            this.channelHealth = resp.data;
+            this.usersService.chanel = resp.data;
+            if (resp.data.status === 'PENDING') {
+                this.channelHealth.limiteDiario = '0'; // O algún valor que no active ningún box
+                this.channelHealth.calidad = 'UNKNOWN';
+            } else if (resp.data.limiteDiario) {
+                // Si viene 'TIER_250', lo limpia. Si viene 'UNLIMITED', lo deja igual.
+                this.channelHealth.limiteDiario = resp.data.limiteDiario.includes('TIER_') 
+                    ? resp.data.limiteDiario.split('TIER_')[1] 
+                    : resp.data.limiteDiario;
+            }            
+            
+          }
+        })
+    }
+
   }
 
 }
