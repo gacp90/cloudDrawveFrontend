@@ -8,19 +8,7 @@
     </div>
 
     <!-- VINCULAR WHATSAPP -->
-    <div *ngIf="user.wp || user.gsm" class="d-flex flex-wrap gap-2">
-        <button type="button" class="m-1 btn btn-success" data-toggle="modal" data-target="#whatsappqr">
-            Vincular Whatsapp
-        </button>
-
-        <button *ngIf="user.gsm" type="button" class="m-1 btn btn-info" data-toggle="modal" data-target="#modalGsm">
-            Modulo GSM
-        </button>
-    </div>
-   
-
-    <div *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" class="d-flex flex-wrap gap-2 my-2">
-        
+    <div *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" class="d-flex flex-wrap gap-2 my-2">        
 
         <button type="button" class="m-1 btn btn-primary" data-toggle="modal" data-target="#addMetodoPaid">
             Metodos de pago
@@ -349,12 +337,8 @@
                         <i class="ti ti-download"></i> Exportar excel Agrupado
                     </button>
 
-                    <button class="btn btn-primary" (click)="loadTemplatesApi()">
+                    <button *ngIf="user.internalApiKey" class="btn btn-primary" (click)="loadTemplatesApi()">
                         <i class="ti-email"></i> Enviar Masivo Api ({{ tickets.length }})
-                    </button>
-    
-                    <button *ngIf="user.whatsapp && user.wp" type="button" class="btn btn-success m-2 " data-toggle="modal" data-target="#whatsappmasive">
-                        Enviar mensajes masivos
                     </button>
                 </div>
 
@@ -789,11 +773,7 @@
                                             <span *ngIf="sendM">Enviando...</span>
                                             <span *ngIf="!sendM">Enviar</span>
                                         </button>
-    
-                                        <button *ngIf="user.gsm" [disabled]="sendS" (click)="sendSMS(tWhatp.value)" type="button" class="d-none d-md-block btn btn-info btn-rounded "><i class="ti-control-play"></i> 
-                                            <span *ngIf="sendS">Enviando...</span>
-                                            <span *ngIf="!sendS"> <i></i> SMS</span>
-                                        </button>
+                                            
                                     </div>
 
                                 </div>
@@ -809,7 +789,7 @@
                                     <span *ngIf="!imprimiendo">Imprimir</span>
                                 </button>
 
-                                <button *ngIf="!app && user.termica" [disabled]="imprimiendo" class="btn btn-info my-3" (click)="printTemplate()">
+                                <button *ngIf="!app" [disabled]="imprimiendo" class="btn btn-info my-3" (click)="printTemplate()">
                                     <span *ngIf="imprimiendo">Imprimiendo...</span>
                                     <span *ngIf="!imprimiendo">Imprimir</span>
                                 </button>
@@ -857,7 +837,7 @@
                                     </ng-container>
                                 </div>
 
-                                <div>
+                                <!-- <div>
 
                                     <div class="form-group mb-1">
                                         <label>Mensaje</label>
@@ -869,7 +849,7 @@
                                         <span *ngIf="!sendImage">Enviar</span>
                                     </button>
 
-                                </div>
+                                </div> -->
 
                             </div>
                             <!-- IMG TICKET -->
