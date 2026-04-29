@@ -71,9 +71,7 @@ export class MensajesComponent implements OnInit {
   loadChatList() {
     this.chatService.getChatList(this.internalApiKey).subscribe({
       next: (data) => {
-        this.chats = data;
-        console.log(this.chats);
-            
+        this.chats = data;            
       },
       error: (err) => console.error('Error:', err)
     });
@@ -82,22 +80,15 @@ export class MensajesComponent implements OnInit {
   // Función que se ejecuta al hacer click en un chat de la lista
   selectChat(chat: any) {
     this.selectedChat = chat;
-    this.showMobilePanel = false;
-
-    console.log(this.selectedChat);
-    
+    this.showMobilePanel = false;    
 
     // El _id en el aggregate que hicimos es el número de teléfono del cliente
-    const customerPhone = chat._id;
-
-    console.log(this.selectedChat.lastMessage.wamid);
-    
+    const customerPhone = chat._id;    
 
     this.chatService.getChatHistory(this.internalApiKey, customerPhone).subscribe({
       next: (msgs) => {
         // .reverse() es necesario porque el backend los trae [nuevo...viejo]
-        // y el chat se lee de [viejo...nuevo]
-        console.log(msgs);        
+        // y el chat se lee de [viejo...nuevo]        
         this.messages = msgs.reverse();
 
         // Si tiene mensajes sin leer, disparamos la lectura
@@ -242,10 +233,6 @@ export class MensajesComponent implements OnInit {
       const { message, customer } = payload;
       if (message.direction === 'inbound') this.playNotificationSound();
       if (this.selectedChat && this.selectedChat._id === customer) {
-        console.log(message);
-        console.log(customer);
-
-        
         this.messages.push(message);
         this.scrollToBottom();
       }
