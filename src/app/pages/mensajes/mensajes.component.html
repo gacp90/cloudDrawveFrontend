@@ -65,7 +65,7 @@
 
           <div class="msg-bubble shadow-sm">
   
-            <span *ngIf="msg.type === 'text' || msg.type === 'template'" style="display: inline-block; vertical-align: middle;">
+            <span *ngIf="msg.type === 'text' || msg.type === 'template' || msg.type === 'button'" style="display: inline-block; vertical-align: middle;">
               {{ msg.content?.text }}
             </span>
 
