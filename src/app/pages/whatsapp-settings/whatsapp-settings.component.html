@@ -40,10 +40,18 @@
 
                     <div class="text-center bg-light p-4 rounded-3 border">
                         <i class="bi bi-shield-check-fill text-muted me-2"></i>
-                        <span class="small text-muted">Proceso rápido y seguro guiado por Meta (Facebook).</span>
+                        
+                        <span *ngIf="esDominioOficial" class="small text-muted">Proceso rápido y seguro guiado por Meta (Facebook).</span>
+                        
+                        <span *ngIf="!esDominioOficial" class="small text-muted">Para conectar WhatsApp en este dominio personalizado, requiere asistencia.</span>
+                        
                         <div class="mt-4">
-                            <button class="btn btn-whatsapp-primary btn-xl rounded-pill fw-bold" (click)="launchWhatsAppSignup()">
+                            <button *ngIf="esDominioOficial" class="btn btn-whatsapp-primary btn-xl rounded-pill fw-bold" (click)="launchWhatsAppSignup()">
                                 <i class="bi bi-box-arrow-in-right me-2"></i> Comenzar Integración Segura
+                            </button>
+
+                            <button *ngIf="!esDominioOficial" class="btn btn-success btn-xl rounded-pill fw-bold text-white shadow-sm" style="background-color: #25D366; border-color: #25D366;" (click)="contactarSoporte()">
+                                <i class="bi bi-whatsapp me-2"></i> Contactar a Soporte
                             </button>
                         </div>
                     </div>
@@ -92,12 +100,10 @@
                     <span class="display-3 fw-bold text-white mb-0">{{ channelHealth.creditosRifari | currency}}</span>
                     <p class="text-white ms-2 fs-5 mb-0">disponibles</p>
                 </div>
-                
-                <a href="https://wa.me/584120000000?text=Hola%20equipo%20de%20Rifari,%20deseo%20recargar%20cr%C3%A9ditos%20para%20mis%20campa%C3%B1as." 
-                   target="_blank" 
-                   class="btn btn-light btn-lg text-primary fw-bold w-100 mt-auto rounded-pill shadow-sm">
+
+                <button class="btn btn-light btn-lg text-primary fw-bold w-100 mt-auto rounded-pill shadow-sm" (click)="abrirModalRecarga()">
                     <i class="bi bi-plus-circle-fill me-2"></i> Recargar Saldo
-                </a>
+                </button>
             </div>
         </div>
 
@@ -137,15 +143,19 @@
                         <span class="tier-number">250</span>
                         <span class="tier-label">mensajes / día</span>
                     </div>
-                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '1000' || channelHealth.limiteDiario == '2000'">
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '1000' ||  channelHealth.limiteDiario == '1K'">
                         <span class="tier-number">1K</span>
                         <span class="tier-label">mensajes / día</span>
                     </div>
-                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '10000'">
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '2000' ||  channelHealth.limiteDiario == '2K'">
+                        <span class="tier-number">2K</span>
+                        <span class="tier-label">mensajes / día</span>
+                    </div>
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '10000' ||  channelHealth.limiteDiario == '10K'">
                         <span class="tier-number">10K</span>
                         <span class="tier-label">mensajes / día</span>
                     </div>
-                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '100000'">
+                    <div class="tier-box" [class.active]="channelHealth.limiteDiario == '100000' ||  channelHealth.limiteDiario == '100K'">
                         <span class="tier-number">100K</span>
                         <span class="tier-label">mensajes / día</span>
                     </div>
@@ -157,4 +167,78 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- MODAL DE RECARGA DE SALDO -->
+<div class="modal-backdrop fade show" *ngIf="mostrarModalRecarga" style="background: rgba(0,0,0,0.5); position: fixed; top:0; left:0; width:100%; height:100%; z-index: 1040;"></div>
+
+<div class="modal fade show" *ngIf="mostrarModalRecarga" style="display: block; z-index: 1050;" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title">Recargar Saldo (USD)</h5>
+        <button type="button" class="close" (click)="cerrarModalRecarga()" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="row">
+          
+          <!-- COLUMNA IZQUIERDA: CONTROLES DE MONTO -->
+          <div class="col-md-6 border-end">
+            <p class="text-muted small mb-3">Selecciona o ingresa la cantidad a recargar. Mínimo 5 USD.</p>
+            
+            <!-- Botones de sugerencia -->
+            <div class="d-flex gap-2 mb-3 flex-wrap">
+              <button class="btn" [ngClass]="cantidadARecargar === 10 ? 'btn-primary' : 'btn-outline-primary'" (click)="seleccionarMonto(10)">10</button>
+              <button class="btn" [ngClass]="cantidadARecargar === 25 ? 'btn-primary' : 'btn-outline-primary'" (click)="seleccionarMonto(25)">25</button>
+              <button class="btn" [ngClass]="cantidadARecargar === 50 ? 'btn-primary' : 'btn-outline-primary'" (click)="seleccionarMonto(50)">50</button>
+              <button class="btn" [ngClass]="cantidadARecargar === 100 ? 'btn-primary' : 'btn-outline-primary'" (click)="seleccionarMonto(100)">100</button>
+            </div>
+
+            <!-- Input Manual -->
+            <div class="form-group mb-4">
+              <label class="form-label font-weight-bold">Otra cantidad:</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control form-control-lg" [(ngModel)]="cantidadARecargar" min="5">
+              </div>
+              <small class="text-danger" *ngIf="cantidadARecargar < 5">El monto mínimo es de 5 USD</small>
+            </div>
+          </div>
+
+          <!-- COLUMNA DERECHA: ESTIMADOR DE MENSAJES -->
+          <div class="col-md-6 bg-light p-4 rounded">
+            <h6 class="font-weight-bold text-center mb-3">Con {{ cantidadARecargar }} USD podrías enviar:</h6>
+            
+            <ul class="list-group list-group-flush bg-transparent">
+              <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom-0">
+                <span><i class="fa fa-bullhorn text-warning me-2"></i> Marketing</span>
+                <span class="badge bg-dark rounded-pill" style="font-size: 1rem;">{{ estimacionMarketing }} </span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom-0">
+                <span><i class="fa fa-bell text-info me-2"></i> Utilidad</span>
+                <span class="badge bg-dark rounded-pill" style="font-size: 1rem;">{{ estimacionUtilidad }} </span>
+              </li>
+            </ul>
+            <small class="text-muted d-block mt-3" style="font-size: 0.75rem; line-height: 1.2;">
+              * Cálculos aproximados basados en la tarifa estándar. Meta cobra por conversación de 24 horas.
+            </small>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalRecarga()" [disabled]="cargandoPago">Cancelar</button>
+        <button type="button" class="btn btn-success" (click)="iniciarPagoSpidi()" [disabled]="cantidadARecargar < 0.1 || cargandoPago">
+          <span *ngIf="!cargandoPago">Pagar {{ cantidadARecargar }} USD con Spidi</span>
+          <span *ngIf="cargandoPago"><i class="fa fa-spinner fa-spin"></i> Generando Link...</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>

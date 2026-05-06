@@ -15,11 +15,16 @@ export class TemplatesService {
   constructor(  private http: HttpClient) { }
 
   createTemplate(apiKey: string, templateData: any): Observable<any> {
-    return this.http.post(`${this.url}/templates/`, templateData, {
-      headers: {
-        'x-api-key': apiKey
-      }
-    });
+    const headers = new HttpHeaders({ 'x-api-key': apiKey });
+    return this.http.post(`${this.url}/templates/`, templateData, { headers });
+  }
+
+  crearPlantillaMedia(apiKey: string, formData: any,): Observable<any> {
+    const headers = new HttpHeaders({ 'x-api-key': apiKey });
+
+    // OJO: Cuando envías FormData, NO debes poner 'Content-Type': 'multipart/form-data' en los headers manualmente. 
+    // Angular y el navegador calculan el "boundary" correcto automáticamente.
+    return this.http.post(`${this.url}/templates/media`, formData, { headers });
   }
 
   loadTemplates(apiKey: string, query: any): Observable<{ok: boolean, templates: Template[], total: number}> {

@@ -3980,6 +3980,40 @@ export class RifaComponent implements OnInit {
       this.showMassTemplateModal = false; 
     }
   }
+
+  descargandoPDF: boolean = false;
+
+  generarPDF() {
+    this.descargandoPDF = true;
+
+    // Aquí le pasas el mismo objeto 'query' que ya usabas para filtrar la tabla en pantalla
+    this.ticketsService.exportarTicketsPDF(this.rifa.rifid!, this.query).subscribe({
+      next: (blob: Blob) => {
+        // 1. Crear una URL local temporal para el archivo
+        const url = window.URL.createObjectURL(blob);
+        
+        // 2. Crear una etiqueta <a> invisible
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tickets-${this.query.estado || 'filtrados'}.pdf`; 
+        
+        // 3. Simular el clic para iniciar la descarga
+        document.body.appendChild(a);
+        a.click();
+        
+        // 4. Limpiar
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        this.descargandoPDF = false;
+      },
+      error: (err) => {
+        console.error('Error descargando el PDF', err);
+        alert('No se encontraron tickets con estos filtros o hubo un error.');
+        this.descargandoPDF = false;
+      }
+    });
+  }
   
 
 }

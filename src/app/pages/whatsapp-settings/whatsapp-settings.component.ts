@@ -1,5 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { User } from 'src/app/models/users.model';
+import { SpidiService } from 'src/app/services/spidi.service';
 import { UsersService } from 'src/app/services/users.service';
 import { WhatsappService } from 'src/app/services/whatsapp.service';
 import Swal from 'sweetalert2';
@@ -21,19 +23,43 @@ interface channel {
 export class WhatsappSettingsComponent implements OnInit {
   
   public user!: User;
+  esDominioOficial: boolean = false;
   constructor(  private whatsappService: WhatsappService,
-                private usersService: UsersService
+                private usersService: UsersService,
+                private spidiService: SpidiService, // <-- NUEVO
+                private route: ActivatedRoute
   ) { 
     this.user = this.usersService.user;
   }
 
 
   ngOnInit(): void {
+    this.verificarDominio();
+
     if (this.user.internalApiKey) {
       this.loadHealt();
-    }{
+    }
+
+    if (this.esDominioOficial) {
       this.loadFacebookSDK();
     }
+  }
+
+  verificarDominio() {
+    // Agregamos 'localhost' por si necesitas hacer pruebas en tu computadora
+    const dominiosPermitidos = ['demo.rifari.com', 'cloud.rifari.com', 'www.demo.rifari.com', 'www.cloud.rifari.com', 'localhost'];
+    const dominioActual = window.location.hostname;
+    
+    // Si el dominio actual está en la lista, esDominioOficial será true
+    this.esDominioOficial = dominiosPermitidos.includes(dominioActual);
+  }
+
+  contactarSoporte() {
+    const numero = '584247064335';
+    const mensaje = encodeURIComponent('Hola, deseo vincular mi número de WhatsApp Business a la API oficial de whatsapp.');
+    const url = `https://wa.me/${numero}?text=${mensaje}`;
+    
+    window.open(url, '_blank'); // Abre en una pestaña nueva
   }
 
   // 1. Cargar el SDK de Facebook
@@ -231,6 +257,8 @@ export class WhatsappSettingsComponent implements OnInit {
       this.whatsappService.healt(this.user.internalApiKey)
         .subscribe({ 
           next: (resp: any) =>{
+            
+            
             this.channelHealth = resp.data;
             this.usersService.chanel = resp.data;
             if (resp.data.status === 'PENDING') {
@@ -247,6 +275,63 @@ export class WhatsappSettingsComponent implements OnInit {
         })
     }
 
+  }
+
+  // ==========================================
+  // VARIABLES PARA EL MODAL DE RECARGA
+  // ==========================================
+  mostrarModalRecarga: boolean = false;
+  cantidadARecargar: number = 25; // Monto por defecto
+  cargandoPago: boolean = false;
+
+  // Ajusta estos precios a la tasa real (en USDT) que vas a cobrar en Rifari
+  preciosMeta = {
+    marketing: 0.080,
+    utilidad: 0.015, 
+    servicio: 0.015  
+  };
+
+  // ==========================================
+  // LÓGICA DEL MODAL Y PAGOS
+  // ==========================================
+  abrirModalRecarga() {
+    this.mostrarModalRecarga = true;
+  }
+
+  cerrarModalRecarga() {
+    this.mostrarModalRecarga = false;
+  }
+
+  seleccionarMonto(monto: number) {
+    this.cantidadARecargar = monto;
+  }
+
+  // Getters para calcular estimaciones dinámicas en el HTML
+  get estimacionMarketing() { return Math.floor(this.cantidadARecargar / this.preciosMeta.marketing); }
+  get estimacionUtilidad() { return Math.floor(this.cantidadARecargar / this.preciosMeta.utilidad); }
+  get estimacionServicio() { return Math.floor(this.cantidadARecargar / this.preciosMeta.servicio); }
+
+  iniciarPagoSpidi() {
+    if (this.cantidadARecargar < 0.1) {
+      Swal.fire('Monto mínimo', 'La recarga mínima es de 5 USDT.', 'warning');
+      return;
+    }
+    
+    this.cargandoPago = true;
+
+    // Llamamos al microservicio
+    this.spidiService.crearCheckout(this.cantidadARecargar, this.user.name || 'Cliente Rifari', this.user.internalApiKey!).subscribe({
+      next: (res: any) => {
+        if (res.ok && res.url) {
+          window.location.href = res.url; // Redirige a Spidi
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar checkout', err);
+        Swal.fire('Error', 'No se pudo conectar con la pasarela de pagos.', 'error');
+        this.cargandoPago = false;
+      }
+    });
   }
 
 }

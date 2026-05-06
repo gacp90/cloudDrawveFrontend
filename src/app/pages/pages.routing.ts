@@ -17,6 +17,8 @@ import { MensajesComponent } from './mensajes/mensajes.component';
 import { ProductsComponent } from './products/products.component';
 import { TemplatesComponent } from './templates/templates.component';
 import { WhatsappSettingsComponent } from './whatsapp-settings/whatsapp-settings.component';
+import { PagosComponent } from './pagos/pagos.component';
+import { TemplateCreateComponent } from './template-create/template-create.component';
 
 
 // COMPONENTS
@@ -36,6 +38,8 @@ const routes: Routes = [
         { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Rifa' } },
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },
         { path: 'plantillas', component: TemplatesComponent, canActivate: [AdminGuard], data:{ title: 'Plantillas' } },
+        { path: 'plantilla/crear', component: TemplateCreateComponent, canActivate: [AdminGuard], data:{ title: 'Crear Plantilla' } },
+        { path: 'pagos', component: PagosComponent, canActivate: [AdminGuard], data:{ title: 'Pagos' } },
         { path: 'vendedores', component: UsuariosComponent, canActivate: [AdminGuard], data:{ title: 'Vendedores' } },
         { path: 'whatsapp-settings', component: WhatsappSettingsComponent, canActivate: [AdminGuard], data:{ title: 'Configuración de WhatsApp' } },
         

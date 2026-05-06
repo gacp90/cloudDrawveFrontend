@@ -381,7 +381,10 @@
                 <div class="d-flex justify-content-between flex-wrap mb-3">    
     
                     <div class="mb-2">
-                        <a class="btn btn-danger" href="{{base_url}}/tickets/pdf/{{rifa.rifid!}}?estado={{query.estado}}">Exportar PDF</a>
+                        <button class="btn btn-danger" (click)="generarPDF()" [disabled]="descargandoPDF">
+                            <i class="fa fa-file-pdf-o"></i> 
+                            {{ descargandoPDF ? 'Generando...' : 'Exportar PDF' }}
+                        </button>
                     </div>
     
                 </div>

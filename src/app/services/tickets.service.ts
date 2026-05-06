@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Ticket } from '../models/ticket.model';
 
 import { environment } from '../../environments/environment';
+import { Observable } from 'rxjs';
 const base_url = environment.base_url;
 
 @Injectable({
@@ -112,6 +113,14 @@ export class TicketsService {
   ==================================================================== */
   clearTicket(id: string){
     return this.http.delete<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/restore/${id}`, this.headers);
+  }
+
+  /** ================================================================
+   *  CLEAR TICKET
+  ==================================================================== */
+  exportarTicketsPDF(rifaId: string, filtros: any): Observable<Blob> {
+    // LA CLAVE: responseType 'blob'
+    return this.http.post(`${base_url}/tickets/pdf/${rifaId}`, filtros, { responseType: 'blob' });
   }
 
 }
