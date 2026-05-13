@@ -27,6 +27,7 @@ import { TemplatesComponent } from './templates/templates.component';
 import { WhatsappSettingsComponent } from './whatsapp-settings/whatsapp-settings.component';
 import { PagosComponent } from './pagos/pagos.component';
 import { TemplateCreateComponent } from './template-create/template-create.component';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
 
 
 @NgModule({
@@ -62,6 +63,7 @@ import { TemplateCreateComponent } from './template-create/template-create.compo
     ReactiveFormsModule,
     PipesModule,
     QRCodeModule,
+    PickerModule,
     NgxPrinterModule.forRoot({printOpenWindow: true})
   ]
 })

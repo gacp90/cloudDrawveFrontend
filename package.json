@@ -23,6 +23,7 @@
     "@capacitor/android": "^7.0.1",
     "@capacitor/app": "^7.0.0",
     "@capacitor/core": "^7.0.1",
+    "@ctrl/ngx-emoji-mart": "^9.3.0",
     "angularx-qrcode": "^16.0.0",
     "cordova-plugin-bluetooth-serial": "^0.4.7",
     "esc-pos-encoder": "^3.0.0",

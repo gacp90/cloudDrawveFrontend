@@ -238,4 +238,34 @@ export class TemplateCreateComponent {
       }
     });
   }
+
+  // ==========================================
+  // FUNCION DE EMOJIS
+  // ==========================================
+  mostrarEmojis: boolean = false;
+
+  // Función para inyectar el emoji en la posición exacta del cursor
+  addEmoji(event: any, inputElement: HTMLTextAreaElement) {
+    const emoji = event.emoji.native; // Obtenemos el emoji real (ej: 😀)
+    
+    const start = inputElement.selectionStart;
+    const end = inputElement.selectionEnd;
+    const textoActual = this.nuevaPlantilla.bodyText;
+
+    // Inyectamos el emoji en el texto
+    this.nuevaPlantilla.bodyText = textoActual.substring(0, start) + emoji + textoActual.substring(end);
+    
+    this.actualizarVariables();
+
+    // Devolvemos el foco al textarea para que el usuario siga escribiendo fluidamente
+    setTimeout(() => {
+      inputElement.focus();
+      inputElement.setSelectionRange(start + emoji.length, start + emoji.length);
+    }, 0);
+  }
+
+  // Opcional: Cerrar el panel si hace clic fuera o cuando termina
+  toggleEmojis() {
+    this.mostrarEmojis = !this.mostrarEmojis;
+  }
 }
