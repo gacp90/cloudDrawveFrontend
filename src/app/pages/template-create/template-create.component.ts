@@ -233,7 +233,7 @@ export class TemplateCreateComponent {
       },
       error: (err: any) => {
         console.error('Error al enviar plantilla:', err);
-        Swal.fire('Error', err.error?.msg || 'Ocurrió un error al enviar la plantilla a Meta.', 'error');
+        Swal.fire('Error', err.error.msg, 'error');
         this.sendTemplate = false;
       }
     });

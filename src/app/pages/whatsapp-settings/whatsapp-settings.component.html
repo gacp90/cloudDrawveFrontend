@@ -33,7 +33,7 @@
                             <div class="benefit-card h-100 p-4 border rounded-3 bg-white">
                                 <i class="bi bi-robot text-warning display-6 mb-3"></i>
                                 <h5 class="fw-bold">Automatiza Consultas</h5>
-                                <p class="small text-muted mb-0">Responde dudas comunes sobre la rifa o premios sin intervención humana.</p>
+                                <p class="small text-muted mb-0">Responde dudas comunes sobre el eventos sin intervención humana.</p>
                             </div>
                         </div>
                     </div>
@@ -175,7 +175,8 @@
 <div class="modal fade show" *ngIf="mostrarModalRecarga" style="display: block; z-index: 1050;" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      
+
+        
       <div class="modal-header">
         <h5 class="modal-title">Recargar Saldo (USD)</h5>
         <button type="button" class="close" (click)="cerrarModalRecarga()" data-dismiss="modal" aria-label="Close">
@@ -184,6 +185,13 @@
       </div>
       
       <div class="modal-body">
+
+          <p class="mb-0 text-center"> Pago seguro con </p>
+        <div class="d-flex justify-content-center mx-auto">
+            <img src="../../../assets/images/spidi.png" width="80" alt="">
+        </div>
+      
+
         <div class="row">
           
           <!-- COLUMNA IZQUIERDA: CONTROLES DE MONTO -->
@@ -206,6 +214,8 @@
               </div>
               <small class="text-danger" *ngIf="cantidadARecargar < 5">El monto mínimo es de 5 USD</small>
             </div>
+
+            
           </div>
 
           <!-- COLUMNA DERECHA: ESTIMADOR DE MENSAJES -->
@@ -233,9 +243,11 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="cerrarModalRecarga()" [disabled]="cargandoPago">Cancelar</button>
         <button type="button" class="btn btn-success" (click)="iniciarPagoSpidi()" [disabled]="cantidadARecargar < 0.1 || cargandoPago">
-          <span *ngIf="!cargandoPago">Pagar {{ cantidadARecargar }} USD con Spidi</span>
+          <span *ngIf="!cargandoPago">Pagar {{ cantidadARecargar }} USD</span>
           <span *ngIf="cargandoPago"><i class="fa fa-spinner fa-spin"></i> Generando Link...</span>
         </button>
+
+        
       </div>
 
     </div>

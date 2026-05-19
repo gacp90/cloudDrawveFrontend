@@ -801,12 +801,14 @@
                                     <!-- TICKETS -->
                                     <ng-container *ngIf="ticketSelected.disponible === false">
                                         
-                                        <div class="shadow mb-3" id="PrintTemplateTpl" #PrintTemplateTpl>
+                                        <div class="shadow mb-3 d-flex" id="PrintTemplateTpl" #PrintTemplateTpl>
                                             <div class="card pb-5"  style="width: 250px; background: #fff;" #contentToCapture>
                                                 <div class="card-body">
                                                     
-                                                    <div class="pro-img m-t-20 d-flex justify-content-center">
-                                                        <img class="mx-auto" [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
+                                                    <div *ngIf="rifa.admin.img" class="pro-img m-t-20 d-flex justify-content-center">
+                                                        <div class="text-center">
+                                                            <img class="mx-auto" [src]="rifa.admin.img | imagen: 'user'" alt="user" width="120px">
+                                                        </div>
                                                     </div>
     
                                                     <div id="captureImprimir">

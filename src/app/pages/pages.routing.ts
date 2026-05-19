@@ -35,7 +35,7 @@ const routes: Routes = [
         { path: 'mensajes', component: MensajesComponent, canActivate: [AdminGuard], data:{ title: 'Mensajes' } },
         { path: 'productos', component: ProductsComponent, canActivate: [AdminGuard], data:{ title: 'Productos' } },
         { path: 'perfil/:id', component: PerfilComponent, data:{ title: 'Perfil' } },
-        { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Rifa' } },
+        { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Evento' } },
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },
         { path: 'plantillas', component: TemplatesComponent, canActivate: [AdminGuard], data:{ title: 'Plantillas' } },
         { path: 'plantilla/crear', component: TemplateCreateComponent, canActivate: [AdminGuard], data:{ title: 'Crear Plantilla' } },

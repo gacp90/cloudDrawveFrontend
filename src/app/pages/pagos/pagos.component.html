@@ -33,9 +33,11 @@
           <thead class="table-light">
             <tr>
               <th scope="col" class="ps-4">Fecha</th>
-              <th scope="col">Referencia (Spidi)</th>
+              <th scope="col" class="">SPIDI ID</th>
+              <th scope="col">Referencia (SPIDI)</th>
               <th scope="col" class="text-end">Monto</th>
               <th scope="col" class="text-center">Estado</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -43,6 +45,11 @@
               <!-- Fecha formateada -->
               <td class="ps-4 text-muted">
                 {{ pago.createdAt | date:'dd/MM/yyyy, h:mm a' }}
+              </td>
+
+              <td>
+                <span *ngIf="pago.status !== 'pending'">{{ pago.spidiRawData.data.session_payment.spidi_transaction.id || 'N/A' }}</span>
+                <span *ngIf="pago.status === 'pending'">N/A</span>                
               </td>
               
               <!-- Referencia -->
@@ -62,6 +69,12 @@
                 <span [class]="obtenerClaseEstado(pago.status)">
                   {{ traducirEstado(pago.status) }}
                 </span>
+              </td>
+
+              <td>
+                <a *ngIf="pago.status !== 'pending'" href="{{pago.spidiRawData.data.session_payment.spidi_transaction.url}}" target="_blank" class="btn btn-sm text-white" [ngClass]="{'btn-success': pago.status === 'completed', 'btn-danger': pago.status !== 'completed'}">
+                    <i class="ti ti-receipt" aria-hidden="true"></i>
+                </a>
               </td>
             </tr>
           </tbody>

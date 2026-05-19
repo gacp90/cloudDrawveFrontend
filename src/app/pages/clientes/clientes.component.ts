@@ -1192,12 +1192,13 @@ export class ClientesComponent implements OnInit {
         confirmButtonText: 'Entendido'
       });
 
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error al iniciar el envío masivo:', error);
       Swal.fire({
         icon: 'error',
-        title: 'Oops...',
-        text: 'Ocurrió un error al comunicar con el servidor para el envío masivo.',
+        title: 'Error...',
+        text: error.error.msg,
+        
       });
     } finally {
       this.isSending = false;

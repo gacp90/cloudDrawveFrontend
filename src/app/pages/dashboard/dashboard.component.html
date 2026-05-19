@@ -3,7 +3,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
-                    <h4 class="card-title">Lista de rifas</h4>
+                    <h4 class="card-title">Rifas</h4>
                     <button *ngIf="user.role === 'ADMIN'" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createRifa">
                         Crear Rifa
                     </button>
@@ -12,7 +12,7 @@
                 <div class="d-flex justify-content-between flex-wrap ">
 
                     <div class="form-group">
-                        <label for="mostrar">Estado </label>
+                        <label for="mostrar">Status </label>
                         <select class="form-control" name="" id="" #estado (change)="changeEstado(estado.value)">
                             <option value="Abierta" selected >Abierta</option>
                             <option value="Cerrada">Cerrada</option>
@@ -21,7 +21,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="mostrar">Mostrar: </label>
+                        <label for="mostrar">View: </label>
                         <select class="form-control" name="" id="" [value]="query.hasta" #mostrar (change)="limiteChange(mostrar.value)">
                             <option value="10">10</option>
                             <option value="25">25</option>
@@ -39,7 +39,7 @@
                             <tr>
                                 <th>Rifa</th>
                                 <th>Monto</th>
-                                <th>Loteria</th>
+                                <th>Lotria</th>
                                 <th>Fecha</th>
                                 <th>Status</th>
                             </tr>

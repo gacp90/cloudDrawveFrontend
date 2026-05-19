@@ -3972,9 +3972,9 @@ export class RifaComponent implements OnInit {
         confirmButtonColor: '#3085d6',
         confirmButtonText: 'Entendido'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al iniciar el envío masivo:', error);
-      Swal.fire('Oops...', 'Ocurrió un error al comunicar con el servidor.', 'error');
+      Swal.fire('Error...', error.error.msg, 'error');
     } finally {
       this.isSending = false;
       this.showMassTemplateModal = false; 

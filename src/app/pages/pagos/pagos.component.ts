@@ -62,7 +62,7 @@ export class PagosComponent implements OnInit {
     this.spidiService.obtenerHistorial(this.user.internalApiKey!).subscribe({
       next: (res: any) => {
         if (res.ok) {
-          this.historialPagos = res.data;
+          this.historialPagos = res.data;          
         }
         this.cargando = false;
       },
