@@ -71,6 +71,8 @@ export class MensajesComponent implements OnInit {
   loadChatList() {
     this.chatService.getChatList(this.internalApiKey).subscribe({
       next: (data) => {
+        console.log(data);
+        
         this.chats = data;            
       },
       error: (err) => console.error('Error:', err)
@@ -85,8 +87,11 @@ export class MensajesComponent implements OnInit {
     // El _id en el aggregate que hicimos es el número de teléfono del cliente
     const customerPhone = chat._id;    
 
-    this.chatService.getChatHistory(this.internalApiKey, customerPhone).subscribe({
+    this.chatService.getChatHistory(this.internalApiKey, chat.customerPhone).subscribe({
       next: (msgs) => {
+
+        console.log(msgs);
+        
         // .reverse() es necesario porque el backend los trae [nuevo...viejo]
         // y el chat se lee de [viejo...nuevo]        
         this.messages = msgs.reverse();
@@ -172,7 +177,7 @@ export class MensajesComponent implements OnInit {
   }
 
   uploadAndSendFile(file: File) {
-    const to = this.selectedChat._id;
+    const to = this.selectedChat.customerPhone;
     const formData = new FormData();
     formData.append('file', file);
     formData.append('to', to);
@@ -236,12 +241,14 @@ export class MensajesComponent implements OnInit {
         this.messages.push(message);
         this.scrollToBottom();
       }
+
+      console.log('Nuevo mensaje recibido:', payload);
       this.updateChatListFromSocket(customer, message);
     });
 }
 
   private updateChatListFromSocket(customer: string, message: any) {
-    const index = this.chats.findIndex(c => c._id === customer);
+    const index = this.chats.findIndex(c => c.customerPhone === customer);
     
     if (index !== -1) {
       // Si ya existe en la lista, actualizamos su último mensaje
@@ -269,6 +276,63 @@ export class MensajesComponent implements OnInit {
   ngOnDestroy(): void {
     if (this.socket) {
       this.socket.disconnect();
+    }
+  }
+
+  // ======================================================================
+  // NOTAS DE VOZ (MediaRecorder API)
+  // ======================================================================
+  isRecording: boolean = false;
+  mediaRecorder: any;
+  audioChunks: any[] = [];
+  mediaStream: MediaStream | null = null;
+
+  async startRecording() {
+    if (!this.selectedChat) return;
+    
+    try {
+      // Pedimos permiso para usar el micrófono
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.mediaRecorder = new MediaRecorder(this.mediaStream);
+      this.audioChunks = [];
+
+      this.mediaRecorder.ondataavailable = (event: any) => {
+        if (event.data.size > 0) {
+          this.audioChunks.push(event.data);
+        }
+      };
+
+      this.mediaRecorder.onstop = () => {
+        // Empaquetamos el audio en un Blob genérico
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+        
+        // Lo convertimos en un File para poder reusar tu función uploadAndSendFile
+        // Nota: Le ponemos extensión .webm temporalmente, el backend (NestJS) lo pasará a .ogg
+        const audioFile = new File([audioBlob], `voice_note_${new Date().getTime()}.webm`, { type: 'audio/webm' });
+        
+        this.uploadAndSendFile(audioFile);
+
+        // Apagamos el micrófono para que no quede el punto rojo en el navegador
+        if (this.mediaStream) {
+          this.mediaStream.getTracks().forEach(track => track.stop());
+        }
+      };
+
+      this.mediaRecorder.start();
+      this.isRecording = true;
+      console.log('Grabando audio...');
+
+    } catch (err) {
+      console.error('Error accediendo al micrófono:', err);
+      alert('Debes permitir el acceso al micrófono para enviar notas de voz.');
+    }
+  }
+
+  stopRecording() {
+    if (this.mediaRecorder && this.isRecording) {
+      this.mediaRecorder.stop();
+      this.isRecording = false;
+      console.log('Grabación detenida. Enviando...');
     }
   }
 

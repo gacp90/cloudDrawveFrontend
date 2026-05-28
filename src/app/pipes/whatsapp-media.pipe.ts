@@ -12,6 +12,10 @@ export class WhatsappMediaPipe implements PipeTransform {
       return `${baseUrl}/uploads/rifa/no-image`;
     }
 
+    if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
+      return fileName; // Lo devolvemos tal cual porque ya tiene la ruta completa
+    }
+
     // Usamos la ruta del controlador de Media que creamos en NestJS
     const baseUrl = environment.wp_url;     
     return `${baseUrl}/media/whatsapp/${fileName}`;

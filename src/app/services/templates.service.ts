@@ -47,4 +47,20 @@ export class TemplatesService {
     return this.http.patch(`${this.url}/templates/${templateId}/toggle-active`, { active }, { headers });
   }
 
+  // Método en templates.service.ts
+  validarPlantillaIA(texto: string, apiKey: string, archivo?: File) {
+    const formData = new FormData();
+    formData.append('texto', texto);
+    
+    if (archivo) {
+      formData.append('file', archivo, archivo.name);
+    }
+
+    const headers = new HttpHeaders({
+      'x-api-key': apiKey
+    });
+
+    return this.http.post(`${this.url}/templates/validar`, formData, { headers });
+  }
+
 }

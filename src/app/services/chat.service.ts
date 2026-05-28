@@ -64,7 +64,7 @@ export class ChatService {
 
   sendFileToWhatsApp(apiKey: string, formData: FormData): Observable<any> {
     const headers = new HttpHeaders({ 'x-api-key': apiKey });
-    return this.http.post(`${this.url}/whatsapp/send-file`, formData, { headers }); 
+    return this.http.post(`${this.url}/chat/media`, formData, { headers }); 
   }
 
   getTemplates(apiKey: string): Observable<any[]> {

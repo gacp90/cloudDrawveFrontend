@@ -160,7 +160,182 @@ export class TemplateCreateComponent {
   // ==========================================
   // GUARDAR Y ENVIAR AL BACKEND
   // ==========================================
+  public textoEstado: string = '';
   async guardarYEnviar() {
+    // 1. Validaciones básicas del Frontend
+    if (!this.nuevaPlantilla.name || !this.nuevaPlantilla.bodyText) {
+      Swal.fire('Campos obligatorios', 'El nombre y el mensaje principal son obligatorios.', 'warning');
+      return;
+    }
+
+    const faltanEjemplos = this.variablesDetectadas.some(v => !this.ejemplosVariables[v]?.trim());
+    if (faltanEjemplos) {
+      Swal.fire('Faltan ejemplos', 'Meta exige un texto de ejemplo para cada variable dinámica.', 'warning');
+      return;
+    }
+
+    if (['IMAGE', 'VIDEO'].includes(this.nuevaPlantilla.headerType) && !this.archivoSeleccionado) {
+      Swal.fire('Falta archivo', 'Seleccionaste un encabezado multimedia pero no adjuntaste ningún archivo.', 'warning');
+      return;
+    }
+
+    // Iniciamos la carga visual
+    this.sendTemplate = true;
+    this.textoEstado = 'Auditando con IA (Protección Anti-bloqueos)...';
+
+    // 2. Unificar todo el texto de la plantilla para darle contexto total a Gemini
+    const textoCompleto = `
+      Encabezado: ${this.nuevaPlantilla.headerText}
+      Cuerpo: ${this.nuevaPlantilla.bodyText}
+      Pie de página: ${this.nuevaPlantilla.footerText}
+      Botones: ${this.nuevaPlantilla.quickReplies.map(q => q.text).join(' | ')}
+    `;
+
+    // 3. Llamar al endpoint de IA (Asumiendo que lo agregaste en TemplatesService)
+    this.templatesService.validarPlantillaIA(textoCompleto, this.internalApiKey, this.archivoSeleccionado || undefined)
+      .subscribe({
+        next: (aiResponse: any) => {
+          if (aiResponse.aprobado) {
+            // ¡La IA dio luz verde! Procedemos a enviar a Meta
+            this.textoEstado = 'IA Aprobada. Subiendo a Meta...';
+
+            Swal.fire({
+              icon: 'success',
+              title: '¡Plantilla Aprobada por IA!',
+              text: 'Tu plantilla ha pasado la auditoría de seguridad y será enviada a revisión en Meta.',
+              confirmButtonText: 'Continuar',
+              cancelButtonText: 'Cancelar',
+              showCancelButton: true,
+            }).then(() => {
+              this.ejecutarEnvioAMeta();
+            });
+          } else {
+            // ¡La IA detectó una infracción! Detenemos el proceso
+            this.sendTemplate = false;
+            this.mostrarModalRechazoIA(aiResponse);
+          }
+        },
+        error: (err: any) => {
+          console.error('Error en la IA:', err);
+          this.sendTemplate = false;
+          // Mostramos el error del backend (ej. Saldo insuficiente)
+          Swal.fire('Error de Validación', err.error?.msg || 'Ocurrió un error al auditar la plantilla.', 'error');
+        }
+      });
+  }
+
+  // ==========================================
+  // FUNCIÓN PRIVADA PARA EL ENVÍO A META
+  // ==========================================
+  private ejecutarEnvioAMeta() {
+    // Extraer el ORDEN EXACTO de las variables
+    const regex = /\{\{([^}]+)\}\}/g;
+    let match;
+    const ordenVariables: string[] = [];
+    while ((match = regex.exec(this.nuevaPlantilla.bodyText)) !== null) {
+      ordenVariables.push(match[1]); 
+    }
+    const metaExamplesArray = ordenVariables.map(variable => this.ejemplosVariables[variable]);
+
+    // Armar el Payload limpio
+    const payload = {
+      name: this.nuevaPlantilla.name.trim().toLowerCase().replace(/\s+/g, '_'),
+      language: this.nuevaPlantilla.language,
+      category: this.nuevaPlantilla.category,
+      headerType: this.nuevaPlantilla.headerType,
+      headerText: this.nuevaPlantilla.headerText,
+      bodyText: this.nuevaPlantilla.bodyText,
+      footerText: this.nuevaPlantilla.footerText,
+      quickReplies: this.nuevaPlantilla.quickReplies.map(qr => qr.text),
+      exampleBodyText: metaExamplesArray.length > 0 ? [ metaExamplesArray ] : []
+    };    
+
+    // Decidir la ruta: Multimedia vs Texto
+    let request$;
+    if (['IMAGE', 'VIDEO'].includes(this.nuevaPlantilla.headerType)) {
+      const formData = new FormData();
+      formData.append('file', this.archivoSeleccionado!);
+      formData.append('templateData', JSON.stringify(payload));
+      
+      request$ = this.templatesService.crearPlantillaMedia(this.internalApiKey, formData);
+    } else {
+      request$ = this.templatesService.createTemplate(this.internalApiKey, payload);
+    }
+
+    // Enviar Petición a Meta
+    request$.subscribe({
+      next: (response: any) => {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Plantilla enviada a revisión!',
+          text: 'La plantilla ha superado la IA y fue registrada en Meta exitosamente.',
+          confirmButtonText: 'Ver mis plantillas'
+        }).then(() => {
+          this.router.navigate(['/dashboard/plantillas']);
+        });
+        this.sendTemplate = false;
+      },
+      error: (err: any) => {
+        console.error('Error al enviar plantilla a Meta:', err);
+        Swal.fire('Error de Meta', err.error?.msg || 'Error al comunicarse con Meta.', 'error');
+        this.sendTemplate = false;
+      }
+    });
+  }
+
+  // ==========================================
+  // DISEÑO DEL MODAL DE RECHAZO DE IA
+  // ==========================================
+  private mostrarModalRechazoIA(aiResponse: any) {
+    let sugerenciasHtml = '';
+    
+    if (aiResponse.plantillas_sugeridas && aiResponse.plantillas_sugeridas.length > 0) {
+      // Iteramos sobre el arreglo que devuelve Gemini
+      const listaLi = aiResponse.plantillas_sugeridas.map((s: string, index: number) => {
+        // Escapamos las comillas simples por si el texto de la IA las incluye
+        const textoEscapado = s.replace(/'/g, "\\'"); 
+        return `
+          <div style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #28a745; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <p style="margin-bottom: 10px; font-size: 0.95em; color: #333;">${s}</p>
+            <button 
+              onclick="navigator.clipboard.writeText('${textoEscapado}').then(() => { this.innerHTML = '<i class=\\'ti-check\\'></i> ¡Copiado!'; setTimeout(() => this.innerHTML = '<i class=\\'ti-files\\'></i> Copiar Plantilla', 2000); })" 
+              style="background: #e9ecef; border: 1px solid #ced4da; color: #495057; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; font-weight: bold; transition: all 0.2s;">
+              <i class="ti-files"></i> Copiar Plantilla
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      sugerenciasHtml = `
+        <hr style="margin: 20px 0;">
+        <div style="text-align: left;">
+          <h5 style="color: #28a745; font-weight: bold; margin-bottom: 10px;">
+            <i class="ti-light-bulb"></i> Plantillas 100% Seguras Sugeridas:
+          </h5>
+          <p class="text-muted small mb-3">Haz clic en "Copiar" y reemplaza tu texto actual con alguna de estas opciones optimizadas para ventas:</p>
+          ${listaLi}
+        </div>
+      `;
+    }
+
+    Swal.fire({
+      icon: 'error',
+      title: '¡Riesgo de Bloqueo Detectado!',
+      html: `
+        <div style="text-align: left; font-size: 0.95em;">
+          <p style="color: #dc3545; font-weight: bold;">Nuestra IA Interna de seguridad ha detenido este envío para proteger tu número de WhatsApp.</p>
+          <p><strong>Motivo detectado por el escáner:</strong> ${aiResponse.motivo_rechazo}</p>
+        </div>
+        ${sugerenciasHtml}
+      `,
+      width: '750px', // Ampliado para que el texto de venta respire bien
+      confirmButtonText: 'Cerrar y corregir mi texto',
+      confirmButtonColor: '#3085d6',
+      allowOutsideClick: false // Obliga al usuario a interactuar con el modal
+    });
+  }
+
+  /* async guardarYEnviar() {
     // 1. Validaciones
     if (!this.nuevaPlantilla.name || !this.nuevaPlantilla.bodyText) {
       Swal.fire('Campos obligatorios', 'El nombre y el mensaje principal son obligatorios.', 'warning');
@@ -237,7 +412,7 @@ export class TemplateCreateComponent {
         this.sendTemplate = false;
       }
     });
-  }
+  } */
 
   // ==========================================
   // FUNCION DE EMOJIS

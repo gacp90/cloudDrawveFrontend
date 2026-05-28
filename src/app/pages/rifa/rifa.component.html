@@ -336,6 +336,10 @@
                     <button (click)="exportarAgrupado()" type="button" class="btn btn-success m-2 ">
                         <i class="ti ti-download"></i> Exportar excel Agrupado
                     </button>
+                    
+                    <button *ngIf="user.wati" type="button" class="btn btn-success m-2" data-toggle="modal" data-target="#whatsappmasive">
+                        <i class="ti-comment"></i> Masivo Waty  
+                    </button>
 
                     <button *ngIf="user.internalApiKey" class="btn btn-primary" (click)="loadTemplatesApi()">
                         <i class="ti-email"></i> Enviar Masivo Api ({{ tickets.length }})

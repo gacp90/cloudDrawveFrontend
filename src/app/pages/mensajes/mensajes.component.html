@@ -24,7 +24,7 @@
           <div class="contact-name">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="mb-0">{{ chat.cliente?.nombre || chat._id }}</h6>
+                <h6 class="mb-0">{{ chat.name || chat.customerPhone }}</h6>
                 <small class="text-muted">{{ chat.ultimoMensaje }}</small>
               </div>
               
@@ -48,7 +48,7 @@
         </button>
         <img src="assets/images/icon/staff.png" class="avatar">
         <div>
-          <strong>{{ selectedChat?.cliente?.nombre || selectedChat?._id }}</strong>
+          <strong>{{ selectedChat?.name || selectedChat?.customerPhone }}</strong>
           <p class="status online">online</p>
         </div>
       </div>
@@ -109,20 +109,40 @@
       </div>
     </div>
 
-    <footer class="chat-footer" *ngIf="selectedChat">
-      <input type="file" #fileInput style="display: none" (change)="onFileSelected($event)" accept="image/*,application/pdf">
+    <footer class="chat-footer-modern" *ngIf="selectedChat">
+      <input type="file" #fileInputImage style="display: none" (change)="onFileSelected($event)" accept="image/*,video/mp4">
+      <input type="file" #fileInputDoc style="display: none" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
       
-      <input type="text" placeholder="Escribe tu mensaje..." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()">
-      
-      <div class="footer-actions">
-        <button class="btn-send" (click)="sendMessage()"><i class="ti-share"></i></button>
-        
-        <button class="btn btn-sm btn-link" (click)="fileInput.click()">
+      <div class="footer-actions-left">
+        <button class="action-btn" (click)="fileInputImage.click()" title="Adjuntar Imagen">
           <i class="ti-image"></i>
         </button>
-        
-        <button class="btn btn-sm btn-link" (click)="fileInput.click()">
+        <button class="action-btn" (click)="fileInputDoc.click()" title="Adjuntar Documento">
           <i class="ti-clip"></i>
+        </button>
+      </div>
+
+      <div class="input-wrapper">
+        <input type="text" 
+              class="chat-input" 
+              placeholder="Escribe un mensaje..." 
+              [(ngModel)]="newMessageText" 
+              (keyup.enter)="sendMessage()">
+      </div>
+
+      <div class="footer-actions-right">
+        <button class="primary-action-btn send-btn" 
+                *ngIf="newMessageText.trim().length > 0" 
+                (click)="sendMessage()">
+          <i class="ti-share"></i>
+        </button>
+
+        <button class="primary-action-btn mic-btn" 
+                *ngIf="newMessageText.trim().length === 0"
+                [class.is-recording]="isRecording"
+                (mousedown)="startRecording()" (mouseup)="stopRecording()" 
+                (touchstart)="startRecording()" (touchend)="stopRecording()">
+          <i class="ti-microphone"></i>
         </button>
       </div>
     </footer>

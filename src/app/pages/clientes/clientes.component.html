@@ -12,6 +12,9 @@
 
                         <button class="btn btn-primary" (click)="loadTemplatesApi()">
                             <i class="ti-email"></i> Enviar Masivo ({{ clients.length }})
+                        </button>                        
+                        <button *ngIf="user.wati" type="button" class="btn btn-success" data-toggle="modal" data-target="#whatsappmasive">
+                            Masivo Waty
                         </button>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createClient">
                             Crear Cliente

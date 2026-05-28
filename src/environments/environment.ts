@@ -70,9 +70,9 @@
 export const environment = {
   production: false,
   wp_url: 'https://wpdemo.rifari.com/api',
-  base_url: 'https://admin.rifalaplaya.com/api',
-  local_url: 'https://admin.rifalaplaya.com',
-  client: true,
+  base_url: 'https://cloud.rifari.com/api',
+  local_url: 'https://cloud.rifari.com',
+  client: false,
   app: false
 };
 

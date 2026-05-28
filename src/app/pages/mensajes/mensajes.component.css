@@ -187,3 +187,109 @@
 @media (min-width: 769px) {
     .d-md-none { display: none !important; }
 }
+
+/* =========================================================
+   MODERN CHAT FOOTER
+   ========================================================= */
+.chat-footer-modern {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #f0f2f5; /* Fondo gris suave estilo WA */
+  border-top: 1px solid #e1e1e1;
+  gap: 15px;
+  width: 100%;
+}
+
+/* --- Botones de Adjuntos --- */
+.footer-actions-left {
+  display: flex;
+  gap: 5px;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  color: #54656f;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  background-color: #e9edef;
+  color: #111b21;
+}
+
+/* --- Input de Texto --- */
+.input-wrapper {
+  flex: 1; /* Ocupa todo el espacio disponible */
+}
+
+.chat-input {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 24px; /* Forma de píldora */
+  border: 1px solid transparent;
+  background-color: #ffffff;
+  font-size: 15px;
+  color: #111b21;
+  outline: none;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05); /* Sombra muy sutil */
+  transition: border 0.2s ease;
+}
+
+.chat-input:focus {
+  border: 1px solid #cfd9df;
+}
+
+.chat-input::placeholder {
+  color: #8696a0;
+}
+
+/* --- Botón Primario (Grabar/Enviar) --- */
+.footer-actions-right {
+  display: flex;
+  align-items: center;
+}
+
+.primary-action-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ffffff;
+  background-color: #00a884; /* Verde principal, puedes cambiarlo al de tu marca */
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.primary-action-btn:hover {
+  transform: scale(1.05);
+}
+
+.primary-action-btn:active {
+  transform: scale(0.95);
+}
+
+/* Animación cuando está grabando audio */
+.mic-btn.is-recording {
+  background-color: #f15c6d; /* Rojo alerta */
+  animation: pulse-record 1.5s infinite;
+}
+
+@keyframes pulse-record {
+  0% { box-shadow: 0 0 0 0 rgba(241, 92, 109, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(241, 92, 109, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(241, 92, 109, 0); }
+}
