@@ -4,6 +4,7 @@ import { ChatService } from 'src/app/services/chat.service';
 import { UsersService } from 'src/app/services/users.service';
 
 import { io } from 'socket.io-client';
+import { ClientesService } from 'src/app/services/clientes.service';
 
 
 @Component({
@@ -17,7 +18,8 @@ export class MensajesComponent implements OnInit {
   public internalApiKey: string = 'token_secreto_rifari_123'; // Esta clave debe ser la misma que configures en tu backend
   private socket: any;
   constructor(  private chatService: ChatService,
-                private usersService: UsersService
+                private usersService: UsersService,
+                private clientesService: ClientesService
 
   ){
     this.user = usersService.user;
@@ -70,9 +72,7 @@ export class MensajesComponent implements OnInit {
   // Función para cargar la lista lateral (Aggregate)
   loadChatList() {
     this.chatService.getChatList(this.internalApiKey).subscribe({
-      next: (data) => {
-        console.log(data);
-        
+      next: (data) => {        
         this.chats = data;            
       },
       error: (err) => console.error('Error:', err)
@@ -85,13 +85,11 @@ export class MensajesComponent implements OnInit {
     this.showMobilePanel = false;    
 
     // El _id en el aggregate que hicimos es el número de teléfono del cliente
-    const customerPhone = chat._id;    
+    const customerPhone = chat.customerPhone;    
 
     this.chatService.getChatHistory(this.internalApiKey, chat.customerPhone).subscribe({
       next: (msgs) => {
 
-        console.log(msgs);
-        
         // .reverse() es necesario porque el backend los trae [nuevo...viejo]
         // y el chat se lee de [viejo...nuevo]        
         this.messages = msgs.reverse();
@@ -110,6 +108,27 @@ export class MensajesComponent implements OnInit {
           });
         }
 
+        if (!this.selectedChat.customerName) {
+          this.selectedChat.buscandoNombre = true;
+
+          this.clientesService.loadClienteForPhone(customerPhone).subscribe({
+            next: (res: any) => {
+              if (res.ok && res.nombre) { 
+                const newName = res.nombre.trim();
+                // ¡AQUÍ REUTILIZAMOS LA FUNCIÓN!
+                this.updateCustomerNameInBackend(customerPhone, newName, this.selectedChat);
+              }
+            },
+            error: (err) => {
+              this.selectedChat.isUnknown = true;
+              this.selectedChat.buscandoNombre = false;
+            },
+            complete: () => {
+              this.selectedChat.buscandoNombre = false;
+            }
+          });
+        }
+
         this.scrollToBottom();
       },
       error: (err) => console.error('Error cargando historial', err)
@@ -117,9 +136,10 @@ export class MensajesComponent implements OnInit {
   }
 
   sendMessage() {
+
     if (!this.newMessageText.trim() || !this.selectedChat) return;
 
-    const to = this.selectedChat._id;
+    const to = this.selectedChat.customerPhone;
     const message = this.newMessageText;
 
     // Limpiamos el input para UX
@@ -134,7 +154,7 @@ export class MensajesComponent implements OnInit {
           this.scrollToBottom();
 
           // Actualizamos la vista previa en la lista lateral
-          const chatIdx = this.chats.findIndex(c => c._id === to);
+          const chatIdx = this.chats.findIndex(c => c.customerPhone === to);
           if (chatIdx !== -1) {
             this.chats[chatIdx].lastMessage = res.data;
           }
@@ -237,12 +257,10 @@ export class MensajesComponent implements OnInit {
     this.socket.on('new_message', (payload: any) => {
       const { message, customer } = payload;
       if (message.direction === 'inbound') this.playNotificationSound();
-      if (this.selectedChat && this.selectedChat._id === customer) {
+      if (this.selectedChat && this.selectedChat.customerPhone === customer) {
         this.messages.push(message);
         this.scrollToBottom();
       }
-
-      console.log('Nuevo mensaje recibido:', payload);
       this.updateChatListFromSocket(customer, message);
     });
 }
@@ -255,7 +273,7 @@ export class MensajesComponent implements OnInit {
       this.chats[index].lastMessage = message;
       
       // Si no es el chat abierto, podríamos marcarlo como "no leído" (opcional)
-      if (!this.selectedChat || this.selectedChat._id !== customer) {
+      if (!this.selectedChat || this.selectedChat.customerPhone !== customer) {
         this.chats[index].unreadCount = (this.chats[index].unreadCount || 0) + 1;
       }
 
@@ -266,6 +284,7 @@ export class MensajesComponent implements OnInit {
       // Si es un contacto nuevo que no estaba en la lista, lo creamos de primero
       this.chats.unshift({
         _id: customer,
+        customerPhone: customer,
         lastMessage: message,
         unreadCount: 1
       });
@@ -320,7 +339,6 @@ export class MensajesComponent implements OnInit {
 
       this.mediaRecorder.start();
       this.isRecording = true;
-      console.log('Grabando audio...');
 
     } catch (err) {
       console.error('Error accediendo al micrófono:', err);
@@ -332,8 +350,60 @@ export class MensajesComponent implements OnInit {
     if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
       this.isRecording = false;
-      console.log('Grabación detenida. Enviando...');
     }
+  }
+
+  // ======================================================================
+  // BUSCAR CLIENTE POR TELEFONO
+  // ======================================================================
+  private updateCustomerNameInBackend(phone: string, name: string, chatRef: any) {
+    chatRef.customerName = name;
+    chatRef.isUnknown = false;
+
+    // 2. Enviamos la petición en segundo plano a NestJS
+    this.chatService.updateCustomerName(this.internalApiKey, { 
+      customerPhone: phone, 
+      newName: name 
+    }).subscribe({
+      next: (resp) => console.log('✅ Nombre guardado en NestJS', resp),
+      error: (err) => {
+        console.error('❌ Error guardando en NestJS', err);
+        // Opcional: Revertir el nombre si falla, o mostrar un Toast de error
+      }
+    });
+  }
+
+  chatParaEditar: any = null;
+  nuevoNombreManual: string = '';
+  // ==========================================
+  // LÓGICA DEL MODAL MANUAL
+  // ==========================================
+  abrirModalNuevoCliente(chat: any) {
+    this.chatParaEditar = chat;
+    this.nuevoNombreManual = ''; // Limpiamos el input
+  }
+
+  guardarNombreManual() {
+    if (!this.nuevoNombreManual.trim() || !this.chatParaEditar) return;
+
+    const phone = this.chatParaEditar.customerPhone || this.chatParaEditar._id;
+    const name = this.nuevoNombreManual.trim();
+
+    // ¡AQUÍ VOLVEMOS A REUTILIZAR LA FUNCIÓN!
+    this.updateCustomerNameInBackend(phone, name, this.chatParaEditar);
+
+    // TODO Opcional: Si quieres que este nuevo cliente quede registrado 
+    // en tu base de datos principal (Express), aquí deberías llamar a 
+    // this.clientesService.crearCliente(...)
+
+    this.cerrarModal();
+  }
+
+  cerrarModal() {
+    this.chatParaEditar = null;
+    this.nuevoNombreManual = '';
+    // Aquí puedes colocar la lógica para cerrar el modal de Bootstrap
+    // Dependiendo de cómo lo uses: Ej. jQuery $('#modalAgregar').modal('hide')
   }
 
 

@@ -1161,6 +1161,7 @@ export class ClientesComponent implements OnInit {
 
       return {
         phone: phone,
+        customerName: cliente.nombre || '',
         parameters: parametrosDinamicos
       };
     }).filter(c => c.phone); // Evitamos clientes sin número

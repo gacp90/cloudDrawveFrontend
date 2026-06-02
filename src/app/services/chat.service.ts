@@ -94,4 +94,10 @@ export class ChatService {
     const headers = new HttpHeaders({ 'x-api-key': apikey });
     return this.http.post(`${this.url}/whatsapp/read-status`, wamid, { headers });
   }
+
+  //CONFIRMACION DE LECTURA
+  updateCustomerName(apikey: string, body: any): Observable<any> {
+    const headers = new HttpHeaders({ 'x-api-key': apikey });
+    return this.http.put(`${this.url}/chat/conversation/name`, body, { headers });
+  }
 }

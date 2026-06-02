@@ -32,16 +32,16 @@ const routes: Routes = [
       [
         { path: '', component: DashboardComponent, data:{ title: 'Dashboard' } },
         { path: 'clientes', component: ClientesComponent, data:{ title: 'Clientes' } },
-        { path: 'mensajes', component: MensajesComponent, canActivate: [AdminGuard], data:{ title: 'Mensajes' } },
+        { path: 'mensajes', component: MensajesComponent, data:{ title: 'Mensajes' } },
         { path: 'productos', component: ProductsComponent, canActivate: [AdminGuard], data:{ title: 'Productos' } },
         { path: 'perfil/:id', component: PerfilComponent, data:{ title: 'Perfil' } },
         { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Evento' } },
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },
-        { path: 'plantillas', component: TemplatesComponent, canActivate: [AdminGuard], data:{ title: 'Plantillas' } },
-        { path: 'plantilla/crear', component: TemplateCreateComponent, canActivate: [AdminGuard], data:{ title: 'Crear Plantilla' } },
-        { path: 'pagos', component: PagosComponent, canActivate: [AdminGuard], data:{ title: 'Pagos' } },
+        { path: 'plantillas', component: TemplatesComponent, data:{ title: 'Plantillas' } },
+        { path: 'plantilla/crear', component: TemplateCreateComponent, data:{ title: 'Crear Plantilla' } },
+        { path: 'pagos', component: PagosComponent, data:{ title: 'Pagos' } },
         { path: 'vendedores', component: UsuariosComponent, canActivate: [AdminGuard], data:{ title: 'Vendedores' } },
-        { path: 'whatsapp-settings', component: WhatsappSettingsComponent, canActivate: [AdminGuard], data:{ title: 'Configuración de WhatsApp' } },
+        { path: 'whatsapp-settings', component: WhatsappSettingsComponent, data:{ title: 'Configuración de WhatsApp' } },
         
         { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
       ] 

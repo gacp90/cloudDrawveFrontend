@@ -3946,6 +3946,7 @@ export class RifaComponent implements OnInit {
       }); 
       return {
         phone: grupo.phone,
+        customerName: grupo.nombre || '',
         parameters: parametrosDinamicos
       };
     });

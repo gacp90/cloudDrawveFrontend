@@ -43,6 +43,13 @@ export class ClientesService {
     loadClienteID(id: string){
       return this.http.get<{ok: boolean, cliente: Client}>( `${base_url}/clients/${id}`, this.headers );
     }
+
+    /** ================================================================
+     *  LOAD CLIENTE FOR PHONE
+    ==================================================================== */
+    loadClienteForPhone(phone: string){
+      return this.http.get<{ok: boolean, cliente: Client}>( `${base_url}/clients/buscar-telefono/${phone}`, this.headers );
+    }
   
     /** ================================================================
      *  CREATE CLIENTE

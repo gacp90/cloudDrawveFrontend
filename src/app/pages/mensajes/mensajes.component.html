@@ -18,13 +18,13 @@
       <div class="contact-card" 
            *ngFor="let chat of chats" 
            (click)="selectChat(chat)"
-           [class.active]="selectedChat?._id === chat._id">
-        <img src="assets/images/icon/staff.png" class="avatar">
+           [class.active]="selectedChat?.customerPhone === chat.customerPhone">
+        <img src="assets/images/icon/avatar-de-usuario.png" class="avatar">
         <div class="contact-info">
           <div class="contact-name">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="mb-0">{{ chat.name || chat.customerPhone }}</h6>
+                <h6 class="mb-0">{{ chat.customerName || chat.customerPhone }}</h6>
                 <small class="text-muted">{{ chat.ultimoMensaje }}</small>
               </div>
               
@@ -41,14 +41,41 @@
 
   <main class="chat-area" [class.active-mobile]="selectedChat">
     
+    <!-- <header class="chat-header" *ngIf="selectedChat">
+      <div class="user-info">
+        <button class="btn-back d-md-none" (click)="selectedChat = null">
+          <i class="ti-arrow-left"></i>
+        </button>
+        <img src="assets/images/icon/avatar-de-usuario.png" class="avatar">
+        <div>
+          <strong>{{ selectedChat?.customerName || selectedChat?.customerPhone }}</strong>
+          <p class="status online">online</p>
+        </div>
+      </div>
+    </header> -->
+
     <header class="chat-header" *ngIf="selectedChat">
       <div class="user-info">
         <button class="btn-back d-md-none" (click)="selectedChat = null">
           <i class="ti-arrow-left"></i>
         </button>
-        <img src="assets/images/icon/staff.png" class="avatar">
+        <img src="assets/images/icon/avatar-de-usuario.png" class="avatar">
+        
         <div>
-          <strong>{{ selectedChat?.name || selectedChat?.customerPhone }}</strong>
+          <strong *ngIf="selectedChat.buscandoNombre">Buscando...</strong>
+          
+          <strong *ngIf="!selectedChat.buscandoNombre">
+            {{ selectedChat.customerName || selectedChat.customerPhone }}
+          </strong>
+          <div>
+            <button *ngIf="selectedChat.isUnknown" 
+                    class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal" data-bs-target="#modalAgregarCliente"
+                    (click)="abrirModalNuevoCliente(selectedChat)">
+              <i class="ti-plus"></i> Guardar contacto
+            </button>
+          </div>
+
           <p class="status online">online</p>
         </div>
       </div>
@@ -153,3 +180,40 @@
   <span class="close-viewer">&times;</span>
   <img [src]="imageSelected | whatsappMedia" class="modal-content-img" (click)="$event.stopPropagation()">
 </div>
+
+<div class="modal fade" id="modalAgregarCliente" tabindex="-1" aria-hidden="true" 
+     [class.show]="chatParaEditar" [style.display]="chatParaEditar ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Guardar Contacto</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <p class="text-muted mb-3">
+          El número <strong>{{ chatParaEditar?.customerPhone }}</strong> no se encuentra en la base de datos general. Asígnale un nombre para este chat.
+        </p>
+
+        <div class="form-group">
+          <label>Nombre del Cliente</label>
+          <input type="text" class="form-control" 
+                 placeholder="Ej. Juan Pérez"
+                 [(ngModel)]="nuevoNombreManual"
+                 (keyup.enter)="guardarNombreManual()">
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" 
+                [disabled]="!nuevoNombreManual.trim()"
+                (click)="guardarNombreManual()">
+          Guardar Nombre
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="chatParaEditar" (click)="cerrarModal()"></div>
