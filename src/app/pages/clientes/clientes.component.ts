@@ -225,7 +225,7 @@ export class ClientesComponent implements OnInit {
       telefono: cliente.telefono,
       cedula: cliente.cedula,
       direccion: cliente.direccion,
-      correo: cliente.correo,
+      correo: cliente.correo || 'aaa',
       ruta: cliente.ruta._id!,
       cid: cliente.cid!
     })

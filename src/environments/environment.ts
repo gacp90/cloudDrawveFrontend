@@ -65,8 +65,8 @@
   client: false,
   app: false
 
-  base_url: 'https://rifasag.rifari.com/api',
-  local_url: 'https://rifasag.rifari.com',
+  base_url: 'https://rifasramirez.rifari.com/api',
+  local_url: 'https://rifasramirez.rifari.com',
   client: true,
   app: false
 
@@ -75,8 +75,8 @@
 export const environment = {
   production: false,
   wp_url: 'https://wpdemo.rifari.com/api',
-  base_url: 'https://ganaconabm.rifari.com/api',
-  local_url: 'https://ganaconabm.rifari.com',
+  base_url: 'https://rbcristinasshop.rifari.com/api',
+  local_url: 'https://rbcristinasshop.rifari.com',
   client: true,
   app: false
 };
