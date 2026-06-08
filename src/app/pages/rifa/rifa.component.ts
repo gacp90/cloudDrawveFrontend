@@ -66,6 +66,8 @@ export class RifaComponent implements OnInit {
   public client = environment.client || false;
   public mostrarHoraGlobal: boolean = false;
 
+  public permisos: boolean = false;
+
   constructor(  private activatedRoute: ActivatedRoute,
                 private usersService: UsersService,
                 private rifasService: RifasService,
@@ -88,6 +90,7 @@ export class RifaComponent implements OnInit {
     this.modulos = smsService.modulos;
     this.internalApiKey = this.usersService.user.internalApiKey!;
 
+    
     activatedRoute.params.subscribe( ({id}) => {
       this.loadRifa(id);      
     });
@@ -382,7 +385,21 @@ export class RifaComponent implements OnInit {
         .subscribe( ({rifa}) => {  
 
           this.rifa = rifa;
-          this.query.rifa = rifa.rifid!;          
+          this.query.rifa = rifa.rifid!;
+          
+          if(this.user.role === 'STAFF'){
+            this.permisos = false;
+          }
+
+          if(this.user.role === 'ADMIN' || this.user.uid === this.rifa.admin.uid){
+            this.permisos = true;
+          }
+
+          if(this.user.role === 'SUPER' && this.user.admin._id === this.rifa.admin.uid){
+            this.permisos = true;
+          }
+
+          console.log('Permiso: ', this.permisos);
 
           this.loadTickets();
           // LOAD VENDEDORES
@@ -521,7 +538,7 @@ export class RifaComponent implements OnInit {
 
     this.query.rifa = this.rifa.rifid!;
 
-    if (this.user.role !== 'ADMIN') {
+    if (this.user.role === 'STAFF') {
       if (!this.query.estado) {
         this.query.estado = 'Disponible';
       }
@@ -555,7 +572,7 @@ export class RifaComponent implements OnInit {
     }else{
       this.query.estado = estado;
 
-      if (this.user.role !== 'ADMIN' && estado !== 'Disponible') {
+      if (this.user.role === 'STAFF' && estado !== 'Disponible') {
         this.query.vendedor = this.user.uid;
       }else{
         delete this.query.vendedor;

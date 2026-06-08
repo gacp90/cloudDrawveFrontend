@@ -11,7 +11,7 @@ export class User {
         public phone: string,
         public empresa: string,
         public password: string,
-        public role: 'ADMIN' | 'STAFF',
+        public role: 'ADMIN' | 'STAFF' | 'SUPER',
         public img: string,
         public status: boolean,
         public admin: User,

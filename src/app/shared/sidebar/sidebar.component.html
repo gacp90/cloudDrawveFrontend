@@ -45,8 +45,8 @@
                     </a>
                     <ul aria-expanded="false" class="collapse">
                         <li><a [routerLink]="['/dashboard/rutas']" routerLinkActive="active">Rutas</a></li>
-                        <li><a [routerLink]="['/dashboard/plantillas']" routerLinkActive="active">Plantillas</a></li>
-                        <li><a [routerLink]="['/dashboard/whatsapp-settings']" routerLinkActive="active">Configuracion de Whatsapp</a></li>
+                        <li *ngIf="user.whatsapp && user.internalApiKey"><a [routerLink]="['/dashboard/plantillas']" routerLinkActive="active">Plantillas</a></li>
+                        <li *ngIf="user.whatsapp"><a [routerLink]="['/dashboard/whatsapp-settings']" routerLinkActive="active">Configuracion de Whatsapp</a></li>
                         <li *ngIf="user.whatsapp && user.internalApiKey"><a [routerLink]="['/dashboard/pagos']" routerLinkActive="active">Historial de Pagos</a></li>
 
                     </ul>

@@ -15,6 +15,7 @@
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Status</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,12 +39,18 @@
                                 <td>
                                     <span *ngIf="user.role === 'ADMIN'" class="label label-primary"> Admin </span>
                                     <span *ngIf="user.role === 'STAFF'" class="label label-info"> Vendedor </span>
+                                    <span *ngIf="user.role === 'SUPER'" class="label label-warning"> Supervisor </span>
                                 </td>
 
                                 <td>
 
                                     <button (click)="desactiveUser(user)" *ngIf="user.status" type="button" class="btn btn-sm btn-success">Activo</button>
                                     <button (click)="desactiveUser(user)" *ngIf="user.status === false" type="button" class="btn btn-sm btn-danger">Desactivo</button>
+                                </td>
+                                <td>
+                                    <button type="button" (click)="setForm(user)" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn" data-toggle="modal" data-target="#updateUser">
+                                        <i class="ti ti-pencil" aria-hidden="true"></i>
+                                    </button>
                                 </td>
                             </tr>
 
@@ -98,6 +105,14 @@ MODAL AGREGAR USUARIO
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <select formControlName="role" class="form-control" id="role">
+                                <option value="STAFF">Vendedor</option>
+                                <option value="SUPER">Supervisor</option>
+                            </select>
+                        </div>
+
                         <div class="col-md-12 m-b-20">
                             <input formControlName="password" type="password" class="form-control" placeholder="Password">
                             <div *ngIf="validate('password')" class="form-control-feedback">
@@ -108,6 +123,62 @@ MODAL AGREGAR USUARIO
                     </div>
 
                     <button type="submit" class="btn btn-info waves-effect btn-block">Guardar</button>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+
+<!-- ========================================================= 
+MODAL EDITAR USUARIO
+======================================================== -->
+<div id="updateUser" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="updateUser" aria-hidden="true" #modalNewUser>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Editar Vendedor</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="formUpUser" (ngSubmit)="updateUser()">
+
+                    <div class="form-group has-danger">
+
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="name" type="text" class="form-control" placeholder="Nombres">
+                            <div *ngIf="validateUp('name')" class="form-control-feedback">
+                                <small> Los nombres son obligatorios </small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 m-b-20">
+                            <input formControlName="email" type="email" class="form-control" placeholder="Email">
+                            <div *ngIf="validateUp('email')" class="form-control-feedback">
+                                <small> El email es obligatorio </small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <select formControlName="role" class="form-control" id="role">
+                                <option value="STAFF">Vendedor</option>
+                                <option value="SUPER">Supervisor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button [disabled]="formUpSubmitted" type="submit" class="btn btn-info waves-effect btn-block">
+                        <span *ngIf="!formUpSubmitted">Guardar</span>
+                        <span *ngIf="formUpSubmitted">Guardando</span>
+                    </button>
                 </form>
 
             </div>

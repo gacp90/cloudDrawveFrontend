@@ -8,7 +8,7 @@
     </div>
 
     <!-- VINCULAR WHATSAPP -->
-    <div *ngIf="user.role === 'ADMIN' && user.uid === rifa.admin._id" class="d-flex flex-wrap gap-2 my-2">        
+    <div *ngIf="permisos" class="d-flex flex-wrap gap-2 my-2">        
 
         <button type="button" class="m-1 btn btn-primary" data-toggle="modal" data-target="#addMetodoPaid">
             Metodos de pago
@@ -177,7 +177,7 @@
 
             <div class="row m-t-40">
                 <!-- TOTAL -->
-                <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer" (click)="searchEstado('total')">
+                <div *ngIf="permisos" class="col-md-6 col-lg-3 col-xlg-3 pointer" (click)="searchEstado('total')">
                     <div class="card">
                         <div class="box bg-primary text-center">
                             <h1 class="font-light text-white"> {{ total }} </h1>
@@ -237,7 +237,7 @@
 
                     </div>
 
-                    <div class="form-group mb-0" *ngIf="user.role === 'ADMIN'" class="">
+                    <div class="form-group mb-0" *ngIf="permisos" class="">
 
                         <label for="vendedores" class="me-2">Vendedores: </label>
                         <select class="form-control" name="" id="vendedores" #vendedoresF (change)="filterVendedor(vendedoresF.value)">
@@ -514,13 +514,11 @@
                             <div class="tab-pane active" id="ticketDetails" role="tabpanel" aria-expanded="true">
 
                                 <div class="mt-4 d-flex flex-wrap justify-content-between ">
-                                    <button *ngIf="user.role === 'ADMIN'" [disabled]="user.role !== 'ADMIN'" type="button" class="btn btn-success btn-sm" (click)="ganadorTicket(ticketSelected.tid!)" >
+                                    <button *ngIf="permisos" [disabled]="!permisos" type="button" class="btn btn-success btn-sm" (click)="ganadorTicket(ticketSelected.tid!)" >
                                         Ticket Ganador
                                     </button>
-
-                                    <button *ngIf="user.gsm" [disabled]="!ticketSelected.telefono" (click)="makeCall(ticketSelected.telefono)" type="buttom" class="btn btn-sm btn-info ms-auto"> <i class="ti ti-headphone-alt"></i> </button>
-
-                                    <button [disabled]="user.role !== 'ADMIN' || ticketSelected.disponible" type="button" class="btn btn-danger btn-sm" (click)="clearTicket(ticketSelected.tid!)">
+                                    
+                                    <button [disabled]="!permisos || ticketSelected.disponible" type="button" class="btn btn-danger btn-sm" (click)="clearTicket(ticketSelected.tid!)">
                                         Limpiar Ticket
                                     </button>                                    
 
@@ -681,7 +679,7 @@
                             <div class="tab-pane" id="paymentsTicket" role="tabpanel" aria-expanded="false">
 
 
-                                <ng-container *ngIf="user.role === 'ADMIN' || ticketSelected.disponible || ticketSelected.vendedor && user.role === 'STAFF' && user.uid === ticketSelected.vendedor._id">
+                                <ng-container *ngIf="permisos || ticketSelected.disponible || ticketSelected.vendedor && user.role === 'STAFF' && user.uid === ticketSelected.vendedor._id">
                                     <h3 class="fw-bold mt-4">Agregar pagos</h3>
 
                                     <div class="form-group mb-3">
@@ -1494,7 +1492,7 @@
 
                     <div class="row m-t-40">
                         <!-- TOTAL -->
-                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                        <div *ngIf="permisos" class="col-md-6 col-lg-3 col-xlg-3 pointer">
                             <div class="card">
                                 <div class="box bg-primary text-center">
                                     <h2 class="font-light text-white"> {{ totalTickets + totalPagado | currency }} </h2>
@@ -1504,7 +1502,7 @@
                             </div>
                         </div>
                         <!-- TOTAL APARTADOS -->
-                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                        <div *ngIf="permisos" class="col-md-6 col-lg-3 col-xlg-3 pointer">
                             <div class="card">
                                 <div class="box bg-warning text-center">
                                     <h2 class="font-light text-white"> {{ totalApartado | currency }} </h2>
@@ -1514,7 +1512,7 @@
                             </div>
                         </div>
                         <!-- TOTAL PAGADOS -->
-                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                        <div *ngIf="permisos" class="col-md-6 col-lg-3 col-xlg-3 pointer">
                             <div class="card">
                                 <div class="box bg-danger text-center">
                                     <h2 class="font-light text-white"> {{ totalPagado | currency }} </h2>
@@ -1525,7 +1523,7 @@
                         </div>
 
                         <!-- TOTAL EGRESOS -->
-                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                        <div *ngIf="permisos" class="col-md-6 col-lg-3 col-xlg-3 pointer">
                             <div class="card">
                                 <div class="box bg-info text-center">
                                     <h2 class="font-light text-white"> {{ totalPendienteCobrar | currency }} </h2>
@@ -1536,7 +1534,7 @@
                         </div>
 
                         <!-- TOTAL EGRESOS -->
-                        <div *ngIf="user.role === 'ADMIN'" class="col-md-6 col-lg-3 col-xlg-3 pointer">
+                        <div *ngIf="permisos" class="col-md-6 col-lg-3 col-xlg-3 pointer">
                             <div class="card">
                                 <div class="box bg-dark text-center">
                                     <h2 class="font-light text-white"> {{ totalMovimiento | currency }} </h2>
@@ -1556,7 +1554,7 @@
                     </div>
                     <div *ngIf="!loadingEgresos">
 
-                        <ng-container *ngIf="user.role === 'ADMIN'">
+                        <ng-container *ngIf="permisos">
                             <h3 class="fw-bold mt-4">Agregar Egreso</h3>
 
                             <div class="form-group mb-3">
@@ -1596,7 +1594,7 @@
                                             </tr>
                                             <tr *ngFor="let egreso of egresos; let i = index">
                                                 <td colspan="2">
-                                                    <button *ngIf="user.role === 'ADMIN'" (click)="deleteEgreso(egreso.moid!)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
+                                                    <button *ngIf="permisos" (click)="deleteEgreso(egreso.moid!)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
                                                     <i class="ti-trash"></i>
                                                 </button> {{egreso.descripcion}}
                                                 </td>
@@ -1648,7 +1646,7 @@
 
                             <div class="d-flex justify-content-between flex-wrap mt-1">
 
-                                <div *ngIf="user.role === 'ADMIN'" class="form-group">
+                                <div *ngIf="permisos" class="form-group">
 
                                     <label for="vendedores" class="me-2">Vendedores: </label>
                                     <select class="form-control" name="" id="vendedores" #vendedoresF (change)="filterVendedorPendientes(vendedoresF.value)">
@@ -1701,7 +1699,7 @@
                                                         </td>
                                                         <td>{{ paid.fecha | date:'d/M/yy, h:mm a' }}</td>
                                                         <td>
-                                                            <button type="button" (click)="confirmarPago(pendiente.tid!, paid._id!, 'Confirmado' )" [disabled]="user.role !== 'ADMIN'" class="btn btn-sm waves-effect waves-light" [ngClass]="{'btn-warning': paid.estado === 'Pendiente'}">
+                                                            <button type="button" (click)="confirmarPago(pendiente.tid!, paid._id!, 'Confirmado' )" [disabled]="!permisos" class="btn btn-sm waves-effect waves-light" [ngClass]="{'btn-warning': paid.estado === 'Pendiente'}">
                                                         <span> {{ paid.estado || 'Confirmado' }} </span>
                                                     </button>
                                                         </td>

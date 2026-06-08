@@ -27,6 +27,7 @@ export class TemplatesComponent implements OnInit {
   public query: any = {
     desde: 0,
     hasta: 50,
+    active: true,
     sort: {
       createdAt: -1
     }
@@ -172,4 +173,31 @@ export class TemplatesComponent implements OnInit {
     this.mostrarModalPreview = false;
     this.plantillaSeleccionada = null;
   }
+
+  /** ================================================================
+   *   CHANGE LIMITE
+  ==================================================================== */
+  limiteChange( cantidad: any ){  
+
+    this.query.hasta = Number(cantidad);    
+    this.loadTemplates();
+
+  }
+
+  /** ================================================================
+   *   CHANGE ORDEN
+  ==================================================================== */
+  statusChange( orden: any ){  
+
+    if (orden === 'Activos') {
+      this.query.active = true      
+    } else {
+      this.query.active = false;
+    } 
+
+    this.loadTemplates();
+
+  }
+
+
 }

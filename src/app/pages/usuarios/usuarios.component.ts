@@ -39,7 +39,7 @@ export class UsuariosComponent {
 
   loadUsers(){
 
-    if (this.user.role === 'ADMIN') {
+    if (this.user.role === 'ADMIN' || this.user.role === 'SUPER') {
       this.query.admin = this.user.uid!;      
     }else{
       Swal.fire('Atención', 'No tienes los privilegios para este modulo', 'warning');
@@ -161,6 +161,80 @@ export class UsuariosComponent {
 
       }
     })
+
+  }
+
+  /** ======================================================================
+     * SET FORM UPDATE
+    ====================================================================== */
+    public userSelect!: User;
+    setForm(user: User){
+  
+      this.userSelect = user;
+  
+      this.formUpUser.patchValue({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      })
+  
+    }
+
+  /** ======================================================================
+   * CREATE USER
+  ====================================================================== */
+  @ViewChild('modalUpdateUser') modalUpdateUser!: ElementRef;
+
+  public formUpSubmitted: boolean = false;
+  public formUpUser = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.minLength(3)]],
+    role: ['STAFF'],
+    admin: ''
+  });
+
+  updateUser(){
+       
+    this.formUpSubmitted = true;   
+    
+    if (this.formUpUser.invalid) {
+      return;
+    }
+    
+    if (this.formUpUser.value.role === 'none') {
+      return;      
+    }
+
+    this.formUpUser.value.admin = this.user.uid!;
+    
+    this.usersService.updateUser(this.formUpUser.value, this.userSelect.uid!)
+    .subscribe( ({user}) => {
+      
+      this.userSelect.name = user.name;
+      this.userSelect.email = user.email;
+      this.userSelect.role = user.role;
+      
+      this.formUpSubmitted = false;
+      
+      Swal.fire('Estupendo', 'El usuario se actualizo con exito!', 'success');
+
+    }, (err) => { 
+      this.formUpSubmitted = false;
+      Swal.fire('Error', err.error.msg, 'error') 
+    });
+
+  }
+  
+  /** ======================================================================
+   * VALIDATE FORM
+  ====================================================================== */
+  validateUp( campo: string): boolean{
+    
+    if ( this.formUpUser.get(campo)?.invalid && this.formUpSubmitted ) {      
+      return true;
+    }else{
+      return false;
+    }
 
   }
 
