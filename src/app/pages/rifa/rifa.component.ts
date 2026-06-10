@@ -322,6 +322,10 @@ export class RifaComponent implements OnInit {
       confirmButtonText: `Si, ${textL}`,
       cancelButtonText: 'Cancelar'
     }).then((result) => {
+
+      if (!result.isConfirmed) {
+        return;
+      }
       
       this.rifasService.updateRifa({abierta}, this.rifa.rifid!)
           .subscribe( ({rifa}) => {
@@ -682,7 +686,7 @@ export class RifaComponent implements OnInit {
   }
 
   /** ================================================================
-   *   UPDATE TICKET
+   *   RESERVE TICKET
   ==================================================================== */
   public ticketUpdateSubmitted: boolean = false;
   public ticketUpdate: any = this.fb.group({
@@ -700,6 +704,101 @@ export class RifaComponent implements OnInit {
     cliente: null 
   })
 
+  
+  reserveTicket(){
+
+    this.ticketUpdateSubmitted = true;
+    
+    if (this.ticketUpdate.invalid) {
+      return;
+    }
+
+    if (this.ticketUpdate.value.estado === 'Disponible') {
+      this.ticketUpdate.value.disponible = false;
+      Swal.fire('Atención', 'Si el ticket esta disponible, no se puede reservar, limpiar el ticket para reservarlo', 'warning');
+      return;
+    }
+    
+    if (this.ticketUpdate.value.ruta === '') {
+      Swal.fire('Atención', 'Debes de seleccionar una ruta', 'success');
+      return;
+    }
+
+    let formData: any = {
+      ticketIds: [this.ticketUpdate.value.tid],
+      nombre: this.ticketUpdate.value.nombre,
+      telefono: this.ticketUpdate.value.telefono,
+      cedula: this.ticketUpdate.value.cedula,
+      direccion: this.ticketUpdate.value.direccion,
+      ruta: this.ticketUpdate.value.ruta,
+      estado: this.ticketUpdate.value.estado,
+      nota: this.ticketUpdate.value.nota,
+      vendedor: this.ticketUpdate.value.vendedor,
+      monto: this.ticketUpdate.value.monto,
+      cliente: this.ticketUpdate.value.cliente,
+      rifa: this.rifa.rifid || this.rifa._id
+    }
+    
+    this.ticketsService.reserveTickets(formData).subscribe({
+      next: (resp: any) => {
+
+        // 2. Evaluamos si el único ticket enviado cayó en exitosos o fallidos
+        if (resp.exitosos && resp.exitosos.length > 0) {
+          const ticketReservado = resp.exitosos[0];
+
+          // Actualizamos la tabla visual
+          this.tickets.map((tic) => {
+            if (tic.tid === ticketReservado.id) {
+              tic.estado = ticketReservado.estado;
+              tic.nombre = formData.cliente.nombre; 
+            }
+          });
+
+          this.ticketUpdateSubmitted = false;
+
+          // Reconstruimos el ticket seleccionado para el mensaje de WhatsApp
+          this.ticketSelected = { 
+            ...this.ticketUpdate.value, 
+            numero: ticketReservado.numero,
+            estado: ticketReservado.estado
+          };
+
+          // Formateo seguro de hora AM/PM
+          let hora = new Date(this.rifa.fecha).getHours();
+          let minutos = new Date(this.rifa.fecha).getMinutes().toString().padStart(2, '0'); // Evita que los minutos salgan como "5" en vez de "05"
+          let forma = 'AM';
+          
+          if (hora >= 12) {
+            if (hora > 12) hora -= 12;
+            forma = 'PM';
+          } else if (hora === 0) {
+            hora = 12;
+          }
+          
+          this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n ${this.rifa.name} \n*Ticket:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Agencia:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${minutos} ${forma}  `;
+          
+          Swal.fire('Estupendo', 'Se ha reservado el ticket exitosamente', 'success');
+
+        } else if (resp.fallidos && resp.fallidos.length > 0) {
+          // El ticket fue tomado por otra persona milisegundos antes
+          Swal.fire('Lo sentimos', `Este ticket ya fue reservado por otra persona.`, 'error');
+          this.ticketUpdateSubmitted = false;
+        }
+
+      }, 
+      error: (err) => {
+        console.log(err);
+        Swal.fire('Error', err.error?.msg || 'Error del servidor', 'error');          
+        this.ticketUpdateSubmitted = false;
+      }
+    });
+    
+
+  }
+
+  /** ================================================================
+   *   UPDATE TICKET
+  ==================================================================== */
   updateTicket(){
 
     this.ticketUpdateSubmitted = true;
@@ -943,56 +1042,81 @@ export class RifaComponent implements OnInit {
   /** ================================================================
    *   UPDATE LIST TICKETS
   ==================================================================== */
-  updateListTikcets(){
-
+  updateListTikcets() {
     this.ticketUpdateSubmitted = true;
-    
-    if (this.ticketUpdate.invalid) {
+
+    if (this.ticketUpdate.invalid || this.listTicketsSelect.length === 0) {
       return;
     }
 
-    if (this.ticketUpdate.value.estado !== 'Disponible') {
-      this.ticketUpdate.value.disponible = false;
-    }else{
-      this.ticketUpdate.value.disponible = true;
-    }
+    // 1. Extraemos únicamente los IDs de los tickets seleccionados
+    const ticketIds = this.listTicketsSelect.map(ticket => ticket.tid);
 
-    this.ticketUpdate.value.vendedor = this.user.uid;
-    
-    let i = 0;
-    
-    for  (const ticket of this.listTicketsSelect) {
+    // 2. Armamos el payload exacto que espera el nuevo backend
+    const payload = {
+      ticketIds: ticketIds,
+      rifa: this.rifa._id || this.rifa.rifid,
+      cliente: this.ticketUpdate.value.cliente,
+      nombre: this.ticketUpdate.value.nombre,
+      telefono: this.ticketUpdate.value.telefono,
+      cedula: this.ticketUpdate.value.cedula,
+      direccion: this.ticketUpdate.value.direccion,
+      ruta: this.ticketUpdate.value.ruta,
+      monto: this.ticketUpdate.value.monto,
+      nota: this.ticketUpdate.value.nota,
+      estado: this.ticketUpdate.value.estado
+    };
 
-      this.ticketUpdate.value.tid = ticket.tid!;      
-
-      this.ticketsService.updateTicket(this.ticketUpdate.value, ticket.tid!)
-        .subscribe( ({ticket}) => {
-
-          this.tickets.map( (tic) => {
-            if (tic.tid === ticket.tid) {
-              tic.estado = ticket.estado;
-              tic.nombre = ticket.nombre;
+    // 3. Una sola petición HTTP al backend
+    this.ticketsService.reserveTickets(payload).subscribe({
+      next: (resp: any) => {
+        // Actualizamos el estado local (UI) solo de los tickets exitosos
+        if (resp.exitosos && resp.exitosos.length > 0) {
+          resp.exitosos.forEach((exitoso: any) => {
+            const index = this.tickets.findIndex(tic => tic.tid === exitoso.id);
+            if (index !== -1) {
+              this.tickets[index].estado = exitoso.estado;
+              this.tickets[index].disponible = false;
+              // Si necesitas actualizar el nombre en la tabla visualmente:
+              if (payload.cliente && payload.cliente.nombre) {
+                this.tickets[index].nombre = payload.cliente.nombre;
+              }
             }
           });
+        }
 
-          this.ticketUpdateSubmitted = false;
-          i++;
+        this.ticketUpdateSubmitted = false;
+
+        // 4. Manejo de Alertas (UX) basado en resultados
+        if (resp.fallidos && resp.fallidos.length > 0) {
+          // Hubo colisiones o errores (alguien más tomó algunos números)
+          const numerosFallidos = resp.fallidos.map((f: any) => f.numero).join(', ');
           
-          if (i === this.listTicketsSelect.length) {
-            Swal.fire('Estupendo', `Se actualizaron ${i} tickets`, 'success');
-            this.listTicketsSelect = [];
-            this.ticketUpdate.reset({
-              estado: 'Disponible',
-              disponible: false
-            })
-          }
+          Swal.fire({
+            title: 'Reserva Parcial',
+            html: `Se reservaron <b>${resp.exitosos.length}</b> tickets.<br><br>
+                   No se pudieron reservar los siguientes números:<br>
+                   <b class="text-danger">${numerosFallidos}</b> este ticket ya fue reservado por otra persona.`,
+            icon: 'warning'
+          });
+        } else {
+          // Éxito total (100% de los tickets apartados)
+          Swal.fire('¡Estupendo!', `Se apartaron los ${resp.exitosos.length} tickets correctamente.`, 'success');
+        }
 
-        }, (err) => {
-          console.log(err);
-          Swal.fire('Error', err.error.msg, 'error');          
-        })
-    }    
-
+        // 5. Limpieza de variables de estado
+        this.listTicketsSelect = [];
+        this.ticketUpdate.reset({
+          estado: 'Apartado', // Ahora el estado por defecto tras la reserva
+          disponible: false
+        });
+      },
+      error: (err: any) => {
+        console.error(err);
+        Swal.fire('Error', err.error?.msg || 'Error inesperado al comunicar con el servidor', 'error');
+        this.ticketUpdateSubmitted = false;
+      }
+    });
   }
 
   /** ================================================================
@@ -4031,6 +4155,97 @@ export class RifaComponent implements OnInit {
         this.descargandoPDF = false;
       }
     });
+  }
+
+  /** ================================================================
+   *   DESCARGAR IMAGEN DEL TICKET
+  ==================================================================== */
+  public descargandoImagen: boolean = false;
+
+  async descargarTicketComoImagen() {
+    this.descargandoImagen = true;
+
+    // 1. Apuntamos al div que envuelve el ticket
+    const element = document.getElementById('PrintTemplateTpl');    
+    
+    if (!element) {
+      console.error('No se encontró el ticket en el DOM');
+      this.descargandoImagen = false;
+      return;
+    }
+
+    try {
+      // 2. Generamos el Canvas original con todo el contenido (sin importar lo largo que sea)
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+
+      // 3. Creamos el lienzo estricto de 600x400
+      const canvasRedimensionado = document.createElement('canvas');
+      canvasRedimensionado.width = 300;
+      canvasRedimensionado.height = 600;
+      const ctx = canvasRedimensionado.getContext('2d');
+
+      if (ctx) {
+        // Pintamos el fondo blanco para rellenar los espacios vacíos
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 300, 600);
+
+        // LA MAGIA: Calculamos el ratio máximo permitido para que no se corte nada
+        const ratio = Math.min(300 / canvas.width, 600 / canvas.height);
+        
+        // Obtenemos las nuevas dimensiones escaladas
+        const newWidth = canvas.width * ratio;
+        const newHeight = canvas.height * ratio;
+
+        // Centramos el ticket perfectamente en el lienzo de 600x300
+        const xOffset = (300 - newWidth) / 2;
+        const yOffset = (600 - newHeight) / 2;
+
+        // Dibujamos el ticket comprimido dentro de las dimensiones
+        ctx.drawImage(
+          canvas, 
+          0, 0, canvas.width, canvas.height, // Coordenadas y tamaño original
+          xOffset, yOffset, newWidth, newHeight // Nuevas coordenadas y tamaño comprimido
+        );
+      }
+
+      // 4. Convertimos a imagen base64
+      const imgData = canvasRedimensionado.toDataURL('image/png');
+      const nombreArchivo = `Ticket-${this.ticketSelected?.numero || 'Rifari'}-${this.ticketSelected?.nombre}.png`;
+
+      // 5. Lógica Inteligente: PC vs Móvil
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile && navigator.share) {
+        // En móviles: Usamos Web Share API para enviarlo directo a WhatsApp
+        const blob = await (await fetch(imgData)).blob();
+        const file = new File([blob], nombreArchivo, { type: 'image/png' });
+
+        await navigator.share({
+          title: 'Ticket de Rifa',
+          text: `Aquí tienes tu ticket #${this.ticketSelected?.numero}`,
+          files: [file]
+        });
+
+        this.descargandoImagen = false;
+      } else {
+        // En PC: Forzamos la descarga del archivo clásico
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = nombreArchivo;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        this.descargandoImagen = false;
+      }
+
+    } catch (error) {
+      console.error('Error generando la imagen del ticket:', error);
+    }
   }
   
 

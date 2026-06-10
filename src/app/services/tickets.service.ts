@@ -104,6 +104,13 @@ export class TicketsService {
   /** ================================================================
    *  UPDATE TICKET
   ==================================================================== */
+  reserveTickets(formData: any){
+    return this.http.post<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/reserve/tickets`, formData, this.headers);
+  }
+
+  /** ================================================================
+   *  UPDATE TICKET
+  ==================================================================== */
   updateVendedorTicket(formData: any, id: string){
     return this.http.put<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/vendedor/${id}`, formData, this.headers);
   }

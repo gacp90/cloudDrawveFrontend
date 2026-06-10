@@ -28,8 +28,6 @@ export class HeaderComponent {
     if (this.user.internalApiKey) {
       setTimeout( ()=> {
         this.channelHealth = this.whatssappService.channel;
-        console.log(this.channelHealth);
-
       }, 1000)
       
     }
