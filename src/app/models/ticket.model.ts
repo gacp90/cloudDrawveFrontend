@@ -38,6 +38,7 @@ export class Ticket{
         public ganador: boolean,
         public select: boolean,
         public img: any[],
+        public totalPagado?: number,
         public _id?: string,
         public tid?: string,
         public cliente?: string,

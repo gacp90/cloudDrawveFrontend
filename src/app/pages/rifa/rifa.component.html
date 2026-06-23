@@ -370,10 +370,13 @@
                     
                     <div class="form-row mb-2">
                         <div class="col">
-                            <input #montF type="number" min="1" class="form-control" placeholder="Monto menor a">
+                            <input #montF type="number" min="1" class="form-control" placeholder="Minimo">
                         </div>
                         <div class="col">
-                            <button class="btn btn-primary" type="button" (click)="filterMonto(montF.value)">Filtrar</button>
+                            <input #montM type="number" min="1" class="form-control" placeholder="Maximo">
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" type="button" (click)="filterRangoMonto(montF.value, montM.value)">Filtrar</button>
                         </div>
                     </div>
     
@@ -423,7 +426,7 @@
                                 <span class="fw-bold text-white" [ngClass]="{'fs-5': ticket.numero.length > 5, 'fs-3': ticket.numero.length < 5}">
                                     {{ ticket.numero }}
                                 </span> 
-                                <span *ngIf="ticket.estado === 'Apartado' && ticket.pagos.length === 0 " class="text-center ml-1">
+                                <span *ngIf="ticket.estado === 'Apartado' && ticket.totalPagado === 0 " class="text-center ml-1">
                                     <span class="badge badge-danger"> - </span>
                                 </span>
                             </div>
@@ -663,7 +666,10 @@
 
                                     </div>
 
-                                    <button *ngIf="ticketSelected" [disabled]="ticketSelected.vendedor && user.role === 'STAFF' && user.uid !== ticketSelected.vendedor._id && ticketSelected.estado !== 'Disponible'" type="submit" class="btn btn-info waves-effect btn-block">Actualizar</button>
+                                    <button *ngIf="ticketSelected" [disabled]="ticketSelected.vendedor && user.role === 'STAFF' && user.uid !== ticketSelected.vendedor._id && ticketSelected.estado !== 'Disponible'" type="submit" class="btn btn-info waves-effect btn-block">
+                                        <span *ngIf="ticketUpdateSubmitted"> Actualizando... </span>
+                                        <span *ngIf="!ticketUpdateSubmitted"> Actualizar </span>
+                                    </button>
                                 </form>
 
                             </div>
@@ -672,82 +678,118 @@
                             <!-- PAGOS Y ABONOS DEL TICKET -->
                             <div class="tab-pane" id="paymentsTicket" role="tabpanel" aria-expanded="false">
 
+                                <ng-container *ngIf="permisos || ticketSelected.disponible || (ticketSelected.vendedor && user.role === 'STAFF' && user.uid === ticketSelected.vendedor._id)">
+                                    <h3 class="fw-bold mt-4">Agregar Pago (Multimoneda)</h3>
 
-                                <ng-container *ngIf="permisos || ticketSelected.disponible || ticketSelected.vendedor && user.role === 'STAFF' && user.uid === ticketSelected.vendedor._id">
-                                    <h3 class="fw-bold mt-4">Agregar pagos</h3>
+                                    <div class="row">
+                                        <div class="col-md-6 form-group mb-3">
+                                            <select class="form-control" [(ngModel)]="nuevoPago.metodoId" (change)="seleccionarMetodo()">
+                                                <option value="" disabled selected>Seleccione Método de Pago</option>
+                                                <option *ngFor="let metodo of metodos" [value]="metodo._id || metodo.metid">
+                                                    {{ metodo.nombre }} (Tasa Ref: {{ metodo.tasa }})
+                                                </option>
+                                            </select>
+                                        </div>
 
-                                    <div class="form-group mb-3">
-                                        <input type="text" class="form-control" placeholder="Descripción" #desc>
-                                        <div class="form-control-feedback">
-                                            <small> La Descripción es obligatoria </small>
+                                        <div class="col-md-6 form-group mb-3">
+                                            <input type="text" class="form-control" placeholder="Descripción / Referencia" [(ngModel)]="nuevoPago.descripcion">
+                                        </div>
+
+                                        <div class="col-md-4 form-group mb-3">
+                                            <label class="form-label text-muted fs-6 mb-0">Monto Local</label>
+                                            <input type="number" min="0" class="form-control" placeholder="Monto" [(ngModel)]="nuevoPago.monto" (keyup)="calcularDesdeMonto()">
+                                        </div>
+
+                                        <div class="col-md-4 form-group mb-3">
+                                            <label class="form-label text-muted fs-6 mb-0">Tasa de Cambio</label>
+                                            <input type="number" min="0" class="form-control" placeholder="Tasa" [(ngModel)]="nuevoPago.tasa" (keyup)="calcularDesdeMonto()">
+                                        </div>
+
+                                        <div class="col-md-4 form-group mb-3">
+                                            <label class="form-label text-muted fs-6 mb-0">Equivale a (USD)</label>
+                                            <input type="number" min="0" class="form-control border-success text-success fw-bold" placeholder="USD" [(ngModel)]="nuevoPago.equivalencia" (keyup)="calcularDesdeEquivalencia()">
+                                        </div>
+                                        
+                                        <div class="col-md-12 form-group mb-3 mt-2">
+                                            <button (click)="addPaidNew()" 
+                                                    [disabled]="ticketSelected.estado === 'Pagado' || nuevoPago.equivalencia <= 0 || !nuevoPago.metodoId || nuevoPago.tasa <= 0" 
+                                                    type="button" 
+                                                    class="btn btn-info waves-effect btn-block w-100">
+                                                Registrar Abono
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <div class="form-group mb-3">
-                                        <input type="number" min="0" class="form-control" placeholder="Monto" #monto>
-                                        <div class="form-control-feedback">
-                                            <small> El monto es obligatorio </small>
-                                        </div>
-                                    </div>
-
-                                    <button (click)="addPaid(desc.value, monto.value)" [disabled]="totalPaid === ticketSelected.monto" type="button" class="btn btn-info waves-effect btn-block">Agregar</button>
-
                                     <hr>
                                 </ng-container>
 
                                 <div class="card">
                                     <div class="card-body">
-                                        <h4 class="card-title"><span class="lstick"></span> Pagos</h4>
+                                        <h4 class="card-title"><span class="lstick"></span> Historial de Transacciones</h4>
                                         <div class="table-responsive m-t-20">
                                             <table class="table vm no-th-brd no-wrap pro-of-month">
                                                 <thead>
                                                     <tr>
-                                                        <th colspan="2">Descripción</th>
+                                                        <th colspan="2">Descripción / Banco</th>
                                                         <th>Fecha</th>
                                                         <th>Estado</th>
-                                                        <th>Monto</th>
+                                                        <th>Equiv. (USD)</th>
                                                         <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr *ngIf="paymentsTicket.length === 0">
-                                                        <td class="text-center" colspan="4"> No se ha registrado ningún pago... </td>
+                                                    <tr *ngIf="pagosDelTicket.length === 0">
+                                                        <td class="text-center" colspan="6"> No se ha registrado ningún pago válido... </td>
                                                     </tr>
-                                                    <tr *ngFor="let paid of paymentsTicket; let i = index">
+                                                    <tr *ngFor="let paid of pagosDelTicket">
                                                         <td colspan="2">
-                                                            <button *ngIf="user.role !== 'STAFF' || user.uid === ticketSelected.vendedor._id" (click)="deletePaid(i)" type="button" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn text-danger">
-                                                            <i class="ti-trash"></i>
-                                                        </button> {{paid.descripcion}}
+                                                            <button *ngIf="(user.role !== 'STAFF' || user.uid === ticketSelected.vendedor._id) && paid.estado !== 'Anulado'" 
+                                                                    (click)="cancelarPagoAction(paid._id)" 
+                                                                    type="button" 
+                                                                    class="btn btn-sm btn-icon btn-pure btn-outline text-danger"
+                                                                    title="Anular / Rechazar Pago">
+                                                                <i class="ti-close"></i>
+                                                            </button> 
+                                                            
+                                                            <div>{{ paid.descripcion }}</div>
+                                                            <small class="text-muted">{{ paid.method?.nombre || 'N/A' }}</small>
                                                         </td>
                                                         <td>{{ paid.fecha | date:'d/M/yy, h:mm a' }}</td>
                                                         <td>
-                                                            <button type="button" [disabled]="user.role !== 'ADMIN'" class="btn btn-sm waves-effect waves-light" [ngClass]="{'btn-warning': paid.estado === 'Pendiente', 'btn-success': paid.estado === 'Confirmado'}">
-                                                                <span> {{ paid.estado || 'Confirmado' }} </span>
-                                                            </button>
+                                                            <span class="badge" 
+                                                                [ngClass]="{'bg-warning': paid.estado === 'Pendiente', 
+                                                                            'bg-success': paid.estado === 'Confirmado',
+                                                                            'bg-danger': paid.estado === 'Anulado'}">
+                                                                {{ paid.estado }}
+                                                            </span>
                                                         </td>
-                                                        <td>{{ paid.monto | currency }}</td>
+                                                        <td>
+                                                            {{ paid.equivalencia | currency:'USD' }}
+                                                            <br>
+                                                            <small class="text-muted">Local: {{ paid.monto | number }}</small>
+                                                        </td>
                                                         <td>
                                                             <a *ngIf="paid.img" href="{{base_url}}/uploads/payments/{{paid.img}}" target="_blank">
-                                                                <img [src]=" paid.img | imagen: 'payments' " alt="user" width="40" class="img-circle" />
+                                                                <img [src]=" paid.img | imagen: 'payments' " alt="comprobante" width="40" class="img-circle" />
                                                             </a>
                                                         </td>
                                                     </tr>
                                                 </tbody>
                                                 <tfoot>
                                                     <tr class="fw-bold">
-                                                        <td colspan="3">Total</td>
-                                                        <td> {{ totalPaid | currency }} </td>
+                                                        <td colspan="4" class="text-end">Total Abonado:</td>
+                                                        <td colspan="2"> {{ ticketSelected.totalPagado | currency:'USD' }} </td>
                                                     </tr>
                                                     <tr class="fw-bold">
-                                                        <td colspan="3">Resta</td>
-                                                        <td> {{ (ticketSelected.monto - totalPaid) | currency }} </td>
+                                                        <td colspan="4" class="text-end">Resta:</td>
+                                                        <td colspan="2" [ngClass]="{'text-danger': (ticketSelected.monto - ticketSelected.totalPagado!) > 0, 'text-success': (ticketSelected.monto - ticketSelected.totalPagado!) <= 0}"> 
+                                                            {{ (ticketSelected.monto - ticketSelected.totalPagado!) | currency:'USD' }} 
+                                                        </td>
                                                     </tr>
                                                 </tfoot>
                                             </table>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                             <!-- PAGOS Y ABONOS DEL TICKET -->
 
@@ -796,7 +838,7 @@
                                         <span *ngIf="!imprimiendo">Imprimir</span>
                                     </button>
                                     
-                                    <button [disabled]="descargandoImagen" class="btn btn-primary" (click)="descargarTicketComoImagen()">
+                                    <button [disabled]="descargandoImagen" class="btn btn-primary" (click)=" descargandoImagen = true; descargarTicketComoImagen()">
                                         <i class="ti ti-download me-2"></i> 
                                         <span *ngIf="descargandoImagen">Descargando...</span>
                                         <span *ngIf="!descargandoImagen">Descargar</span>
@@ -835,8 +877,9 @@
                                                             <li class="list-group-item text-negro-imp py-1"> Loteria: {{ rifa.loteria }}</li>
                                                             <li class="list-group-item text-negro-imp py-1"> {{ ticketSelected.nombre }} </li>
                                                             <li class="list-group-item text-negro-imp py-1"> {{ ticketSelected.telefono }} </li>
-                                                            <li class="list-group-item text-negro-imp py-1" *ngFor="let pago of ticketSelected.pagos">
-                                                                <span class="fw-bold text-negro">{{ pago.descripcion }}</span> - <span class="text-negro"> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </span> - {{ pago.monto | currency }}
+                                                            <li class="list-group-item text-negro-imp py-1" *ngFor="let pago of pagosDelTicket">
+                                                                <span class="fw-bold text-negro">{{ pago.descripcion }}</span> - <span class="text-negro"> {{ pago.fecha | date:'d/M/yy, h:mm a' }} </span> 
+                                                                <span *ngIf="pago.tasa !== 1"> - {{ pago.monto | currency }} {{pago.method.moneda}} </span> <span> - {{pago.equivalencia | currency}} </span> 
                                                             </li>
                                                             <li class="list-group-item text-negro-imp py-1"> <span class="fw-bold text-negro">resta: {{ (ticketSelected.monto! - totalPaid!) | currency }} </span> </li>
                                                         </ul>

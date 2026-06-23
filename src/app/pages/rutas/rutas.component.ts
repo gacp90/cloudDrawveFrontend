@@ -50,7 +50,7 @@ export class RutasComponent implements OnInit {
     if (this.user.role === 'ADMIN') {
       this.query.admin = this.user.uid;
     }else{
-      this.query.admin = this.user.admin?.uid;
+      this.query.admin = this.user.admin;
     }
 
     this.rutasService.loadRutas(this.query)
@@ -123,7 +123,7 @@ export class RutasComponent implements OnInit {
           });
           ruta.ruid = ruta._id;
           this.rutas.push(ruta);
-          Swal.fire('Estupendo', 'Se ha creado la rifa exitosamente', 'success');
+          Swal.fire('Estupendo', 'Se ha creado la ruta exitosamente', 'success');
 
         }, (err) => {
           console.log(err);

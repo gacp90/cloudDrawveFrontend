@@ -28,6 +28,7 @@ import { WhatsappSettingsComponent } from './whatsapp-settings/whatsapp-settings
 import { PagosComponent } from './pagos/pagos.component';
 import { TemplateCreateComponent } from './template-create/template-create.component';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { MetodosComponent } from './metodos/metodos.component';
 
 
 @NgModule({
@@ -49,7 +50,8 @@ import { PickerModule } from '@ctrl/ngx-emoji-mart';
     TemplatesComponent,
     WhatsappSettingsComponent,
     PagosComponent,
-    TemplateCreateComponent
+    TemplateCreateComponent,
+    MetodosComponent
   ],
   exports: [
     DashboardComponent,

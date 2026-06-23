@@ -65,8 +65,8 @@
   client: false,
   app: false
 
-  base_url: 'https://rifasramirez.rifari.com/api',
-  local_url: 'https://rifasramirez.rifari.com',
+  base_url: 'https://srcapacheros.rifari.com/api',
+  local_url: 'https://srcapacheros.rifari.com',
   client: true,
   app: false
 

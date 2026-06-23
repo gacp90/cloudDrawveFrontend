@@ -19,6 +19,7 @@ import { TemplatesComponent } from './templates/templates.component';
 import { WhatsappSettingsComponent } from './whatsapp-settings/whatsapp-settings.component';
 import { PagosComponent } from './pagos/pagos.component';
 import { TemplateCreateComponent } from './template-create/template-create.component';
+import { MetodosComponent } from './metodos/metodos.component';
 
 
 // COMPONENTS
@@ -37,11 +38,17 @@ const routes: Routes = [
         { path: 'perfil/:id', component: PerfilComponent, data:{ title: 'Perfil' } },
         { path: 'rifa/:id', component: RifaComponent, data:{ title: 'Evento' } },
         { path: 'rutas', component: RutasComponent, canActivate: [AdminGuard], data:{ title: 'Rutas' } },
+        { path: 'metodos', component: MetodosComponent, data:{ title: 'Métodos de Pago' } },
         { path: 'plantillas', component: TemplatesComponent, data:{ title: 'Plantillas' } },
         { path: 'plantilla/crear', component: TemplateCreateComponent, data:{ title: 'Crear Plantilla' } },
-        { path: 'pagos', component: PagosComponent, data:{ title: 'Pagos' } },
+        { path: 'recargas', component: PagosComponent, data:{ title: 'Recargas' } },
         { path: 'vendedores', component: UsuariosComponent, canActivate: [AdminGuard], data:{ title: 'Vendedores' } },
         { path: 'whatsapp-settings', component: WhatsappSettingsComponent, data:{ title: 'Configuración de WhatsApp' } },
+
+        { 
+          path: 'finanzas', 
+          loadChildren: () => import('./finanzas/finanzas.module').then( m => m.FinanzasModule )
+        },
         
         { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
       ] 

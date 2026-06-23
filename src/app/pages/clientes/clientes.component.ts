@@ -70,7 +70,7 @@ export class ClientesComponent implements OnInit {
     if (this.user.role === 'ADMIN') {
       query.admin = this.user.uid;
     }else{
-      query.admin = this.user.admin?.uid;
+      query.admin = this.user.admin;
     }
 
     this.rutasService.loadRutas(query)

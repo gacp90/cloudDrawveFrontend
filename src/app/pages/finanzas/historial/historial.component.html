@@ -1,0 +1,178 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><span class="lstick"></span> Filtros de Búsqueda</h4>
+                <h6 class="card-subtitle">Utilice las siguientes opciones para auditar los pagos recibidos</h6>
+                
+                <div class="row m-t-20">
+                    <div class="col-md-3 form-group">
+                        <label>Rifa / Evento</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.rifa" (change)="cargarPagos()">
+                            <option value="">Todas las Rifas</option>
+                            <option *ngFor="let rifa of rifasList" [value]="rifa._id || rifa.rifid">{{ rifa.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Vendedor</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.vendedor" (change)="cargarPagos()">
+                            <option value="">Todos los Vendedores</option>
+                            <option [value]="(user.role === 'ADMIN')? user.uid: user.admin">{{ (user.role === 'ADMIN')? user.name: 'Administrador' }}</option>
+                            <option *ngFor="let vend of vendedoresList" [value]="vend.uid">{{ vend.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Ruta de Cobro</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.ruta" (change)="cargarPagos()">
+                            <option value="">Todas las Rutas</option>
+                            <option *ngFor="let ruta of rutasList" [value]="ruta._id|| ruta.ruid">{{ ruta.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Banco / Método</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.method" (change)="cargarPagos()">
+                            <option value="">Todos los Métodos</option>
+                            <option *ngFor="let met of metodosList" [value]="met._id || met.metid">{{ met.nombre }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Estado del Pago</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.estado" (change)="cargarPagos()">
+                            <option value="">Todos los Estados</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Confirmado">Confirmado</option>
+                            <option value="Anulado">Anulado</option>
+                            <option value="Rechazado">Rechazado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 form-group">
+                        <label>Rango de Fechas</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio" (change)="cargarPagos()">
+                            <div class="input-group-append input-group-prepend">
+                                <span class="input-group-text mx-1"> <i class="ti-arrows-horizontal"></i> </span>
+                            </div>
+                            <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin" (change)="cargarPagos()">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 form-group">
+                        <label>Mostrar</label>
+                        <select #mostrar class="form-control custom-select" [(ngModel)]="filtros.hasta" (change)="cargarPagos()">
+                            <option value="10">10 registros</option>
+                            <option value="50">50 registros</option>
+                            <option value="100">100 registros</option>
+                            <option value="500">500 registros</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary btn-block waves-effect waves-light" (click)="limpiarFiltros()">
+                            <i class="ti-reload"></i> Limpiar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="card-title mb-0">Resultados ({{ totalRegistros }})</h4>
+                    
+                    <button class="btn btn-success waves-effect waves-light" 
+                            [disabled]="pagosSeleccionados.length === 0"
+                            (click)="confirmarLote()">
+                        <i class="ti-check"></i> Confirmar Lote ({{ pagosSeleccionados.length }})
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped no-wrap">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="chkAll" (change)="toggleAll($event)">
+                                        <label class="custom-control-label" for="chkAll"></label>
+                                    </div>
+                                </th>
+                                <th># Ticket</th>
+                                <th>Cliente / Comprador</th>
+                                <th>Banco / Referencia</th>
+                                <th>Moneda Local</th>
+                                <th>Equivalente (USD)</th>
+                                <th>Fecha</th>
+                                <th>Vendedor / Ruta</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngIf="pagosList.length === 0">
+                                <td colspan="9" class="text-center py-4">
+                                    No se encontraron pagos con los filtros seleccionados.
+                                </td>
+                            </tr>
+                            <tr *ngFor="let pago of pagosList">
+                                <td class="text-center">
+                                    <div class="custom-control custom-checkbox" *ngIf="pago.estado === 'Pendiente'">
+                                        <input type="checkbox" class="custom-control-input" [id]="'chk' + (pago.payid || pago._id)" 
+                                            [checked]="pagosSeleccionados.includes(pago.payid || pago._id)"
+                                            (change)="togglePago(pago.payid || pago._id)">
+                                        <label class="custom-control-label" [for]="'chk' + (pago.payid || pago._id)"></label>
+                                    </div>
+                                </td>
+                                <td><span class="font-weight-bold">#{{ pago.ticket?.numero || 'N/A' }}</span></td>
+                                <td>{{ pago.cliente?.nombre || 'Sin registrar' }}</td>
+                                <td>
+                                    <div>{{ pago.method?.nombre || 'N/A' }}</div>
+                                    <small class="text-muted">{{ pago.descripcion }}</small>
+                                </td>
+                                <td>{{ pago.monto | number }} <small>{{pago.method.moneda}}</small></td>
+                                <td class="font-weight-bold text-success">{{ pago.equivalencia | currency:'USD' }}</td>
+                                <td>{{ pago.fecha | date:'dd/MM/yyyy h:mm a' }}</td>
+                                <td>
+                                    <div>{{ pago.vendedor?.name || 'N/A' }}</div>
+                                    <small class="text-info">{{ pago.ruta?.name || 'Sin Ruta' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          [ngClass]="{'badge-warning': pago.estado === 'Pendiente', 
+                                                     'badge-success': pago.estado === 'Confirmado',
+                                                     'badge-danger': pago.estado === 'Anulado' || pago.estado === 'Rechazado'}">
+                                        {{ pago.estado }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button *ngIf="pago.estado === 'Pendiente'" (click)="confirmarIndividual(pago.payid || pago._id)" class="btn btn-sm btn-success text-white" title="Confirmar Pago">
+                                            <i class="ti-check"></i>
+                                        </button>
+                                        <button *ngIf="pago.estado !== 'Anulado' && pago.estado !== 'Rechazado'" (click)="anularPago(pago)" class="btn btn-sm btn-danger text-white" title="Anular o Rechazar">
+                                            <i class="ti-close"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <button class="btn btn-outline-secondary" (click)="cambiarPagina(-filtros.hasta)" [disabled]="filtros.desde <= 0">Anterior</button>
+                    <span>Mostrando {{ pagosList.length }} de {{ totalRegistros }}</span>
+                    <button class="btn btn-outline-secondary" (click)="cambiarPagina(filtros.hasta)" [disabled]="(filtros.desde + filtros.hasta) >= totalRegistros">Siguiente</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

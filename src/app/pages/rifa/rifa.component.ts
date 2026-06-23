@@ -38,6 +38,9 @@ import { Venta } from 'src/app/models/ventas.model';
 import { VentasService } from 'src/app/services/ventas.service';
 import { TemplatesService } from 'src/app/services/templates.service';
 import { ChatService } from 'src/app/services/chat.service';
+import { MetodosService } from 'src/app/services/metodos.service';
+import { Metodo } from 'src/app/models/metodos.model';
+import { PaymentsService } from 'src/app/services/payments.service';
 
 interface templateIn{
   id: string,
@@ -84,7 +87,10 @@ export class RifaComponent implements OnInit {
                 private templatesServices: TemplatesService,
                 private chatService: ChatService,
                 private ventasService: VentasService,
-                private printerService: NgxPrinterService){
+                private printerService: NgxPrinterService,
+                private metodosServices: MetodosService,
+                private paymentsService: PaymentsService
+              ){
 
     this.user = usersService.user;
     this.modulos = smsService.modulos;
@@ -98,8 +104,38 @@ export class RifaComponent implements OnInit {
   }
 
   ngOnInit(): void {  
+
+    this.loadMetodos();
     
   }
+
+  /** ======================================================================
+   * LOAD METODOS
+  ====================================================================== */
+  public metodos: Metodo[] = []
+  public queryMetodo: any = {
+    desde: 0,
+    hasta: 100,
+    status: true,
+    sort: {}
+  };
+
+  loadMetodos(){
+  
+    this.metodosServices.loadMetodos(this.query)
+      .subscribe({
+        next: ({metodos}) => {
+          this.metodos = metodos;
+        },
+        error: (err) => {
+          Swal.fire('Error', err.error.msg, 'error');
+        }
+    })  
+  }
+
+  /** ======================================================================
+   * LOAD GANADOR
+  ====================================================================== */
 
   loadGanador(){
 
@@ -637,12 +673,18 @@ export class RifaComponent implements OnInit {
             }            
           }
 
+          this.totalPaid = ticket.totalPagado!;
+
           let hora = new Date(this.rifa.fecha).getHours();
           let forma = 'AM';
 
           if (hora > 12) {
             hora -= 12;
             forma = 'PM';
+          }
+
+          if(ticket.estado !== 'Disponible'){
+            this.cargarPagosDelTicket(ticket.tid! || ticket._id!);
           }
           
           this.ticketWhatsapp = `Hola, *${this.ticketSelected.nombre}* \n${this.rifa.admin.empresa} \n ${this.rifa.name} \n*Ticket:* ${this.ticketSelected.numero} \n*Valor:* $${this.ticketSelected.monto} \n*Pagado:* $${this.totalPaid} \n*Resta:* $${this.ticketSelected.monto - this.totalPaid} \n*Agencia:* ${this.rifa.loteria} \n*Fecha:* ${new Date(this.rifa.fecha).getDate()}/${new Date(this.rifa.fecha).getMonth()+1}/${new Date(this.rifa.fecha).getFullYear()} ${hora}:${new Date(this.rifa.fecha).getMinutes()} ${forma}  `;
@@ -720,6 +762,7 @@ export class RifaComponent implements OnInit {
     }
     
     if (this.ticketUpdate.value.ruta === '') {
+      this.ticketUpdate.value.disponible = false;
       Swal.fire('Atención', 'Debes de seleccionar una ruta', 'success');
       return;
     }
@@ -962,7 +1005,7 @@ export class RifaComponent implements OnInit {
       if (result.isConfirmed) {
         
         this.ticketsService.clearTicket(id)
-            .subscribe( ({ticket}) => {
+            .subscribe( ({ticket, rezagados}) => {              
 
               this.tickets.map( (tic) => {
                 if (tic.tid === ticket.tid) {
@@ -970,9 +1013,11 @@ export class RifaComponent implements OnInit {
                   tic.nombre = ticket.nombre;
                 }
               });
+              
               this.ticketSelected = ticket;
               this.paymentsTicket = [];
-              this.totalPaid = 0;
+              this.totalPaid = ticket.totalPagado!;
+              this.rifa.rezagados = rezagados;
 
               this.ticketUpdate.reset({
                 tid: ticket.tid!,
@@ -1366,12 +1411,29 @@ export class RifaComponent implements OnInit {
 
   }
 
+  filterRangoMonto(minimo: any, maximo: any) {
+      
+      const min = Number(minimo);
+      const max = Number(maximo);
+
+      if (min < 0 || max <= min) {
+          Swal.fire('Atención', 'El rango ingresado no es válido', 'warning');
+          return;
+      }
+
+      // Consulta de rango nativa de MongoDB ($gte = mayor o igual, $lte = menor o igual)
+      this.query.totalPagado = { $gte: min, $lte: max };
+
+      this.loadTickets();
+  }
+
   /** ================================================================
    *   LIMPIAR FILTRO
   ==================================================================== */
   clearFilters(){
     delete this.query.$expr;
     delete this.query.pagos;
+    delete this.query.totalPagado;
 
     this.loadTickets();
   }
@@ -4162,9 +4224,9 @@ export class RifaComponent implements OnInit {
   ==================================================================== */
   public descargandoImagen: boolean = false;
 
-  async descargarTicketComoImagen() {
+  descargarTicketComoImagen() {
     this.descargandoImagen = true;
-
+    
     // 1. Apuntamos al div que envuelve el ticket
     const element = document.getElementById('PrintTemplateTpl');    
     
@@ -4174,7 +4236,8 @@ export class RifaComponent implements OnInit {
       return;
     }
 
-    try {
+    setTimeout(async () => {
+      try {
       // 2. Generamos el Canvas original con todo el contenido (sin importar lo largo que sea)
       const canvas = await html2canvas(element, {
         scale: 2,
@@ -4246,6 +4309,154 @@ export class RifaComponent implements OnInit {
     } catch (error) {
       console.error('Error generando la imagen del ticket:', error);
     }
+    }, 500); // Timeout de seguridad por si algo falla
+
+    
+  }
+
+  /** ================================================================
+   *   LOAD PAYMENTS TICKET
+  ==================================================================== */
+  public pagosDelTicket: any[] = [];
+  public nuevoPago: any = {
+    metodoId: '',
+    descripcion: '',
+    monto: null,
+    tasa: null,
+    equivalencia: null
+  };
+
+  seleccionarMetodo(): void {
+    const metodo = this.metodos.find( m => m._id! || m.metid! === this.nuevoPago.metodoId );
+    if (metodo) {
+      // Cargamos la tasa por defecto del banco
+      this.nuevoPago.tasa = metodo.tasa;     
+
+      // Si ya habían escrito un monto, recalculamos los dólares al instante
+      this.calcularDesdeMonto(); 
+    }
+  }
+
+  calcularDesdeMonto(): void {
+    if (this.nuevoPago.monto && this.nuevoPago.tasa && this.nuevoPago.tasa > 0) {
+      // Monto / Tasa = Dólares
+      this.nuevoPago.equivalencia = Number((this.nuevoPago.monto / this.nuevoPago.tasa).toFixed(2));
+    } else {
+      this.nuevoPago.equivalencia = null;
+    }
+  }
+
+  cargarPagosDelTicket(ticketId: string) {
+    // El backend se encarga de todo el trabajo pesado    
+    this.pagosDelTicket = [];
+    const query = { 
+        ticket: ticketId,
+        estado: ['Pendiente', 'Confirmado'] 
+    };
+
+    this.paymentsService.loadPayments(query).subscribe((res: any) => {      
+       this.pagosDelTicket = res.pagos;       
+    });
+  }
+
+  calcularDesdeEquivalencia(): void {
+    if (this.nuevoPago.equivalencia && this.nuevoPago.monto && this.nuevoPago.equivalencia > 0) {
+      // Matemática inversa: Monto / Dólares = Tasa efectiva usada en este negocio
+      this.nuevoPago.tasa = Number((this.nuevoPago.monto / this.nuevoPago.equivalencia).toFixed(2));
+    }
+  }
+
+  addPaidNew(): void { 
+    
+    const deuda = this.ticketSelected.monto - this.ticketSelected.totalPagado!;
+    
+    if (this.nuevoPago.equivalencia > (deuda + 0.05)) {
+        Swal.fire('Error', `El abono supera la deuda restante de $${deuda.toFixed(2)}`, 'error');
+        return; 
+    }
+
+    if (this.nuevoPago.descripcion.trim().length === 0) {
+        Swal.fire('Atención', 'La descripción o referencia es obligatoria', 'warning');
+        return; 
+    }
+
+    // Ya no tomamos la tasa del 'metodoData', sino la que el usuario dejó en el input
+    const metodoData: any = this.metodos.find( m => m._id! || m.metid! === this.nuevoPago.metodoId );
+
+    const payload = {
+      pagos: [
+        {
+          descripcion: this.nuevoPago.descripcion,
+          nombre: metodoData.nombre,
+          cuenta: metodoData.cuenta,
+          
+          // Enviamos los valores manipulables del formulario
+          tasa: this.nuevoPago.tasa,
+          monto: this.nuevoPago.monto,
+          equivalencia: this.nuevoPago.equivalencia,
+          
+          ticket: this.ticketSelected._id! || this.ticketSelected.tid!,
+          ruta: this.ticketSelected.ruta._id || this.ticketSelected.ruta.ruid,
+          method: metodoData._id || metodoData.metid,
+          rifa: this.ticketSelected.rifa,
+          cliente: this.ticketSelected.cliente
+        }
+      ]
+    };    
+
+    this.paymentsService.createPayment(payload)
+      .subscribe(({ok, msg, pagos, resumenTickets}) => {
+      // Manejo de errores y reseteo del formulario...
+      
+      this.ticketSelected.totalPagado = resumenTickets[0].totalPagado;
+      this.ticketSelected.estado = resumenTickets[0].estado;
+
+      this.totalPaid = this.ticketSelected.totalPagado!;
+
+      // Reseteamos incluyendo la tasa
+      this.nuevoPago = { metodoId: '', descripcion: '', monto: null, tasa: null, equivalencia: null };
+      
+      this.cargarPagosDelTicket(this.ticketSelected.tid!);
+      Swal.fire('Guardado', 'El pago ha sido registrado', 'success');
+
+    }, (err) => {
+      Swal.fire('Error', err.error.msg, 'error');
+    });
+  }
+
+  cancelarPagoAction(pagoId: string) {
+    Swal.fire({
+      title: '¿Anular este pago?',
+      text: "El dinero se restará del ticket y de la cuenta bancaria (si estaba confirmado).",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, anular',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        
+        // Llamamos al nuevo endpoint de Node.js
+        this.paymentsService.cancelPayment(pagoId, { estadoCancelacion: 'Anulado' })
+          .subscribe((res: any) => {
+            
+            Swal.fire('Anulado', 'El pago fue revertido con éxito.', 'success');
+            
+            // Recargamos los datos para recalcular la caché en la UI
+            this.cargarPagosDelTicket(this.ticketSelected.tid!);
+            
+            // Tienes que actualizar el ticket localmente o hacer un fetch del ticket nuevamente
+            // para que refleje el nuevo 'totalPagado'
+            this.ticketsService.loadTicketID(this.ticketSelected.tid!).subscribe((t:any) => {
+               this.ticketSelected = t.ticket;
+            });
+
+        }, (err) => {
+           Swal.fire('Error', err.error.msg, 'error');
+        });
+      }
+    });
   }
   
 

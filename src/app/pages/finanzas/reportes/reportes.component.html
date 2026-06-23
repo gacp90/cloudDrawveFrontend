@@ -1,0 +1,110 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><span class="lstick"></span> Reporte General de Ingresos</h4>
+                <h6 class="card-subtitle">Filtre para auditar el dinero consolidado y verificado (Estado: Confirmado)</h6>
+                
+                <div class="row m-t-20">
+                    <div class="col-md-4 form-group">
+                        <label>Rifa / Evento</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.rifa" (change)="cargarReporte()">
+                            <option value="">Consolidado Global (Todas)</option>
+                            <option *ngFor="let rifa of rifasList" [value]="rifa._id || rifa.rifid">{{ rifa.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Vendedor</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.vendedor" (change)="cargarReporte()">
+                            <option value="">Todos los Vendedores</option>
+                            <option [value]="(user.role === 'ADMIN')? user.uid: user.admin">{{ (user.role === 'ADMIN')? user.name: 'Administrador' }}</option>
+                            <option *ngFor="let vend of vendedoresList" [value]="vend.uid || vend._id">{{ vend.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Ruta de Cobro</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.ruta" (change)="cargarReporte()">
+                            <option value="">Todas las Rutas</option>
+                            <option *ngFor="let ruta of rutasList" [value]="ruta._id || ruta.ruid">{{ ruta.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 form-group">
+                        <label>Método de Pago</label>
+                        <select class="form-control custom-select" [(ngModel)]="filtros.method" (change)="cargarReporte()">
+                            <option value="">Todos los Bancos</option>
+                            <option *ngFor="let met of metodosList" [value]="met._id || met.metid">{{ met.nombre }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-5 form-group">
+                        <label>Rango de Fechas (Cierre de Caja)</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" [(ngModel)]="filtros.desde" (change)="cargarReporte()">
+                            <div class="input-group-append input-group-prepend">
+                                <span class="input-group-text mx-1"> <i class="ti-arrows-horizontal"></i> </span>
+                            </div>
+                            <input type="date" class="form-control" [(ngModel)]="filtros.hasta" (change)="cargarReporte()">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 form-group d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary btn-block waves-effect waves-light" (click)="limpiarFiltros()">
+                            <i class="ti-reload"></i> Restablecer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex no-block align-items-center">
+                    <div>
+                        <h2 class="text-white m-b-0">{{ granTotalUSD | currency:'USD' }}</h2>
+                        <h6 class="text-white">Ingreso Neto Total (Equivalencia USD)</h6>
+                    </div>
+                    <div class="ml-auto">
+                        <h2 class="text-white m-b-0 font-weight-bold">{{ totalTransacciones }}</h2>
+                        <h6 class="text-white">Transacciones Validadas</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12" *ngIf="reporteData.length === 0">
+        <div class="alert alert-warning text-center">
+            No hay ingresos confirmados para los filtros seleccionados.
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6" *ngFor="let met of reporteData">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-row">
+                    <div class="round align-self-center round-success"><i class="ti-wallet"></i></div>
+                    <div class="m-l-10 align-self-center">
+                        <h3 class="m-b-0">{{ met.totalEquivalenciaUSD | currency:'USD' }}</h3>
+                        <h5 class="text-muted m-b-0">{{ met.metodoNombre }}</h5>
+                    </div>
+                </div>
+                <hr>
+                <ul class="list-inline m-b-0 text-center">
+                    <li>
+                        <h6 class="text-muted text-info">Moneda Local Recibida</h6>
+                        <h4 class="font-weight-bold">{{ met.totalMontoOriginal | number }} {{ met.moneda }}</h4>
+                    </li>
+                    <li>
+                        <h6 class="text-muted text-info">Volumen de Recibos</h6>
+                        <h4 class="font-weight-bold">{{ met.cantidadTransacciones }}</h4>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

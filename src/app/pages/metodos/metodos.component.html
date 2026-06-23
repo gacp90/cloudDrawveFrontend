@@ -1,0 +1,239 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body"> 
+
+                <!-- TITULO Y BOTONES -->
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+
+                    <h4 class="card-title">Lista de metodos de pagos</h4>
+
+                    <div class="d-flex flex-wrap justify-content-betwenn gap-2">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createMetodo">
+                            Crear Metodo
+                        </button>
+                    </div>
+
+
+                </div>
+
+                <div class="d-flex flex-wrap align-items-end justify-content-between">
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <div class="form-group mb-0">
+                            <label for="statusSS" class="me-2">Estado: </label>
+                            <select class="form-control" name="statusSS" id="statusSS" #statusS (change)="statusChange(statusS.value)">
+                                <option value="Activos">Activos</option>
+                                <option value="Deshabilitados">Deshabilitados</option>
+                            </select>    
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+
+                <!-- EXPORTAR Y BUSCADOR -->                
+                <div class="d-flex justify-content-between mt-3">
+                    <small><span class="fw-bold">Total:</span> {{ total }} </small>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="demo-foo-addrow" class="table m-t-30 table-hover no-wrap contact-list" data-page-size="10">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cuenta</th>
+                                <th>Moneda</th>
+                                <th>Tasa</th>
+                                <th>Saldo</th>
+                                <th>Estado</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr *ngIf="metodos.length === 0">
+                                <td colspan="6"> No existen registros de métodos... </td>
+                            </tr>
+
+                            <tr *ngFor="let metodo of metodos">
+                                <td>
+                                    {{ metodo.nombre }}
+                                </td>
+                                <td>
+                                    {{ metodo.cuenta}}
+                                </td>
+                                <td>{{ metodo.moneda }}</td>
+                                <td>{{ metodo.tasa }}</td>
+                                <td>{{ metodo.saldo }}</td>
+                                <td>
+                                    <button (click)="updateSttatus(metodo)" type="button" class="btn btn-sm" [ngClass]="{'btn-success': metodo.status, 'btn-danger': !metodo.status}">
+                                        <span *ngIf="metodo.status" >Activo</span>
+                                        <span *ngIf="!metodo.status" >Deshabilitado</span>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" (click)="setForm(metodo)" class="btn btn-sm btn-icon btn-pure btn-outline delete-row-btn" data-toggle="modal" data-target="#updateMetodo">
+                                        <i class="ti ti-pencil" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+
+                                <td colspan="8">
+
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <button [disabled]="query.desde === 0" (click)="cambiarPagina(query.hasta * -1)" type="button" class="btn btn-dark text-white">Atras</button>
+                                        <button [disabled]="( query.desde + query.hasta ) >= total" (click)="cambiarPagina(query.hasta)" type="button" class="btn btn-dark text-white">Siguiente</button>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================= 
+MODAL CREATE
+======================================================== -->
+<div id="createMetodo" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="createMetodo" aria-hidden="true" #modalNewUser>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="createMetodo">Nuevo Metodo de pago</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="updateForm" (ngSubmit)="create()">
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="moneda" type="text" class="form-control" placeholder="moneda (BS, USD, EUR, COP, USDT, CLP, MXN)">
+                            <div *ngIf="validate('moneda')" class="form-control-feedback">
+                                <small> La moneda es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="nombre" type="text" class="form-control" placeholder="nombre">
+                            <div *ngIf="validate('nombre')" class="form-control-feedback">
+                                <small> El nombre es obligatorio </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="cuenta" type="text" class="form-control" placeholder="cuenta">
+                            <div *ngIf="validate('cuenta')" class="form-control-feedback">
+                                <small> La cuenta es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="tasa" type="text" class="form-control" placeholder="tasa">
+                            <div *ngIf="validate('tasa')" class="form-control-feedback">
+                                <small> La tasa es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="comision" type="text" class="form-control" placeholder="comision">
+                            <div *ngIf="validate('comision')" class="form-control-feedback">
+                                <small> La comision es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <button [disabled]="formSubmit" type="submit" class="btn btn-info waves-effect btn-block">
+                        <span *ngIf="!formSubmit">Guardar</span>
+                        <span *ngIf="formSubmit">Guardando...</span>
+                    </button>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- ========================================================= 
+MODAL UPDATE
+======================================================== -->
+<div id="updateMetodo" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="updateMetodo" aria-hidden="true" #modalNewUser>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="updateMetodo">Actualizar Metodo de pago</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal form-material" autocomplete="off" [formGroup]="updateForm" (ngSubmit)="update()">
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="moneda" type="text" class="form-control" placeholder="moneda (BS, USD, EUR, COP, USDT, CLP, MXN)">
+                            <div *ngIf="validateU('moneda')" class="form-control-feedback">
+                                <small> La moneda es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="nombre" type="text" class="form-control" placeholder="nombre">
+                            <div *ngIf="validateU('nombre')" class="form-control-feedback">
+                                <small> El nombre es obligatorio </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="cuenta" type="text" class="form-control" placeholder="cuenta">
+                            <div *ngIf="validateU('cuenta')" class="form-control-feedback">
+                                <small> La cuenta es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="tasa" type="text" class="form-control" placeholder="tasa">
+                            <div *ngIf="validateU('tasa')" class="form-control-feedback">
+                                <small> La tasa es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group has-danger">
+                        <div class="col-md-12">
+                            <input formControlName="comision" type="text" class="form-control" placeholder="comision">
+                            <div *ngIf="validateU('comision')" class="form-control-feedback">
+                                <small> La comision es obligatoria </small>
+                            </div>
+                        </div>
+                    </div>
+                    <button [disabled]="formSubmit" type="submit" class="btn btn-info waves-effect btn-block">
+                        <span *ngIf="!formSubmit">Guardar</span>
+                        <span *ngIf="formSubmit">Guardando...</span>
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

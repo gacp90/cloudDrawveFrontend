@@ -119,7 +119,7 @@ export class TicketsService {
    *  CLEAR TICKET
   ==================================================================== */
   clearTicket(id: string){
-    return this.http.delete<({ok: Boolean, ticket: Ticket})>(`${base_url}/tickets/restore/${id}`, this.headers);
+    return this.http.delete<({ok: Boolean, ticket: Ticket, rezagados: number})>(`${base_url}/tickets/restore/${id}`, this.headers);
   }
 
   /** ================================================================

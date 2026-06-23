@@ -57,6 +57,7 @@ export class Rifa{
         public botones: _botones[],
         public min: number,
         public max: number,
+        public rezagados: number,
         public status: boolean,
         public abierta: boolean,
         public img: _img[],
